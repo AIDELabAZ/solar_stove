@@ -1,7 +1,15 @@
-# No version control on the following file types:
+# No version control for Stata project files or log files
 
-
-.dta
-.csv
-.doc
-.DS_Store
+*.dta
+*.sav
+*.csv
+*.rar
+*.stpr
+*.smcl
+*.pdf
+*.sty
+*.png
+*.smcl
+*.docx
+*.html
+*.DS_Store
