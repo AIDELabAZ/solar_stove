@@ -1,0 +1,7 @@
+# No version control on the following file types:
+
+
+.dta
+.csv
+.doc
+.DS_Store
