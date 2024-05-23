@@ -21,7 +21,7 @@
 ***********************************************************************
 
 * define paths
-	global	root	=	"$data"
+	global	root	=	"$data/raw/dietary"
 	global	export	=	"$data/refined"
 	global	output	=	"$data/analysis/tables"
 	global	logout	=	"$data/logs"
@@ -36,9 +36,9 @@
 
 * import ingredient sheet and save as .dta
 	*import 			excel using "$root/raw/Dietary/HDDS/Lealui_mapungu_nalitoya_data28_02_2020.xlsx", sheet("Lealui_Mapungu_Nalitoya_ingridi") firstrow clear
-	*save 				"$root/raw/Dietary/HDDS/raw_ingredients.dta", replace
+	*save 				"$root/Dietary/HDDS/raw_ingredients.dta", replace
 
-	use				"$root/raw/Dietary/HDDS/raw_ingredients.dta", clear
+	use				"$root/HDDS/raw_ingredients.dta", clear
 	***	43,127 household observations
 	*** 34,420 dish observations
 
@@ -410,16 +410,16 @@
 * cut out liquid data
 	preserve
 		keep if 	meal == 3
-		save 		"$root/refined/Liquids/liquids.dta", replace
+		save 		"$export/Liquids/liquids.dta", replace
 	restore
 
 * cut out meal data
 	preserve
 		keep if 	meal != 3
-		save 		"$root/refined/HDDS/meals.dta", replace
+		save 		"$root/HDDS/meals.dta", replace
 	restore
 
-	use 			"$root/refined/HDDS/meals.dta", clear
+	use 			"$root/HDDS/meals.dta", clear
 
 * drop data with missing values
 	drop type 		vol
@@ -480,7 +480,7 @@
 	
 * merge in data of Ingredient1
 	rename 			Ingredient1 lozi
-	merge m:1 		lozi using "$root/refined/HDDS/food_match.dta"
+	merge m:1 		lozi using "$export/HDDS/food_match.dta"
 	drop if 		_merge == 2
 	sort 			_merge lozi
 	*** 33,514 observations matched, 517 observations didn't match
@@ -490,11 +490,11 @@
 	rename 			lozi lozi1
 	rename 			english english1
 	rename 			foodgroup foodgroup1
-	rename 			process process1
+	rename 			proccess process1
 
 * merge in data of Ingredient2
 	rename 			Ingredient2 lozi
-	merge m:1 		lozi using "$root/refined/HDDS/food_match.dta"
+	merge m:1 		lozi using "$export/HDDS/food_match.dta"
 	drop if 		_merge == 2
 	sort 			_merge lozi
 	*** 32,596 observations matched, 1,701 observations didn't match
@@ -504,11 +504,11 @@
 	rename 			lozi lozi2
 	rename 			english english2
 	rename 			foodgroup foodgroup2
-	rename 			process process2
+	rename 			proccess process2
 
 * merge in data of Ingredient3
 	rename 			Ingredient3 lozi
-	merge m:1 		lozi using "$root/refined/HDDS/food_match.dta"	
+	merge m:1 		lozi using "$export/HDDS/food_match.dta"	
 	drop if 		_merge == 2
 	sort 			_merge lozi
 	*** 32,933 observations matched, 1,413 observations didn't match
@@ -518,11 +518,11 @@
 	rename 			lozi lozi3
 	rename 			english english3
 	rename 			foodgroup foodgroup3
-	rename 			process process3
+	rename 			proccess process3
 
 * merge in data of Ingredient4
 	rename 			Ingredient4 lozi
-	merge m:1 		lozi using "$root/refined/HDDS/food_match.dta"
+	merge m:1 		lozi using "$export/HDDS/food_match.dta"
 	drop if 		_merge == 2
 	sort 			_merge lozi
 	*** 33,164 observations matched, 1,250 observations didn't match
@@ -532,11 +532,11 @@
 	rename 			lozi lozi4
 	rename 			english english4
 	rename 			foodgroup foodgroup4
-	rename 			process process4
+	rename 			proccess process4
 
 * merge in data of Ingredient5
 	rename 			Ingredient5 lozi
-	merge m:1 		lozi using "$root/refined/HDDS/food_match.dta"
+	merge m:1 		lozi using "$export/HDDS/food_match.dta"
 	drop if 		_merge == 2
 	sort 			_merge lozi	
 	*** 33,394 observations matched, 1,099 observations didn't match
@@ -546,11 +546,11 @@
 	rename 			lozi lozi5
 	rename 			english english5
 	rename			 foodgroup foodgroup5
-	rename 			process process5
+	rename 			proccess process5
 
 * merge in data of Ingredient6
 	rename 			Ingredient6 lozi
-	merge m:1 		lozi using "$root/refined/HDDS/food_match.dta"
+	merge m:1 		lozi using "$export/HDDS/food_match.dta"
 	drop if 		_merge == 2
 	sort 			_merge lozi		
 	*** 33,518 observations matched, 1,069 observations didn't match
@@ -560,11 +560,11 @@
 	rename 			lozi lozi6
 	rename 			english english6
 	rename 			foodgroup foodgroup6
-	rename 			process process6
+	rename 			proccess process6
 
 * merge in data of Ingredient7
 	rename 			Ingredient7 lozi
-	merge m:1 		lozi using "$root/refined/HDDS/food_match.dta"
+	merge m:1 		lozi using "$export/HDDS/food_match.dta"
 	drop if 		_merge == 2	
 	sort 			_merge lozi	
 	*** 33,569 observations matched, 1,060 observations didn't match
@@ -574,7 +574,7 @@
 	rename 			lozi lozi7
 	rename 			english english7
 	rename 			foodgroup foodgroup7
-	rename 			process process7
+	rename 			proccess process7
 
 * define Labels
 	lab define 		foodgroup 0 "None" 1 "Cereals" 2 "Tubers" ///
@@ -585,6 +585,7 @@
 						14 "Oils & Fats" 15 "Sweets" ///
 						16 "Spices & Condiments" 17 "Fried Snacks" ///
 						18 "Beverages"
+						
 
 	lab define 		process 0 "None" 1 "Unprocessed" 2 "Proccessed Food" ///
 						3 "Processed Ingredient" 4 "Ultra-Processed"
@@ -692,6 +693,6 @@
 * 3 - end matter, clean up to save
 ***********************************************************************
 	
-	save 			"$root/refined/HDDS/cleaned_ingredients.dta", replace	
+	save 			"$export/HDDS/cleaned_ingredients.dta", replace	
 	
 /* END */

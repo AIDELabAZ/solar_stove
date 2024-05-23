@@ -1,9 +1,9 @@
 * project: solar stove
 * created on: july 2020
 * created by: lem
-* edited by:
-* last edit: 7 june 2021 
-* stata v.15.1 (mac)
+* edited by: lem
+* last edit: 23 may 2024 
+* stata v.17 (mac)
 
 * does
 	* inputs food_converter.dta

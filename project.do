@@ -40,7 +40,7 @@
 
     if `"`c(username)'"' == "lauramccann" {
     global 		code  	"/Users/lauramccann/Documents/GitHub/solar_stove/"
-	global 		data	"/Volumes/GoogleDrive/My Drive/shared_data/solar_stoves"
+	global 		data	"/Users/lauramccann/Dropbox/Solar_Stoves"
     }
 
 ***********************************************************************

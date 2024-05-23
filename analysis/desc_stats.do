@@ -12,7 +12,7 @@
 ***********************************************************************
 
 * define
-	global				ans		=	"$data"
+	global				ans		=	"$data/refined"
 	global				output	=	"$data/analysis/tables"
 	global				figure	=	"$data/analysis/figures"
 	global				logout	=	"$data/logs"
@@ -23,7 +23,7 @@
 	log using			"$logout/outcomes", append
 
 * load data
-	use					"$ans/refined/dietary_cleaned.dta", clear		
+	use					"$ans/dietary_cleaned.dta", clear		
 								
 * set up global list of control variables, including village dummies
 	global 				x_cov age gender educ hh_size tli cc 	

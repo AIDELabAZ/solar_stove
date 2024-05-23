@@ -15,7 +15,7 @@
 ***********************************************************************
 
 * define paths
-	global	root	=	"$data"
+	global	root	=	"$data/raw/dietary"
 	global	export	=	"$data/refined"
 	global	logout	=	"$data/logs"
 	
@@ -24,8 +24,9 @@
 	log using			"$logout/raw_cleaning_lm", append
 	
 * load data
-	use 				"$root/refined/HDDS/cleaned_ingredients.dta", clear
-		
+	use 				"$export/HDDS/cleaned_ingredients.dta", clear
+
+
 ***********************************************************************
 * 1 - generate variables for intermediate dietary outcomes (2a in PAP)
 ***********************************************************************		
@@ -295,7 +296,7 @@
 	lab var 			t12 "6 Week Total: spices, condiments and beverages"
 	
 * save HDDS data
-	save 			  	"$root/refined/HDDS/dds.dta", replace	
+	save 			  	"$export/HDDS/dds.dta", replace	
 	
 	
 	
@@ -306,11 +307,11 @@
 ***********************************************************************	
 
 * import species data sheet and save as .dta
-	*import 			delimited using "$root/raw/Dietary/DSR/species.csv", clear
+	*import 			delimited using "$root/raw/dietary/DSR/species.csv", clear
 	*save 				"$root/refined/HDDS/dds.dta", replace
 
 * load data with matched ingredients
-	use 				"$root/refined/HDDS/dds.dta", clear
+	use 				"$export/HDDS/dds.dta", clear
 	
 * fill in scientific names for species by matching on english words for 
 	* ingredients, using a reference document (species.dta)
@@ -318,7 +319,7 @@
 * matching for ingredient 1 
 	* merge in data of species, match on english1
 	rename 				english1 english
-	merge 				m:1 english using "$root/raw/Dietary/DSR/species.dta"
+	merge 				m:1 english using "$root/DSR/species.dta"
 	*** 21,485 observations matched, 12,114 observations didn't match
 	
 	drop if				_merge == 2
@@ -336,7 +337,7 @@
 * matching for ingredient 2 
 	* merge in data of species, match on english2
 	rename 				english2 english
-	merge m:1 			english using "$root/raw/Dietary/DSR/species.dta"
+	merge m:1 			english using "$root/DSR/species.dta"
 	*** 15,938 observations matched, 17,667 observations didn't match
 	
 	drop if	 			_merge == 2
@@ -355,7 +356,7 @@
 * Matching for ingredient 3**		
 * merge in species.dta, match on english3
 	rename 				english3 english
-	merge m:1 			english using "$root/raw/Dietary/DSR/species.dta"
+	merge m:1 			english using "$root/DSR/species.dta"
 	*** 26,183 observations matched, 7,423 observations didn't match
 
 	drop if 			_merge == 2
@@ -373,7 +374,7 @@
 * Matching for ingredient 4		
 	* merge in species.dta, match on english4
 	rename 				english4 english
-	merge m:1 			english using "$root/raw/Dietary/DSR/species.dta"
+	merge m:1 			english using "$root/DSR/species.dta"
 	*** 18,020 observations matched, 15,593 observations didn't match
 	
 	drop if 			_merge == 2
@@ -391,7 +392,7 @@
 * Matching for ingredient 5	
 	* merge in species.dta, match on english5
 	rename 				english5 english
-	merge m:1 			english using "$root/raw/Dietary/DSR/species.dta"
+	merge m:1 			english using "$root/DSR/species.dta"
 	*** 25,616 observations matched, 8,003 observations didn't match
 	
 	drop if 			_merge == 2
@@ -409,7 +410,7 @@
 * Matching for ingredient 6
 	* merge in species.dta, match on english
 	rename 				english6 english
-	merge m:1 			english using "$root/raw/Dietary/DSR/species.dta"
+	merge m:1 			english using "$root/DSR/species.dta"
 	*** 2,258 observations matched, 31,373 observations didn't match
 	
 	drop if 			_merge == 2
@@ -427,7 +428,7 @@
 * Matching for ingredient 7
 	* merge in species.dta, match on english6
 	rename 				english7 english
-	merge m:1 			english using "$root/raw/Dietary/DSR/species.dta"
+	merge m:1 			english using "$root/DSR/species.dta"
 	*** 252 observations matched, 31,391 observations didn't match
 	
 	drop if 			_merge == 2
@@ -554,7 +555,7 @@
 	lab var 			DSR_total "DSR: Total"
 
 * save DSR data	
-	save 				"$root/refined/DSR/dsr.dta", replace		
+	save 				"$export/DSR/dsr.dta", replace		
 		
 ***********************************************************************
 * 4 - generate variables for final outcomes: meals skipped
@@ -621,6 +622,9 @@
 * (i) Total number of meals skipped over all six weeks.	
 	gen 				hhtot_skipped = mealct_tot - hhmeals_total
 	label var			hhtot_skipped "Total Number of Meals Skipped per Household"		
+	
+	replace 			hhtot_skipped = 0 if hhtot_skipped < 0
+	
 
 * (ii) Total number of breakfast meals skipped over all six weeks.		
 * generate variable that calculates the difference in max breakfast meals (42) and how
@@ -634,6 +638,7 @@
 * have the # br meals skipped
 	by hhid:  			egen hhbr_skipped = max(hhbr_skipped_temp) 
 	drop 				hhbr_skipped_temp
+	replace 			hhbr_skipped = 0 if hhbr_skipped < 0
 	label var 			hhbr_skipped "Number of Breakfasts Skipped"
 
 * (iii) Total number of lunch meals skipped over all six weeks.			
@@ -720,22 +725,22 @@
 	label var			avg_dindish "Average Number of Dinner Dishes"
 	
 * load cleaned dietary data
-	save 				"$root/refined/dietary.dta", replace	
+	save 				"$export/DSR/dietary.dta", replace	
+	
 * ***********************************************************************
 * 6 - merge in control variables
 * ***********************************************************************
 
 * load set of control variables
-	import delimited 	using		"$root/raw/control_var.csv", clear
+	import delimited 	using		"$data/raw/controls/control_var.csv", clear
 
-* drop duplicateslicates based on household id
-	duplicates drop cod, force 
-
-* drop other variables
-	drop 			v1 village week-n_undefined_tweek solar_stove ai	
-	rename			cod hhid
 	
+	* drop duplicateslicates based on household id
+	duplicates drop cod, force 
+	drop			solar_stove aas_activities
+
 * rename some control variables
+	rename			cod hhid
 	rename 			age_cal age
 
 * convert education variable
@@ -745,7 +750,6 @@
 	
 * relabel control variables	
 	lab var 		hhid "Household Identifier"
-	lab var 		aas_activities "RCT Block"
 	lab var 		age "Age"
 	lab var 		educ "Educational Attainment"
 	lab var			hh_size "Household Size"
@@ -753,21 +757,22 @@
 	
 	
 * save
-	save 			"$root/refined/c_var.dta", replace
+	save 			"$export/c_var.dta", replace
+
 	
 * ***********************************************************************
 * 1b - merge in control variables and clean up
 * ***********************************************************************
 
 * load cleaned dietary data
-	use 			"$root/refined/dietary.dta", clear
+	use 			"$export/DSR/dietary.dta", clear
 
 * rename treatment and assignment variables
 	*rename 			solar treat_assign
 	*rename 			ss_count ss_use
 
 * merge in control variables
-	merge m:1 		hhid using "$root/refined/c_var.dta", force
+	merge m:1 		hhid using "$export/c_var.dta", force
 	*** 30,659 observations matched, 2,915 observations not matched
 
 	drop if 		_merge == 1
@@ -831,7 +836,7 @@
 *	describe
 *	summarize      	
 	
-	save 				"$root/refined/dietary_cleaned.dta", replace	
+	save 				"$export/dietary_cleaned.dta", replace	
 	
 * close the log
 	log					close

@@ -21,7 +21,7 @@
 ***********************************************************************
 
 * define
-	global				ans		=	"$data"
+	global				ans		=	"$data/refined"
 	global				output	=	"$data/analysis/tables"
 	global				figure	=	"$data/analysis/figures"
 	global				logout	=	"$data/logs"
@@ -35,7 +35,9 @@
 ************************************************************************
 
 * load data
-	use					"$ans/refined/dietary_cleaned.dta", clear		
+	use					"$ans/dietary_cleaned.dta", clear	
+	
+	merge 				m:1 hhid week using "$ans/fuel_cleaned.dta"
 								
 * set up global list of control variables, including village dummies
 	global 				x_cov age gender educ hh_size tli cc 	
@@ -984,9 +986,34 @@
 * estimation of ITT for dietary outcomes complete!
 ***********************************************************************	
 
+
 * save	
-	save 			"$root/analysis/dietary_outcomes.dta", replace	
+	save 			"$data/analysis/dietary_outcomes.dta", replace	
 		
+
+***********************************************************************
+* estimation of ITT for fuel outcomes (week)
+***********************************************************************	
+
+***********************************************************************
+* estimation of ITT for fuel outcomes (total)
+***********************************************************************	
+
+week, total
+time on treatment 
+money on treatment 
+
+
+week, total 
+time*times collected 
+money*timesbought 
+
+
+
+
+
+
+
 * close the log
 	log				close
 	
