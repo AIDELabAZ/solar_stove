@@ -1,8 +1,7 @@
-* project: solar stoves (thesis)
+* project: solar stoves (jde short paper)
 * created on: July 2020
 * created by: lem
-* edited by: 
-* Stata v.15.1 (mac)
+* Stata v.17 (mac)
 
 * does
 	* establishes an identical workspace between users
@@ -12,31 +11,31 @@
 	* loads any user written packages needed for analysis
 
 * assumes
-	* access to all data (Google Drive) and code (GitHub)
+	* access to all data (Dropbox) and code (GitHub)
 
 * TO DO:
 	* add .do files as they are completed
 
+	
 ***********************************************************************
 * 0 - setup
 ***********************************************************************
 
 * set $pack to 0 to skip package installation
 	global 			pack			0
-	
-* dependencies
-	* for packages/commands, make a local containing any required packages
-        local userpack "blindschemes mdesc estout distinct winsor2 mipolate asdoc"
-
-		*set scheme plotplainblind, perm
+		
+* Specify Stata version in use
+    global stataVersion 17.0    // set Stata version
+    version $stataVersion
+		
 ***********************************************************************
 * 0 (a) - Create user specific paths
 ***********************************************************************
 
 * Define root folder globals
     if `"`c(username)'"' == "jdmichler" {
-    global 		code  	"C:/Users/jdmichler/git/solar_stove"
-	global 		data	"G:/My Drive/solar_stoves"
+    global 		code  	"C:/Users/jdmichler/git/AIDELabAZ/solar_stove"
+	global 		data	"C:/Users/jdmichler/Dropbox/Solar_Stoves"
     }
 
     if `"`c(username)'"' == "lauramccann" {
@@ -51,11 +50,8 @@
 * install packages if global is set to 1
 if $pack == 1 {
 	
-	* temporarily set delimiter to ; so can break the line
-		#delimit ;
 	* for packages/commands, make a local containing any required packages
-		loc userpack "blindschemes mdesc estout distinct winsor2" ;
-		#delimit cr
+		loc userpack "blindschemes mdesc estout distinct winsor2" 
 	
 	* install packages that are on ssc	
 		foreach package in `userpack' {
