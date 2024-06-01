@@ -992,16 +992,169 @@
 		
 
 ***********************************************************************
-* estimation of ITT for fuel outcomes (week)
-***********************************************************************	
-
-***********************************************************************
-* estimation of ITT for fuel outcomes (total)
+* estimation of ITT for fuel outcomes - time
 ***********************************************************************	
 
 week, total
 time on treatment 
 money on treatment 
+
+
+* (iv) Regress fuel use for a week on treatment assignment			
+	* final fuel use week outcomes with and without controls using OLS
+	preserve
+		duplicates drop		hhid week, force	
+		reg					time_collection_min treat_assign i.group i.village, vce(cluster hhid) 
+		summarize 			time_collection_min if treat_assign == 0	
+		estadd scalar		dep_mean = r(mean)		
+		estadd scalar		dep_sd = r(sd)					
+		estadd local 		cov "No", replace
+		estadd local 		fe "Yes", replace			
+		est					store wftimeo	
+		eststo 				clear
+			
+		reg					time_collection_min treat_assign $x_cov i.group i.village, vce(cluster hhid) 
+		summarize 			time_collection_min if treat_assign == 0	
+		estadd scalar		dep_mean = r(mean)		
+		estadd scalar		dep_sd = r(sd)					
+		estadd local 		cov "No", replace
+		estadd local 		fe "Yes", replace			
+		est					store wftimeoc	
+		eststo 				clear
+	restore	
+	
+	* (v) Regress fuel use for a week on treatment assignment			
+	* final fuel use week outcomes with and without controls using OLS	
+	preserve
+		duplicates drop		hhid, force	
+		reg					time_collection_min treat_assign i.group i.village, vce(cluster hhid) 
+		summarize 			time_collection_min if treat_assign == 0	
+		estadd scalar		dep_mean = r(mean)		
+		estadd scalar		dep_sd = r(sd)					
+		estadd local 		cov "No", replace
+		estadd local 		fe "Yes", replace			
+		est					store tftimeo	
+		eststo 				clear
+			
+		reg					time_collection_min treat_assign $x_cov i.group i.village, vce(cluster hhid) 
+		summarize 			time_collection_min if treat_assign == 0	
+		estadd scalar		dep_mean = r(mean)		
+		estadd scalar		dep_sd = r(sd)					
+		estadd local 		cov "No", replace
+		estadd local 		fe "Yes", replace			
+		est					store tftimeoc	
+		eststo 				clear			
+	restore	
+		
+		
+	
+	* (iv) Regress fuel use for a week on treatment assignment			
+	* final fuel use week outcomes with and without controls using OLS
+	
+	gen time = time_collection_min*times_collected_week
+	preserve
+		duplicates drop		hhid week, force	
+		reg					time treat_assign i.group i.village, vce(cluster hhid) 
+		summarize 			time if treat_assign == 0	
+		estadd scalar		dep_mean = r(mean)		
+		estadd scalar		dep_sd = r(sd)					
+		estadd local 		cov "No", replace
+		estadd local 		fe "Yes", replace			
+		est					store wftimeo	
+		eststo 				clear
+			
+		reg					time treat_assign $x_cov i.group i.village, vce(cluster hhid) 
+		summarize 			time if treat_assign == 0	
+		estadd scalar		dep_mean = r(mean)		
+		estadd scalar		dep_sd = r(sd)					
+		estadd local 		cov "No", replace
+		estadd local 		fe "Yes", replace			
+		est					store wftimeinoc	
+		eststo 				clear
+	restore	
+	
+	* (v) Regress fuel use for a week on treatment assignment			
+	* final fuel use week outcomes with and without controls using OLS	
+	preserve
+		duplicates drop		hhid, force	
+		reg					time treat_assign i.group i.village, vce(cluster hhid) 
+		summarize 			time if treat_assign == 0	
+		estadd scalar		dep_mean = r(mean)		
+		estadd scalar		dep_sd = r(sd)					
+		estadd local 		cov "No", replace
+		estadd local 		fe "Yes", replace			
+		est					store tftimeino	
+		eststo 				clear
+			
+		reg					time treat_assign $x_cov i.group i.village, vce(cluster hhid) 
+		summarize 			time if treat_assign == 0	
+		estadd scalar		dep_mean = r(mean)		
+		estadd scalar		dep_sd = r(sd)					
+		estadd local 		cov "No", replace
+		estadd local 		fe "Yes", replace			
+		est					store tftimeoc	
+		eststo 				clear			
+	restore		
+		
+		
+
+***********************************************************************
+* estimation of ITT for fuel outcomes -money
+***********************************************************************	
+
+* interact times bought and price bought
+	gen price = time_bought_week*price_bought_kwacha
+
+* (i) weekly cost (kwacha) of fuel on treatment assignment with and without 
+	* controls using OLS regression
+	preserve
+		duplicates drop		hhid week, force	
+		reg					price treat_assign i.group i.village, vce(cluster hhid) 
+		summarize 			price if treat_assign == 0	
+		estadd scalar		dep_mean = r(mean)		
+		estadd scalar		dep_sd = r(sd)					
+		estadd local 		cov "No", replace
+		estadd local 		fe "Yes", replace			
+		est					store wfmoneyo
+		eststo 				clear
+			
+		reg					price treat_assign $x_cov i.group i.village, vce(cluster hhid) 
+		summarize 			price if treat_assign == 0	
+		estadd scalar		dep_mean = r(mean)		
+		estadd scalar		dep_sd = r(sd)					
+		estadd local 		cov "No", replace
+		estadd local 		fe "Yes", replace			
+		est					store wfmoneyoc	
+		eststo 				clear
+	restore 
+
+* (ii) total (six-week) cost (kwacha) of fuel on treatment assignment with and 
+	* without controls using OLS regression	 
+	preserve
+		duplicates drop		hhid, force	
+		reg					price treat_assign i.group i.village, vce(cluster hhid) 
+		summarize 			price if treat_assign == 0	
+		estadd scalar		dep_mean = r(mean)		
+		estadd scalar		dep_sd = r(sd)					
+		estadd local 		cov "No", replace
+		estadd local 		fe "Yes", replace			
+		est					store tfmoneyo
+		eststo 				clear
+			
+		reg					price treat_assign $x_cov i.group i.village, vce(cluster hhid) 
+		summarize 			price if treat_assign == 0	
+		estadd scalar		dep_mean = r(mean)		
+		estadd scalar		dep_sd = r(sd)					
+		estadd local 		cov "No", replace
+		estadd local 		fe "Yes", replace			
+		est					store tfmoneyoc	
+		eststo 				clear
+	restore 
+
+* interact times collected/bought and price 
+
+
+
 
 
 week, total 
