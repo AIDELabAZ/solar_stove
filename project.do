@@ -39,7 +39,7 @@
     }
 
     if `"`c(username)'"' == "lauramccann" {
-    global 		code  	"/Users/lauramccann/Documents/GitHub/solar_stove/"
+    global 		code  	"/Users/lauramccann/Documents/GitHub/solar_stove"
 	global 		data	"/Users/lauramccann/Dropbox/Solar_Stoves"
     }
 
@@ -51,7 +51,7 @@
 if $pack == 1 {
 	
 	* for packages/commands, make a local containing any required packages
-		loc userpack "blindschemes mdesc estout distinct winsor2" 
+		loc userpack "blindschemes mdesc estout distinct winsor2 mipolate" 
 	
 	* install packages that are on ssc	
 		foreach package in `userpack' {
@@ -99,14 +99,20 @@ if $pack == 1 {
 	
 	do				"$code/cleaning/dietary_comp.do"
 	
+**********************************************************************
+* 4 - run .do file that cleans fuel dataset
+**********************************************************************	
+	
+	do				"$code/cleaning/fuel_use.do"	
+	
 ***********************************************************************
-* 4 - run .do file for itt outocmes
+* 5 - run .do file for itt outocmes
 ***********************************************************************
 
 	do				"$code/analysis/itt_outcomes.do"
 
 ***********************************************************************
-* 5 - run .do file for late outcomes
+* 6 - run .do file for late outcomes
 ***********************************************************************
 
 	do				"$code/analysis/late_outcomes"

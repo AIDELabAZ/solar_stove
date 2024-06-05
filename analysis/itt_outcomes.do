@@ -38,6 +38,12 @@
 	use					"$ans/dietary_cleaned.dta", clear	
 	
 	merge 				m:1 hhid week using "$ans/fuel_cleaned.dta"
+	*** 28,643 obs matched, 1901 in dietary data not matched, 32 obs in fuel data not matched
+	
+	order _merge
+	sort _merge hhid
+	
+	
 								
 * set up global list of control variables, including village dummies
 	global 				x_cov age gender educ hh_size tli cc 	

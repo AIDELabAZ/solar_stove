@@ -490,7 +490,7 @@
 	rename 			lozi lozi1
 	rename 			english english1
 	rename 			foodgroup foodgroup1
-	rename 			proccess process1
+	rename 			process process1
 
 * merge in data of Ingredient2
 	rename 			Ingredient2 lozi
@@ -504,7 +504,7 @@
 	rename 			lozi lozi2
 	rename 			english english2
 	rename 			foodgroup foodgroup2
-	rename 			proccess process2
+	rename 			process process2
 
 * merge in data of Ingredient3
 	rename 			Ingredient3 lozi
@@ -518,7 +518,7 @@
 	rename 			lozi lozi3
 	rename 			english english3
 	rename 			foodgroup foodgroup3
-	rename 			proccess process3
+	rename 			process process3
 
 * merge in data of Ingredient4
 	rename 			Ingredient4 lozi
@@ -532,7 +532,7 @@
 	rename 			lozi lozi4
 	rename 			english english4
 	rename 			foodgroup foodgroup4
-	rename 			proccess process4
+	rename 			process process4
 
 * merge in data of Ingredient5
 	rename 			Ingredient5 lozi
@@ -546,7 +546,7 @@
 	rename 			lozi lozi5
 	rename 			english english5
 	rename			 foodgroup foodgroup5
-	rename 			proccess process5
+	rename 			process process5
 
 * merge in data of Ingredient6
 	rename 			Ingredient6 lozi
@@ -560,7 +560,7 @@
 	rename 			lozi lozi6
 	rename 			english english6
 	rename 			foodgroup foodgroup6
-	rename 			proccess process6
+	rename 			process process6
 
 * merge in data of Ingredient7
 	rename 			Ingredient7 lozi
@@ -574,7 +574,7 @@
 	rename 			lozi lozi7
 	rename 			english english7
 	rename 			foodgroup foodgroup7
-	rename 			proccess process7
+	rename 			process process7
 
 * define Labels
 	lab define 		foodgroup 0 "None" 1 "Cereals" 2 "Tubers" ///
