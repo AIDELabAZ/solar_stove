@@ -40,10 +40,17 @@
 	merge 				m:1 hhid week using "$ans/fuel_cleaned.dta"
 	*** 28,643 obs matched, 1901 in dietary data not matched, 32 obs in fuel data not matched
 	
-	order _merge
-	sort _merge hhid
+	order 				_merge hhid week
+	sort 				_merge hhid week
 	
-	
+* make sure there are no households with no fuel data	
+	preserve 
+		collapse (sum) 		time_collection_min price_collected_kwacha ///
+								q_collected_kg times_collected_week ///
+								time_bought_week price_bought_kwacha ///
+								q_bought_kg, by(village hhid)		
+		save 				"$ans/missing_fuel_check.dta", replace
+	restore			
 								
 * set up global list of control variables, including village dummies
 	global 				x_cov age gender educ hh_size tli cc 	
@@ -1109,7 +1116,7 @@ money on treatment
 ***********************************************************************	
 
 * interact times bought and price bought
-	gen price = time_bought_week*price_bought_kwacha
+	gen 					price = time_bought_week*price_bought_kwacha
 
 * (i) weekly cost (kwacha) of fuel on treatment assignment with and without 
 	* controls using OLS regression
