@@ -14,6 +14,7 @@ This is the repo for the weather project.<br>
 
 Contributors:
 * Jeffrey D. Michler
+* Natalia Estrada Carmona
 * Laura McCann
 
 As described in more detail below, scripts variously
