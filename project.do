@@ -1,7 +1,7 @@
 * project: solar stoves (jde short paper)
 * created on: July 2020
 * created by: lem
-* Stata v.17 (mac)
+* Stata v.18.5
 
 * does
 	* establishes an identical workspace between users
@@ -25,7 +25,7 @@
 	global 			pack			0
 		
 * Specify Stata version in use
-    global stataVersion 17.0    // set Stata version
+    global stataVersion 18.5    // set Stata version
     version $stataVersion
 		
 ***********************************************************************

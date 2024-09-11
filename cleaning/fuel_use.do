@@ -1,9 +1,9 @@
 * project: solar stove - final outcomes: fuel use
 * created on: February 2021
 * created by: lem
-* edited by: lem
-* last edit: 23 may 2024 
-* stata v.17 (mac)
+* edited by: jdm
+* last edit: 11 Sep 2024
+* stata v.18.5
 
 * does [UPDATE]
 	* inputs raw_fuels.dta
@@ -41,13 +41,9 @@
 
 * drop unnecessary variables / anonymize
 	drop 				household_name cod_hh_collectedbought name_collected ///
-							cod_hh_bought name_whopayed type_lozi v28 v29 ///
-							quantity_written_bought time_collection_week ///
-							quantity_collected_written quantity_collected_clean ///
-							units_clean source_or_price_written_bought ///
-							source_or_price_written_collecti v27 type_en
+							cod_hh_bought name_whopayed type_lozi v27
 
-	rename				cod hhid		
+	rename				cod hhid	
 		
 	gen 				Village = 0 if village == "Lealui" | ///
 							village == "LeaLui" | village == "lealui"
@@ -64,25 +60,132 @@
 
 	drop if 			hhid == .
 
-	replace 			times_collected_week = "" if times_collected_week == "-"
+* rename and redefine variables	
+	gen					fuel = 0 if type_en == "Charcoal"
+	replace				fuel = 1 if type_en == "Firewood/Caw dong" | ///
+							type_en == "Firewood"
+	replace				fuel = 0 if type_en == "undefined" & bought == 1					
+	
+	lab define 			fuel 0 "Charcoal" 1 "Firewood"
+	lab values 			fuel fuel
+	order				fuel, after(week)
+	lab var				fuel "Type of fuel"
+	drop				type_en
+	drop if				fuel == .
 
-	destring	 		times_collected_week, replace 
-			
-	mvdecode 			time_collection_min price_collected_kwacha q_collected_kg ///
-							times_collected_week time_bought_week ///
-							price_bought_kwacha q_bought_kg, mv(0)
+	rename				collected cltd
+	lab define 			yesno 0 "No" 1 "Yes"
+	lab values 			cltd yesno 
+	
+	rename				time_collection_min time_cltd
+	replace				time_cltd = 0 if time_cltd == .
+	
+	rename				price_collected_kwacha price_cltd
 		
+	rename				q_collected_kg quant_cltd
+	replace				quant_cltd = 0 if quant_cltd == .
 		
-	mvencode 			time_collection_min price_collected_kwacha q_collected_kg ///
-							times_collected_week time_bought_week ///
-							price_bought_kwacha q_bought_kg, mv(0)	
-						
-						
-						
-	collapse (sum) 		time_collection_min price_collected_kwacha q_collected_kg ///
-							times_collected_week time_bought_week ///
-							price_bought_kwacha q_bought_kg, by(village hhid week)	
-						
+	replace				times_collected_week = "" if times_collected_week == "-"
+	destring			times_collected_week, replace
+	rename				times_collected_week times_cltd
+	replace				times_cltd = 0 if times_cltd == .
+
+	rename				bought bght
+	lab values 			bght yesno 
+	
+	rename				time_bought_week times_bght
+	replace				times_bght = 0 if times_bght == .
+	
+	rename				price_bought_kwacha price_bght
+	
+	rename				q_bought_kg quant_bght
+	replace				quant_bght = 0 if quant_bght == .
+	
+	drop				source_or_price_written_collecti time_collection_week ///
+							quantity_collected_written quantity_collected_clean ///
+							units_clean source_or_price_written_bought ///
+							quantity_written_bought
+	
+	order				cltd times_cltd time_cltd price_cltd quant_cltd ///
+							bght times_bght price_bght quant_bght, ///
+							after(fuel)
+	
+* collapse to combine firewood and firewood/dung
+	collapse (sum)		times_cltd time_cltd price_cltd quant_cltd times_bght ///
+						price_bght quant_bght ///
+			 (max)		cltd bght, by(village hhid week fuel)
+	
+	replace				price_cltd = . if price_cltd == 0
+	replace				price_bght = . if price_bght == 0
+	
+* reshape panel
+	isid				village hhid week fuel
+	reshape wide 		cltd times_cltd time_cltd price_cltd quant_cltd bght ///
+							times_bght price_bght quant_bght, ///
+							i(village hhid week) j(fuel)
+
+* rename variables
+	order				cltd0 times_cltd0 time_cltd0 price_cltd0 quant_cltd0 ///
+							bght0 times_bght0 price_bght0 quant_bght0 ///
+							cltd1 times_cltd1 time_cltd1 price_cltd1 quant_cltd1 ///
+							bght1 times_bght1 price_bght1 quant_bght1, ///
+							after(week)
+		
+	drop				cltd0 times_cltd0 time_cltd0 price_cltd0 quant_cltd0
+		
+	replace				bght0 = 0 if bght0 == .
+	rename				bght0 c_bhgt	
+	lab var				c_bhgt "Was charcoal bought?"	
+	
+	replace				times_bght0 = 0 if times_bght0 == .
+	rename				times_bght0 c_times	
+	lab var				c_times "Number of times charcoal was bought"	
+	
+	rename				price_bght0 c_price
+	lab var				c_price "Price of charcoal (kwacha)"	
+	
+	replace				quant_bght0 = 0 if quant_bght0 == .
+	rename				quant_bght0 c_quant
+	lab var				c_quant "Quantity of charcoal bought (kg)"
+		
+	replace				cltd1 = 0 if cltd1 == .
+	rename				cltd1 f_cltd
+	lab var				f_cltd "Was firewood collected?"	
+	
+	replace				times_cltd1 = 0 if times_cltd1 == .
+	rename				times_cltd1 f_cltd_times	
+	lab var				f_cltd_times "Number of times firewood was collected"	
+	
+	replace				time_cltd1 = 0 if time_cltd1 == .
+	rename				time_cltd1 f_time
+	lab var				f_time "Time spent collecting firewood (min)"		
+	
+	rename				price_cltd1 f_cltd_price
+	lab var				f_cltd_price "Price of firewood collected (kwacha)"	
+	
+	replace				quant_cltd1 = 0 if quant_cltd1 == .
+	rename				quant_cltd1 f_cltd_quant
+	lab var				f_cltd_quant "Quantity of firewood collected (kg)"
+	
+	replace				bght1 = 0 if bght1 == .
+	rename				bght1 f_bhgt	
+	lab var				f_bhgt "Was firewood bought?"	
+	
+	replace				times_bght1 = 0 if times_bght1 == .
+	rename				times_bght1 f_bght_times	
+	lab var				f_bght_times "Number of times firewood was bought"	
+	
+	rename				price_bght1 f_bght_price
+	lab var				f_bght_price "Price of bought firewood (kwacha)"	
+	
+	replace				quant_bght1 = 0 if quant_bght1 == .
+	rename				quant_bght1 f_bght_quant
+	lab var				_bght_quant "Quantity of firewood bought (kg)"
+
+* fill in panel
+	duplicates tag		hhid, gen(dup)
+	
+	*** leave panel unbalanced but deal with household that has 9 weeks
 						
 	save 				"$export/fuel_cleaned.dta", replace
 
