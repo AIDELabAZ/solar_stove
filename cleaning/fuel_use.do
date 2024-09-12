@@ -2,20 +2,22 @@
 * created on: February 2021
 * created by: lem
 * edited by: jdm
-* last edit: 11 Sep 2024
+* edited on: 12 Sep 2024
 * stata v.18.5
 
-* does [UPDATE]
-	* inputs raw_fuels.dta
-	* relabels data
-	* 
+* does
+	* inputs raw fuel data
+	* cleans data
+	* merges in controls
+	* outputs weekly fuel data for regressions
 
 * assumes
-	* some cleaning has already been done, but not sure where that code is
+	* access to raw data
+	* access to cleaned controls
 
 * to do:
-	* formatting
-	* clarify collected values (is estimated worth or actual amt sold?)
+	* done
+	
 
 ************************************************************************
 **# 0 - setup
@@ -244,13 +246,21 @@
 	replace 		cc = 0 if week == 6 & village == 2
 		
 	lab var 		cc "Cloud Cover"	
-	
 
 * merge in household characteristics
+	drop				village
 	merge				m:1 hhid using "$export/c_var.dta"
-
-		
+	*** 3 households have fuel data but not household data
+	*** hhid 247000, 340000, 347000
+	
+	keep if				_merge == 3
+	drop				_merge
+	
+* save
+	compress
 	save 				"$export/fuel_cleaned.dta", replace
 
+* close the log
+	log	close
 
-*** END
+/* END */					

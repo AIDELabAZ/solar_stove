@@ -1,60 +1,59 @@
 * project: solar stove
 * created on: july 2020
 * created by: lem
-* edited by: lem
-* last edit: 23 may 2024 
-* stata v.17 (mac)
+* edited by: jdm
+* edited on: 12 Sep 2024
+* stata v.18.5
 
 * does
-	* inputs food_converter.dta
+	* inputs raw ingredient dictionary
 	* converts Lozi to English names
-	* outputs data as food_match.dta
-		* this outputted .do file will be used to match translated names of 	
+	* outputs cleaned ingredient dictionary
+		* this outputted file will be used to match translated names of 	
 		* ingredients, their food groups, and their level of processing to 
 		* ingredient observations in our raw ingredient data
 
 * assumes
+	* access to raw ingredient dictionary
 	* mipolate is installed
 
 * to do:
-	* formatting
+	* done
 
+	
 ***********************************************************************
-* 0 - setup
+**# 0 - setup
 ***********************************************************************
 
 * define paths
-	global			root	=	"$data"
-	global			export	=	"$data/refined"
+	global			root	=	"$data/raw/dietary/HDDS"
+	global			export	=	"$data/refined/HDDS"
 	global			logout	=	"$data/logs"
 	
 * open log
 	cap log 		close 
-	log using		"$logout/raw_cleaning", append
+	log using		"$logout/food_converter", append
 	
-************************************************************************
-* 1 - prepare ingredients data
-************************************************************************
-
 * import dictionary sheet and save as .dta
-	*import 			excel using "$root/raw/Dietary/HDDS/Lealui_mapungu_nalitoya_data28_02_2020.xlsx", sheet("dictionary") firstrow clear
-	*save 				"$root/raw/dietary/Hdds/food_converter.dta", replace
-
-* load data
-	use				"$root/raw/dietary/Hdds/food_converter.dta", clear
-					
+	import 			delimited using "$root/food_converter.csv", ///
+						varnames(1) case(lower)  clear
+		
+		
+************************************************************************
+**# 1 - prepare ingredients data
+************************************************************************
+		
 * drop missing values
 	drop if 		english == "na"
 	*** 237 observations dropped
-			
+		
 * drop if english == "water"
-
 	replace 		foodgroup = "" if foodgroup == "na"
 	*** 36 changes made
 
 * create group food variable
 	egen 			food = group(english)
-	*** 1315 missing values generated
+	*** 1,315 missing values generated
 
 * interpolate missing food group values
 	by english, sort: stripolate foodgroup food, gen(foo) groupwise
@@ -69,7 +68,7 @@
 
 * drop duplicates
 	duplicates drop lozi, force
-	*** 1346 observations dropped
+	*** 1,646 observations dropped
 
 * fill in  missing values for food group
 	replace 		foodgroup = "Sweets" if english == "candy"
@@ -695,13 +694,20 @@
 	drop food
 
 	drop if lozi != "" & english == ""
-	*** 31 observations dropped
+	*** 50 observations dropped
 
 	insobs 1
-
+	
+	
+************************************************************************
+**# 2 - end matter
+************************************************************************
+	
 * save
+	compress
+	save 		"$export/food_match.dta", replace
 
-save "$root/refined/Hdds/food_match.dta", replace
+* close the log
+	log	close
 
-
-** END **
+/* END */					

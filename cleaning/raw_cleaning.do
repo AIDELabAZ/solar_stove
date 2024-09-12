@@ -1,7 +1,9 @@
 * project: solar stove
 * created on: July 2020
 * created by: lem
-* Stata v.15.1 (mac)
+* edited by: jdm
+* edited on: 12 Sep 2024
+* stata v.18.5
 
 * does
 	* inputs raw_ingredients.dta
@@ -10,18 +12,19 @@
 	* outputs cleaned ingredients data as meals.dta
 
 * assumes
-	* 
+	* access to raw data
+	* cleaned ingredient dictionary
 
 * to do:
-	* formatting
+	* left off around line 700
 
 
 ***********************************************************************
-* 0 - setup
+**# 0 - setup
 ***********************************************************************
 
 * define paths
-	global	root	=	"$data/raw/dietary"
+	global	root	=	"$data/raw/dietary/HDDS"
 	global	export	=	"$data/refined"
 	global	output	=	"$data/analysis/tables"
 	global	logout	=	"$data/logs"
@@ -30,15 +33,14 @@
 	cap log 			close 
 	log using			"$logout/raw_cleaning", append
 
-************************************************************************
-* 1 - prepare ingredients data
-************************************************************************
-
 * import ingredient sheet and save as .dta
-	*import 			excel using "$root/raw/Dietary/HDDS/Lealui_mapungu_nalitoya_data28_02_2020.xlsx", sheet("Lealui_Mapungu_Nalitoya_ingridi") firstrow clear
-	*save 				"$root/Dietary/HDDS/raw_ingredients.dta", replace
+	import 			excel using "$root/Lealui_mapungu_nalitoya_data28_02_2020.xlsx", sheet("Lealui_Mapungu_Nalitoya_ingridi") firstrow clear
+	
+************************************************************************
+**# 1 - prepare ingredients data
+************************************************************************
 
-	use				"$root/HDDS/raw_ingredients.dta", clear
+	sum Dish
 	***	43,127 household observations
 	*** 34,420 dish observations
 
@@ -56,41 +58,8 @@
 	lab var			Meal "Meal"
 	
 * order variables	
-	order 			village Group hhid Solar week day Meal Dish
-
-* create village indicator
-	gen 			Village = 0 if village == "Lealui" | ///
-						village == "LeaLui" | village == "lealui"
-	replace 		Village = 1 if village == "Mapungu"
-	replace 		Village = 2 if village == "Nalitoay"
-	lab var 		Village "Village"
-	lab def 		village 0 "Lealui" 1 "Mapungu" 2 "Nalitoya"
-	lab val 		Village village
-	
-	drop 			village
-	rename 			Village village
-	order 			village
-	
-* create AAS group indicator
-	gen 			group = 0 if Group == "none" | Group == "None"
-	replace 		group = 1 if Group == "Agriculture" | /// 
-						Group == "agriculture"
-	replace 		group = 2 if Group == "Nutrition" | Group == "nutrition"
-	replace 		group = 3 if Group == "agriculture and nutrition"
-	lab var 		group "AAS group"
-	lab define 		AAS 0 "None" 1 "Learning Plot" 2 "Nutrition Club" 3 "Both"
-	lab val 		group AAS
-	drop 			Group
-	order 			group, after(village)
-
-* create solar stove treatment indicator
-	gen 			solar = 0 if Solar == "No"
-	replace 		solar = 1 if Solar == "Yes"
-	lab var 		solar "Treatment (Solar Stove)"
-	lab define 		solar 0 "Control" 1 "Treatment"
-	lab val 		solar treatment
-	drop 			Solar
-	order 			solar, after(hhid)
+	order 			hhid week day Meal Dish
+	drop			Group Solar Gender village
 
 * create meal indicator
 	gen 			meal = 0 if Meal == "Breakfast" | Meal == "breakfast"
@@ -104,15 +73,6 @@
 	lab val 		meal meal
 	drop 			Meal
 	order 			meal, after(day)
-
-* create gender indicator
-	gen 		   	gender = 0 if Gender == "Men"
-	replace 		gender = 1 if Gender == "Women"
-	lab var 		gender "Gender (Female = 1)"
-	lab define 		gender 0 "Male" 1 "Female"
-	lab val 		gender gender
-	drop 			Gender
-	order 			gender, after (hhid)
 
 * create cooking method indicator
 	drop 			Cookingmethod
@@ -213,6 +173,11 @@
 						Method == "missing"
 	replace 		cook = 7 if cook == 6
 	drop 			Method
+	
+	
+************************************************************************
+**# 2 - clean up liquid and legume data
+************************************************************************
 
 * create liquid quantity
 	replace 		Quantity = "2.5" if Quantity == "2,5"
@@ -339,15 +304,9 @@
 	drop 			Other Notes Note Basedonmemory  ///
 						Notesorspecifyifotherunits AB
 
-* drop missing values
-	drop if 		village == .
-	*** 35 observations dropped
-	drop if			group == .
-	*** 476 observations dropped
-	drop if 		hhid == .
-	*** 0 observations dropped
-	drop if 		solar == .
-	*** 0 observations dropped
+************************************************************************
+**# 3 - clean up ingredient data
+************************************************************************
 
 * replace "na" values with blanks for ingredient variables
 	replace 		Ingredient1 = "" if Ingredient1 == "na" | ///
@@ -407,24 +366,30 @@
 	replace 		day = 5 if day == . & week == 3 & hhid == 366000
 	replace 		day = 6 if day == . & week == 6 & hhid == 366000
 
+	
+************************************************************************
+**## 3.1 - cut out liquid data
+************************************************************************
+	
 * cut out liquid data
 	preserve
 		keep if 	meal == 3
 		save 		"$export/Liquids/liquids.dta", replace
 	restore
 
-* cut out meal data
-	preserve
-		keep if 	meal != 3
-		save 		"$root/HDDS/meals.dta", replace
-	restore
 
-	use 			"$root/HDDS/meals.dta", clear
+************************************************************************
+**## 3.2 - clean meal data
+************************************************************************
 
+* load just meal data
+	keep if 	meal != 3
+	*** 6,987 observations deleted
+	
 * drop data with missing values
 	drop type 		vol
 	drop if 		cook == 0 | cook == 7
-	*** 4,852 obs dropped
+	*** 4,908 obs dropped
 	drop if 		Ingredient1  == "" & Ingredient2 == "" & /// 
 						Ingredient3 == "" & Ingredient4 == "" & /// 
 						Ingredient5 == "" & Ingredient6 == "" & ///
@@ -483,7 +448,7 @@
 	merge m:1 		lozi using "$export/HDDS/food_match.dta"
 	drop if 		_merge == 2
 	sort 			_merge lozi
-	*** 33,514 observations matched, 517 observations didn't match
+	*** 30,736 observations matched, 694 observations didn't match
 
 	replace 		lozi = "" if _merge == 1
 	drop 			_merge
@@ -497,8 +462,10 @@
 	merge m:1 		lozi using "$export/HDDS/food_match.dta"
 	drop if 		_merge == 2
 	sort 			_merge lozi
-	*** 32,596 observations matched, 1,701 observations didn't match
+	*** 29,824 observations matched, 1,841 observations didn't match
 
+	cvxcxvxc
+	
 	replace 		lozi = "" if _merge == 1	
 	drop 			_merge
 	rename 			lozi lozi2
