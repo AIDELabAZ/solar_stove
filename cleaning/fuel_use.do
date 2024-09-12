@@ -146,7 +146,7 @@
 	
 	replace				quant_bght0 = 0 if quant_bght0 == .
 	rename				quant_bght0 c_quant
-	lab var				c_quant "Quantity of charcoal bought (kg)"
+	lab var				c_quant "Quantity of charcoal (kg)"
 		
 	replace				cltd1 = 0 if cltd1 == .
 	rename				cltd1 f_cltd
@@ -180,13 +180,26 @@
 	
 	replace				quant_bght1 = 0 if quant_bght1 == .
 	rename				quant_bght1 f_bght_quant
-	lab var				_bght_quant "Quantity of firewood bought (kg)"
+	lab var				f_bght_quant "Quantity of firewood bought (kg)"
 
-* fill in panel
-	duplicates tag		hhid, gen(dup)
+* drop household that collected for 9 weeks
+	drop if				week > 6
+
+* natalia uses a price of $8.33 for charcoal and $7.69 for firewood
+* replace price with these values
+	replace				c_price = 8.33
+	generate			f_price = 7.69
+	drop				f_bght_price f_cltd_price
+	gen					f_quant = f_cltd_quant + f_bght_quant	
 	
-	*** leave panel unbalanced but deal with household that has 9 weeks
-						
+	lab var				f_price "Price of firewood (USD)"
+	lab var				f_quant "Quantity of firewood (kg)"
+	lab var				c_price "Price of charcoal (USD)"	
+	
+	
+	
+	
+					
 	save 				"$export/fuel_cleaned.dta", replace
 
 

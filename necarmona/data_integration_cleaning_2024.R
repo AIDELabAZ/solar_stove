@@ -17,13 +17,9 @@ library(gridExtra)
 library(lmtest)
 library(sandwich)
 library(lfe)
+library(tidyverse)
 #settings====
 
-#TODO:Winsorize  response variables as part of the preparation step check the package robustHD  for multiple datasets
-#TODO: Explore figures i.e. forest plots to present the results. 1) use of solar stoves, 2) dietary outcomes (HDDS, wdds, SR), 3) health outcomes (skipped meals, number of dishes, boiled liquids), 4) energy sources harvesting time, use and cost (firewood and charcoal)
-#TODO: Test lm and felm results (both treat covarietes differently, see effect of AAS)
-#TODO: Run all the analyses stated in the action plan
-#TODO: Estimate dish, meal, day Se USING Liang-Zeger cluster-robust standard errors and use Eicker-Huber-White (EHW) robust standard errors when calculating total values
 
 encoding = "native.enc"
 Sys.setlocale(locale = "English")
@@ -40,28 +36,16 @@ main_hh_characterization<-read.csv("D:/2 Bioversity/spia/2024/runs_files_2024/so
 #calculating physical and living assets
 main_hh_covariates<-main_hh_characterization%>%
   mutate(
-    #Physical asset factor - Conversion factors from ???
-    Cellphone_a= ifelse(Cellphone=="Yes",
-                        ifelse (cellphone_cond!="not working", (cellphone_no*3),0 ),0 ),
-    boat_a= ifelse(boat=="Yes", #no info so the weight = moto
-                   ifelse (cellphone_cond!="not working",  (boats_no*48),0 ),0 ),
-    Canoe_a= ifelse(Canoe=="Yes",#no info so the weight = Bicycle
-                    ifelse (cellphone_cond!="not working",  (canoe_no*6),0 ),0 ),
-    moto_a= ifelse(moto=="Yes",
-                   ifelse (cellphone_cond!="not working",  (moto_no*48),0 ),0 ),
-    Bicycle_a= ifelse(Bicycle=="Yes",
-                      ifelse (cellphone_cond!="not working",  (bycicle_no*6),0 ),0 ),
-    Radio_a= ifelse(Radio=="Yes",
-                    ifelse (cellphone_cond!="not working",  (radio_no*2),0 ),0 ),
-    #Tropical livestock units - TLU. Conversion factors from  ???
-    Cows_a= ifelse(Cows=="Yes", (caws_no*1),0 ),
-    Oxen_a= ifelse(Oxen=="Yes", (oxen_no*1.42),0 ),
-    Pigs_a= ifelse(Pigs=="Yes", (pigs_no*0.3),0 ),
-    Goats_a= ifelse(Goats=="Yes", (goats_no*0.2),0 ),
-    chicken_a= ifelse(chicken=="Yes", (chicken_no*0.04),0 ),
-    Ducks_a= ifelse(Ducks=="Yes", (ducks_no*0.04),0 ),
-    phy_assets=Cellphone_a+boat_a+Canoe_a+moto_a+Bicycle_a+Radio_a,
-    TLU=Cows_a+Oxen_a+Pigs_a+Goats_a+chicken_a+Ducks_a,
+
+    #Tropical livestock units - TLU. Conversion factors from  FAO 2008
+    Cows_a= ifelse(Cows=="Yes", (caws_no*0.7),0 ),
+    Oxen_a= ifelse(Oxen=="Yes", (oxen_no*0.8),0 ),
+    Pigs_a= ifelse(Pigs=="Yes", (pigs_no*0.2),0 ),
+    Goats_a= ifelse(Goats=="Yes", (goats_no*0.1),0 ),
+    chicken_a= ifelse(chicken=="Yes", (chicken_no*0.01),0 ),
+    Ducks_a= ifelse(Ducks=="Yes", (ducks_no*0.01),0 ),
+
+    tli=Cows_a+Oxen_a+Pigs_a+Goats_a+chicken_a+Ducks_a,
     
     #Participation in AAS activities
     aas_involvement=if_else(Participation_in_NSL_AAS_activities=="Learning plots"|Participation_in_NSL_AAS_activities=="Learning plots SILC", "agriculture",
@@ -84,12 +68,42 @@ main_hh_covariates<-main_hh_characterization%>%
   
   clean_names()%>%
   #remove hh names and year of birth. 
-  dplyr::select(c(cod,village_cor, gender,age_cal,highest_grade, solar_stove, hh_no, aas_involvement,tlu,phy_assets  ))%>%
+  dplyr::select(c(cod,village_cor, gender,age_cal,highest_grade, solar_stove, hh_no, aas_involvement,tli))%>%
   
   
   # create dummy columns for covariates 
   dummy_cols()
+#Physical asset factor - Conversion factors from Filmer and Pritchett 2001. and Traisac, 2012
+#account for not working material assets. 
+#use the number of assets in the PCA rather than just yes/no responses in MFA
+library(psych)
+main_hh_covariates_asset<-main_hh_characterization%>%
+  mutate(Cellphone_no_c=if_else(cellphone_cond=="not working", 0, cellphone_no),
+         boat_no_c=if_else(boat_cond=="not working", 0, boats_no),
+         canoe_no_c=if_else(canoe_cond=="not working", 0, canoe_no),
+         moto_no_c=if_else(moto_cond=="not working", 0, moto_no),
+         radio_no_c=if_else(radio_cond=="not working", 0, radio_no))%>%
+  select(Cellphone_no_c,boat_no_c,canoe_no_c,moto_no_c,radio_no_c )%>%
+  replace(is.na(.), 0)
+         
 
+# Perform PCA
+#first pc1 explains 30.28% of the variability
+
+pca_result <- principal(main_hh_covariates_asset, nfactors = 1, rotate = "none")
+
+# Extract the first principal component (which is the asset index)
+asset_index <- pca_result$scores[,1]
+
+# Add the asset index to the original data
+main_hh_covariates <- cbind(main_hh_covariates, main_hh_covariates_asset, asset_index)
+
+ggplot(main_hh_covariates, aes(x = seq_along(asset_index), y = asset_index, color=village_cor)) +
+  geom_point(size = 3) +
+  labs(title = "Household Asset Index",
+       x = "Household",
+       y = "Asset Index") +
+  theme_minimal()
 
 write.csv(main_hh_covariates, here("anonymized_source_files", "main_hh_covariates.csv"), row.names=FALSE, sep = ";")
 
@@ -172,7 +186,7 @@ write.csv(l_combined_all_ingredients, here("anonymized_source_files","ingredient
 
 ####
 ####
-## The final curated file is called dictionary_2016_2024.csv
+## The final curated file is called dictionary_2016_2024_2.csv
 ####
 ####
 
@@ -187,7 +201,7 @@ all_villages_ing_dish_meals_l<-read.csv(here("anonymized_source_files", "all_vil
 
 #Dictionary translating Lozi words into English and assigning the food group, household dietary diversity group and womends dietary diversity group
 #Guide used-> https://www.fao.org/nutrition/assessment/tools/household-dietary-diversity/en/
-dictionary_2016_2024<-read.csv(here("anonymized_source_files", "dictionary_2016_2024.csv"))%>%
+dictionary_2016_2024<-read.csv(here("anonymized_source_files", "dictionary_2016_2024_2.csv"))%>%
   #for comparability ensure names are lower case and without special characters
   mutate(ingridient_name = str_replace_all(Lozi, "[^a-zA-Z\\s]", ""))
 
@@ -201,14 +215,53 @@ dictionary_2016_2024$ingridient_name <- stri_enc_toutf8(dictionary_2016_2024$ing
 all_villages_ing_dish_meals_l_fg<-all_villages_ing_dish_meals_l%>%
   stringdist_left_join(dictionary_2016_2024,by=c("ingridient_name") , ignore_case=TRUE, max_dist = 0, method="osa")
 
-write.csv(all_villages_ing_dish_meals_l_fg, here("anonymized_source_files","all_villages_ing_dish_meals_l_fg.csv"), row.names=FALSE, sep = ";")
+
+separate_ing<-all_villages_ing_dish_meals_l_fg%>%
+  filter(separate=="yes")%>%
+  
+  #separating ingredients entered as one word "saltmezi" when revised is salt and water. 
+  separate(Ingridient,  into = c("Ingridient_part1","Ingridient_part2"), sep="; ", fill="right")%>%
+  separate(ing_type,  into=c("ing_type_part1","ing_type_part2"), sep=";", fill="right")%>%
+  separate(scientific_name,  into=c("scientific_name_part1","scientific_name_part2"), sep=";", fill="right")%>%
+  separate(hdds,  into=c("hdds_part1","hdds_part2"), sep=";", fill="right")%>%
+  separate(wdds,  into=c("wdds_part1","wdds_part2"), sep=";", fill="right")%>%
+  separate(zfbdrfg,  into=c("zfbdrfg_part1","zfbdrfg_part2"), sep=";", fill="right")
+  
+
+  #putting it back again into one column only - pivoting from wider to longer
+separate_ing_long<-separate_ing%>%
+  tidyr::pivot_longer(cols=starts_with("Ingridient_part"),
+               names_to = "Ingridient_parts",
+               values_to = "Ingridient")%>%
+    tidyr::pivot_longer(cols=starts_with("ing_type_part"),
+               names_to = "ing_type_parts",
+               values_to ="ing_type")%>%
+  tidyr::pivot_longer(cols=starts_with("scientific_name_part"),
+               names_to = "scientific_name_parts",
+               values_to = "scientific_name")%>%
+    tidyr::pivot_longer(cols=starts_with("hdds_part"),
+               names_to = "hdds_parts",
+               values_to = "hdds")%>%
+    tidyr::pivot_longer(cols=starts_with("wdds_part"),
+               names_to = "wdds_parts",
+               values_to ="wdds" )  %>% 
+    tidyr::pivot_longer(cols=starts_with("zfbdrfg_part"),
+               names_to = "zfbdrfg_parts",
+               values_to ="zfbdrfg" ) %>%
+    distinct(cod, week, day, meal, dish, ingridient_no,Ingridient_parts, .keep_all=TRUE)%>%
+  dplyr::select(-c(Ingridient_parts,ing_type_parts,scientific_name_parts,hdds_parts,hdds_parts,wdds_parts, zfbdrfg_parts ))%>%
+  
+  #nsuring column order is the same as all_villages_ing_dish_meals_l_fg
+  dplyr::select("cod","week","day", "meal","dish","notes","cooking_method","based_on_memory","no_of_cups_of_legumes" , "notes_or_specify_if_other_units_were_used",
+                "village","ingridient_no" , "ingridient_name.x","Lozi","Ing_desc"  ,"Food.group","Ingridient","ing_type",
+                "scientific_name","found_2024","in_mabyn_dic_notlisted","separate","hdds","wdds","zfbdrfg","ingridient_name.y" )
+ 
+  
+all_villages_ing_dish_meals_l_fg_c<-rbind(all_villages_ing_dish_meals_l_fg, separate_ing_long)
 
 
-###
-###
-# FIXME: Revisit to handle separate columns
-###
-###
+write.csv(all_villages_ing_dish_meals_l_fg_c, here("anonymized_source_files","all_villages_ing_dish_meals_l_fg.csv"), row.names=FALSE, sep = ";")
+
 
 # Prepare Firewood data collected weekly ====
 firewood<-read.csv("D:/2 Bioversity/spia/2024/runs_files_2024/source_data/firewood_charcoal.csv")%>%
@@ -265,131 +318,3 @@ boiled_liquids_cov<-all_villages_liquids%>%
 
 
 write.csv(boiled_liquids_cov, here("anonymized_source_files","all_villages_boiled_liquids_cov.csv"), row.names=FALSE, sep = ";")
-
-
-
-# legumes frequency 
-legumes<-all_villages_ing_dish_meals_l_fg%>%
-  filter(Food.group=="Pulses (beans, peas and lentils)")%>%
-  group_by(cod, week, day, meal)%>% #to remove times when cooked two spp of pulses in one meal. 
-  dplyr::summarise(freq=n_distinct(Food.group))%>%
-  group_by(cod)%>%
-  dplyr::summarise(freq_tot=sum(freq))
-    
-#variables interpretation
-#freq_tot-> total number of times the hh cooked pulses
-
-
-##integrate number of dishes with hh characteristics and covariables====
-legumes_6w<-legumes%>%
-  left_join(main_hh_covariates, by="cod")%>%
-  filter(!is.na(solar_stove))
-
-tot_f<-ggplot(legumes_6w, aes(x=freq_tot, y=solar_stove, fill=solar_stove))+
-  geom_boxplot(notch = TRUE)+
-  geom_violin(trim=FALSE, fill=NA)+
-  stat_summary(fun.y=mean, geom="point", shape=23, size=2)+
-  xlab("Total number of times the hh cooked pulses (6 weeks)")+
-  ylab("")+
-  theme(legend.position="none")
-
-
-ggsave(tot_f,
-       filename="pulses.png",
-       path=here("runs_files_2024","figure"),
-       dpi = 300,
-       width = 7,
-       height = 4,
-       units="in")
-
-
-legumes_6w_cov<-legumes_6w%>%
-  dplyr::select(-c(village_cor_Lealui,village_cor_Mapungu,village_cor_Nalitoya,       
-                   gender_Men,gender_Women,highest_grade_Higher,highest_grade_None,         
-                   highest_grade_Primary,highest_grade_Secondary,solar_stove_No,solar_stove_Yes,           
-                   aas_involvement_Ag_nut,aas_involvement_agriculture,aas_involvement_None,aas_involvement_nutrition))
-
-#setting reference levels
-legumes_6w_cov$village_cor <- relevel(factor(legumes_6w_cov$village_cor), ref = "Lealui")
-legumes_6w_cov$gender <- relevel(factor(legumes_6w_cov$gender), ref = "Women")
-legumes_6w_cov$highest_grade <- relevel(factor(legumes_6w_cov$highest_grade), ref = "None")
-legumes_6w_cov$aas_involvement <- relevel(factor(legumes_6w_cov$aas_involvement), ref = "None")
-legumes_6w_cov$solar_stove <- relevel(factor(legumes_6w_cov$solar_stove), ref = "No")
-
-
-  
-#species richness====
-
-sr_avg<-all_villages_ing_dish_meals_l_fg%>%
-  group_by(cod, week, day)%>%
-  dplyr::summarise(no_spp=n_distinct(scientific_name))%>%
-  group_by(cod)%>%
-  dplyr::summarise(no_spp_mean=mean(no_spp))
-
-sr_tot<-all_villages_ing_dish_meals_l_fg%>%
-  group_by(cod)%>%
-  dplyr::summarise(no_spp=n_distinct(scientific_name))
-
-#variables interpretation
-#sr_tot-> total number of unique species consumed during the 6-week period
-#sr_avg-> daily average number of unique species consumed 
-
-##integrate number of dishes with hh characteristics and covariables====
-sr<-sr_avg%>%
-  left_join(sr_tot, by="cod")%>%
-  left_join(main_hh_covariates, by="cod")%>%
-  filter(!is.na(solar_stove))
-
-sr_mean_f<-ggplot(sr, aes(x=no_spp_mean, y=solar_stove, fill=solar_stove))+
-  geom_boxplot(notch = TRUE)+
-  geom_violin(trim=FALSE, fill=NA)+
-  stat_summary(fun.y=mean, geom="point", shape=23, size=2)+
-  xlab("Daily average number of unique species consumed")+
-  ylab("")+
-  theme(legend.position="none")
-
-sr_tot_f<-ggplot(sr, aes(x=no_spp, y=solar_stove, fill=solar_stove))+
-  geom_boxplot(notch = TRUE)+
-  geom_violin(trim=FALSE, fill=NA)+
-  stat_summary(fun.y=mean, geom="point", shape=23, size=2)+
-  xlab("Total number of unique species consumed during the 6-week period")+
-  ylab("")+
-  theme(legend.position="none")
-
-
-SR_f<-grid.arrange(  sr_mean_f, sr_tot_f, nrow=1,ncol=2)
-
-ggsave(SR_f,
-       filename="SR_f.png",
-       path=here("runs_files_2024","figure"),
-       dpi = 300,
-       width = 7,
-       height = 4,
-       units="in")
-
-
-sr_mean_6W_cov<-sr%>%
-  dplyr::select(-c(no_spp, village_cor_Lealui,village_cor_Mapungu,village_cor_Nalitoya,       
-                   gender_Men,gender_Women,highest_grade_Higher,highest_grade_None,         
-                   highest_grade_Primary,highest_grade_Secondary,solar_stove_No,solar_stove_Yes,           
-                   aas_involvement_Ag_nut,aas_involvement_agriculture,aas_involvement_None,aas_involvement_nutrition))
-
-#setting reference levels
-sr_mean_6W_cov$village_cor <- relevel(factor(sr_mean_6W_cov$village_cor), ref = "Lealui")
-sr_mean_6W_cov$gender <- relevel(factor(sr_mean_6W_cov$gender), ref = "Women")
-sr_mean_6W_cov$highest_grade <- relevel(factor(sr_mean_6W_cov$highest_grade), ref = "None")
-sr_mean_6W_cov$aas_involvement <- relevel(factor(sr_mean_6W_cov$aas_involvement), ref = "None")
-sr_mean_6W_cov$solar_stove <- relevel(factor(sr_mean_6W_cov$solar_stove), ref = "No")
-
-sr_tot_6W_cov<-sr%>%
-  dplyr::select(-c(no_spp_mean, village_cor_Lealui,village_cor_Mapungu,village_cor_Nalitoya,       
-                   gender_Men,gender_Women,highest_grade_Higher,highest_grade_None,         
-                   highest_grade_Primary,highest_grade_Secondary,solar_stove_No,solar_stove_Yes,           
-                   aas_involvement_Ag_nut,aas_involvement_agriculture,aas_involvement_None,aas_involvement_nutrition))
-
-#setting reference levels
-sr_tot_6W_cov$village_cor <- relevel(factor(sr_tot_6W_cov$village_cor), ref = "Lealui")
-sr_tot_6W_cov$gender <- relevel(factor(sr_tot_6W_cov$gender), ref = "Women")
-sr_tot_6W_cov$highest_grade <- relevel(factor(sr_tot_6W_cov$highest_grade), ref = "None")
-sr_tot_6W_cov$aas_involvement <- relevel(factor(sr_tot_6W_cov$aas_involvement), ref = "None")
-sr_tot_6W_cov$solar_stove <- relevel(factor(sr_tot_6W_cov$solar_stove), ref = "No")

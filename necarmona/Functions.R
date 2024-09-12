@@ -33,62 +33,62 @@ figure_box_plot <- function(data, xlabel, ylabel, fill_label, name) {
 # Fit the felm model
 
 
+# 
+# 
+# robust_test <- coeftest(model, vcov = robust_se)
+# 
+# tidy_results <- tidy(robust_test)
+# 
 
 
-robust_test <- coeftest(model, vcov = robust_se)
-
-tidy_results <- tidy(robust_test)
-
-
-
-# Function to run the felm model with treatment, covariates, and fixed effects
-run_felm_model_EHW_se <- function(data, outcome_var, treatment_var, covariates, fixed_effects) {
-  
-  # Ensure the response variable and village_cor_col are in the data
-  if (!all(c(response_var, village_cor_col) %in% colnames(data))) {
-    stop("Response variable or village correlation column not found in data")
-  }
-  
-  # Create the formula dynamically
-  covariates_str <- paste(covariates, collapse = " + ")
-  fixed_effects_str <- paste(fixed_effects, collapse = " + ")
-  formula_str <- paste(outcome_var, "~", treatment_var, "+", covariates_str, "|", fixed_effects_str)
-  formula <- as.formula(formula_str)
-  
-  # Debugging: Print or inspect formula_str
-  print("Generated Formula:")
-  print(formula_str)
-  
-  # Print the first few rows of data for debugging
-  cat("First few rows of data:\n")
-  print(head(data))
-  
-  # Fit the felm model
-  model <- tryCatch({
-    felm(formula, data = data)
-  }, error = function(e) {
-    message("Error fitting the model: ", conditionMessage(e))
-    return(NULL)
-  })
-  
-  if (is.null(model)) {
-    stop("Model fitting failed.")
-  }
-  
-  # Print model summary
-  print(summary(model))
-  # Calculate robust standard errors
-  robust_se <- tryCatch({
-    vcovHC(model, type = "HC1")
-  }, error = function(e) {
-    message("Error calculating robust standard errors: ", conditionMessage(e))
-    return(NULL)
-  })
-  
-  if (!is.null(robust_se)) {
-    robust_test <- coeftest(model, vcov = robust_se)
-    tidy_results <- tidy(robust_test)}
-}
+# # Function to run the felm model with treatment, covariates, and fixed effects
+# run_felm_model_EHW_se <- function(data, outcome_var, treatment_var, covariates, fixed_effects) {
+#   
+#   # Ensure the response variable and village_cor_col are in the data
+#   if (!all(c(response_var, village_cor_col) %in% colnames(data))) {
+#     stop("Response variable or village correlation column not found in data")
+#   }
+#   
+#   # Create the formula dynamically
+#   covariates_str <- paste(covariates, collapse = " + ")
+#   fixed_effects_str <- paste(fixed_effects, collapse = " + ")
+#   formula_str <- paste(outcome_var, "~", treatment_var, "+", covariates_str, "|", fixed_effects_str)
+#   formula <- as.formula(formula_str)
+#   
+#   # Debugging: Print or inspect formula_str
+#   print("Generated Formula:")
+#   print(formula_str)
+#   
+#   # Print the first few rows of data for debugging
+#   cat("First few rows of data:\n")
+#   print(head(data))
+#   
+#   # Fit the felm model
+#   model <- tryCatch({
+#     felm(formula, data = data)
+#   }, error = function(e) {
+#     message("Error fitting the model: ", conditionMessage(e))
+#     return(NULL)
+#   })
+#   
+#   if (is.null(model)) {
+#     stop("Model fitting failed.")
+#   }
+#   
+#   # Print model summary
+#   print(summary(model))
+#   # Calculate robust standard errors
+#   robust_se <- tryCatch({
+#     vcovHC(model, type = "HC1")
+#   }, error = function(e) {
+#     message("Error calculating robust standard errors: ", conditionMessage(e))
+#     return(NULL)
+#   })
+#   
+#   if (!is.null(robust_se)) {
+#     robust_test <- coeftest(model, vcov = robust_se)
+#     tidy_results <- tidy(robust_test)}
+# }
 
 
 
@@ -102,6 +102,6 @@ wrap_text <- function(labels, width = 10) {
 
 
 #winsorize each column ====
-winsorize_column <- function(x, probs = c(0.05, 0.95)) {
+winsorize_column <- function(x, probs = c(0.02, 0.98)) {
   return(Winsorize(x, probs = probs, na.rm=TRUE))
 }

@@ -80,7 +80,7 @@ if $pack == 1 {
 
 * Set log preferences
 	set 		logtype text    // so logs can be opened without Stata
-
+/*
 ***********************************************************************
 * 1 - run ingredients data cleaning .do file
 ***********************************************************************
