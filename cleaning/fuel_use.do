@@ -17,9 +17,9 @@
 	* formatting
 	* clarify collected values (is estimated worth or actual amt sold?)
 
-* **********************************************************************
-* 0 - setup
-* **********************************************************************
+************************************************************************
+**# 0 - setup
+************************************************************************
 
 * define paths
 	global	root	=	"$data/raw/fuel"
@@ -36,7 +36,7 @@
 
 
 ************************************************************************
-* 1a - rename and relabel WEEKLY vars in fuel_final sheet
+**# 1 - rename and relabel fuel variables
 ************************************************************************
 
 * drop unnecessary variables / anonymize
@@ -56,8 +56,7 @@
 	drop 				village
 	rename 				Village village
 	order 				village		
-							
-
+						
 	drop if 			hhid == .
 
 * rename and redefine variables	
@@ -190,16 +189,67 @@
 	replace				c_price = 8.33
 	generate			f_price = 7.69
 	drop				f_bght_price f_cltd_price
-	gen					f_quant = f_cltd_quant + f_bght_quant	
-	
 	lab var				f_price "Price of firewood (USD)"
-	lab var				f_quant "Quantity of firewood (kg)"
 	lab var				c_price "Price of charcoal (USD)"	
+
+* generate upper and lower bound values	
+	gen					f_quant_lb = f_cltd_quant + f_bght_quant	
+	gen					f_quant_ub = f_cltd_times*f_cltd_quant + f_bght_times*f_bght_quant	
+	lab var				f_quant_lb "Quantity of firewood lower bound (kg)"
+	lab var				f_quant_ub "Quantity of firewood upper bound (kg)"
 	
+	gen					f_val_lb = f_price*f_quant_lb
+	gen					f_val_ub = f_price*f_quant_ub
+	lab var				f_val_lb "Value of firewood lower bound (USD)"
+	lab var				f_val_ub "Value of firewood upper bound (USD)"
 	
+	gen					c_quant_lb = c_quant
+	gen					c_quant_ub = c_times* c_quant
+	lab var				c_quant_lb "Quantity of charcoal lower bound (kg)"
+	lab var				c_quant_ub "Quantity of charcoal upper bound (kg)"
 	
+	gen					c_val_lb = c_price*c_quant_lb
+	gen					c_val_ub = c_price*c_quant_ub
+	lab var				c_val_lb "Value of charcoal lower bound (USD)"
+	lab var				c_val_ub "Value of charcoal upper bound (USD)"
 	
-					
+	gen					val_fuel_lb = f_val_lb + c_val_lb
+	gen					val_fuel_ub = f_val_ub + c_val_ub
+	lab var				val_fuel_lb "Value of all fuel lower bound (USD)"
+	lab var				val_fuel_ub "Value of all fuel upper bound (USD)"
+	
+
+************************************************************************
+**# 2 - add control variables
+************************************************************************
+
+* add cloud cover data
+	gen 			cc = 100 if week == 1 & village == 1
+	replace 		cc = 11.75 if week == 2 & village == 1
+	replace 		cc= 99.99 if week == 3 & village == 1
+	replace 		cc = 0.00 if week == 4 & village == 1
+	replace 		cc = 0.00 if week == 5 & village == 1
+	replace 		cc = 0.00 if week == 6 & village == 1
+	replace 		cc = 100 if week == 1 & village == 0
+	replace 		cc = 1.7 if week == 2 & village == 0
+	replace 		cc = 2.06 if week == 3 & village == 0
+	replace 		cc = 0 if week == 4 & village == 0
+	replace 		cc = 0 if week == 5 & village == 0
+	replace 		cc = 0.01 if week == 6 & village == 0
+	replace 		cc = 100 if week == 1 & village == 2
+	replace 		cc = 35.84 if week == 2 & village == 2
+	replace 		cc = 0 if week == 3 & village == 2
+	replace 		cc = 0 if week == 4 & village == 2
+	replace 		cc = 0 if week == 5 & village == 2
+	replace 		cc = 0 if week == 6 & village == 2
+		
+	lab var 		cc "Cloud Cover"	
+	
+
+* merge in household characteristics
+	merge				m:1 hhid using "$export/c_var.dta"
+
+		
 	save 				"$export/fuel_cleaned.dta", replace
 
 

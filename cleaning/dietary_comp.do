@@ -1,7 +1,9 @@
 * project: solar stoves - final outcomes: composition of diet
 * created on: January 2021
 * created by: lem
-* Stata v.15.1 (mac)
+* edited by: jdm
+* last edit: 12 Sep 2024
+* stata v.18.5
 
 * does
 	* inputs meals.dta
@@ -727,39 +729,7 @@
 * load cleaned dietary data
 	save 				"$export/DSR/dietary.dta", replace	
 	
-* ***********************************************************************
-* 6 - merge in control variables
-* ***********************************************************************
 
-* load set of control variables
-	import delimited 	using		"$data/raw/controls/control_var.csv", clear
-
-	
-	* drop duplicateslicates based on household id
-	duplicates drop cod, force 
-	drop			solar_stove aas_activities
-
-* rename some control variables
-	rename			cod hhid
-	rename 			age_cal age
-
-* convert education variable
-	lab def 		educ 0 "None" 1 "Primary" 2 "Secondary" 3 "Higher", replace
-	encode 			highest_grade, gen(educ)
-	drop 			highest_grade
-	
-* relabel control variables	
-	lab var 		hhid "Household Identifier"
-	lab var 		age "Age"
-	lab var 		educ "Educational Attainment"
-	lab var			hh_size "Household Size"
-	lab var 		tli "Tropical Livestock Index"	
-	
-	
-* save
-	save 			"$export/c_var.dta", replace
-
-	
 * ***********************************************************************
 * 1b - merge in control variables and clean up
 * ***********************************************************************
@@ -781,27 +751,6 @@
 * drop merge variable
 	drop 			_merge
 
-* add cloud cover data
-	gen 			cc = 100 if week == 1 & village == 1
-	replace 		cc = 11.75 if week == 2 & village == 1
-	replace 		cc= 99.99 if week == 3 & village == 1
-	replace 		cc = 0.00 if week == 4 & village == 1
-	replace 		cc = 0.00 if week == 5 & village == 1
-	replace 		cc = 0.00 if week == 6 & village == 1
-	replace 		cc = 100 if week == 1 & village == 0
-	replace 		cc = 1.7 if week == 2 & village == 0
-	replace 		cc = 2.06 if week == 3 & village == 0
-	replace 		cc = 0 if week == 4 & village == 0
-	replace 		cc = 0 if week == 5 & village == 0
-	replace 		cc = 0.01 if week == 6 & village == 0
-	replace 		cc = 100 if week == 1 & village == 2
-	replace 		cc = 35.84 if week == 2 & village == 2
-	replace 		cc = 0 if week == 3 & village == 2
-	replace 		cc = 0 if week == 4 & village == 2
-	replace 		cc = 0 if week == 5 & village == 2
-	replace 		cc = 0 if week == 6 & village == 2
-		
-	lab var 		cc "Cloud Cover"	
 		
 ***********************************************************************
 * 6 - generate legume variables
