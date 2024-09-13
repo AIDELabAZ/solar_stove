@@ -120,36 +120,36 @@ p_meal<-legumes%>%
 
 dds_dish<-all_villages_ing_dish_meals_l_fg%>%
   group_by(cod, week, day, meal,  dish)%>%
-  dplyr::summarise(hdds_dish=n_distinct(hdds, na.rm=TRUE), wdds_dish=n_distinct(wdds, na.rm=TRUE), zfbdrfg_dish=n_distinct(zfbdrfg, na.rm = TRUE),sr_dish=n_distinct(scientific_name, na.rm=TRUE) )%>%
+  dplyr::summarise(hdds_dish=n_distinct(hdds, na.rm=TRUE), wdds_dish=n_distinct(wdds, na.rm=TRUE),sr_dish=n_distinct(scientific_name, na.rm=TRUE) )%>%
   group_by(cod)%>%
-  dplyr::summarise(hdds_dish_avg=mean(hdds_dish), wdds_dish_avg=mean(wdds_dish), , zfbdrfg_dish_avg=mean(zfbdrfg_dish), sr_dish_avg=mean(sr_dish))
+  dplyr::summarise(hdds_dish_avg=mean(hdds_dish), wdds_dish_avg=mean(wdds_dish), sr_dish_avg=mean(sr_dish))
 
 
 dds_meal<-all_villages_ing_dish_meals_l_fg%>%
   group_by(cod, week, day, meal)%>%
-  dplyr::summarise(hdds_meal=n_distinct(hdds, na.rm=TRUE), wdds_meal=n_distinct(wdds, na.rm=TRUE),  zfbdrfg_meal=n_distinct(zfbdrfg, na.rm = TRUE), spp_meal=n_distinct(scientific_name, na.rm=TRUE))%>%
+  dplyr::summarise(hdds_meal=n_distinct(hdds, na.rm=TRUE), wdds_meal=n_distinct(wdds, na.rm=TRUE),  spp_meal=n_distinct(scientific_name, na.rm=TRUE))%>%
   group_by(cod, meal)%>%
-  dplyr::summarise(hdds_meal_avg=mean(hdds_meal), wdds_meal_avg=mean(wdds_meal), zfbdrfg_meal_avg=mean(zfbdrfg_meal), sr_meal_avg=mean(spp_meal))%>%
+  dplyr::summarise(hdds_meal_avg=mean(hdds_meal), wdds_meal_avg=mean(wdds_meal), sr_meal_avg=mean(spp_meal))%>%
   pivot_wider(names_from = meal,
-              values_from = c(hdds_meal_avg, wdds_meal_avg, zfbdrfg_meal_avg, sr_meal_avg))
+              values_from = c(hdds_meal_avg, wdds_meal_avg, sr_meal_avg))
 
 dds_day<-all_villages_ing_dish_meals_l_fg%>%
   group_by(cod, week, day)%>%
-  dplyr::summarise(hdds_day=n_distinct(hdds, na.rm=TRUE), wdds_day=n_distinct(wdds, na.rm=TRUE), zfbdrfg_day=n_distinct(zfbdrfg, na.rm = TRUE),sr_day=n_distinct(scientific_name, na.rm=TRUE))%>%
+  dplyr::summarise(hdds_day=n_distinct(hdds, na.rm=TRUE), wdds_day=n_distinct(wdds, na.rm=TRUE), sr_day=n_distinct(scientific_name, na.rm=TRUE))%>%
   group_by(cod)%>%
-  dplyr::summarise(hdds_day_avg=mean(hdds_day), wdds_day_avg=mean(wdds_day), zfbdrfg_day_avg=mean(zfbdrfg_day), sr_day_avg=mean(sr_day))
+  dplyr::summarise(hdds_day_avg=mean(hdds_day), wdds_day_avg=mean(wdds_day), sr_day_avg=mean(sr_day))
 
 
 dds_week_avg<-all_villages_ing_dish_meals_l_fg%>%
   group_by(cod, week)%>%
-  dplyr::summarise(hdds_week=n_distinct(hdds, na.rm=TRUE), wdds_week=n_distinct(wdds, na.rm=TRUE), zfbdrfg_week=n_distinct(zfbdrfg, na.rm = TRUE), sr_week=n_distinct(scientific_name, na.rm=TRUE))%>%
+  dplyr::summarise(hdds_week=n_distinct(hdds, na.rm=TRUE), wdds_week=n_distinct(wdds, na.rm=TRUE), sr_week=n_distinct(scientific_name, na.rm=TRUE))%>%
   group_by(cod)%>%
-  dplyr::summarise(hdds_week_avg=mean(hdds_week), wdds_week_avg=mean(wdds_week),zfbdrfg_week_avg=mean(zfbdrfg_week), sr_week_avg=mean(sr_week) )
+  dplyr::summarise(hdds_week_avg=mean(hdds_week), wdds_week_avg=mean(wdds_week),sr_week_avg=mean(sr_week) )
 
 
 dds_week_tot<-all_villages_ing_dish_meals_l_fg%>%
   group_by(cod)%>%
-  dplyr::summarise(hdds_week_tot=n_distinct(hdds, na.rm=TRUE), wdds_week_tot=n_distinct(wdds, na.rm=TRUE), zfbdrfg_week_tot=n_distinct(zfbdrfg, na.rm = TRUE), sr_week_tot=n_distinct(scientific_name))
+  dplyr::summarise(hdds_week_tot=n_distinct(hdds, na.rm=TRUE), wdds_week_tot=n_distinct(wdds, na.rm=TRUE), sr_week_tot=n_distinct(scientific_name))
 
 dds<-dds_dish%>%
   left_join(dds_meal, by="cod")%>%

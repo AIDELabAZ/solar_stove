@@ -2,15 +2,22 @@
 * created on: January 2021
 * created by: lem
 * edited by: jdm
-* last edit: 12 Sep 2024
+* edited on: 12 Sep 2024
 * stata v.18.5
 
 * does
-	* inputs meals.dta
+	* inputs cleaned ingredient data
 	* generates HDDS and SR indices
 	* generates variables for number of meals, number of meals skipped, and
 		* average number of dishes per meal type
-	* outputs hdds.dta (HDDS), dsr.dta (DSR), and dietary_comp.dta
+	* outputs regression ready data
+
+* assumes
+	* access to cleaned ingredient dictionary
+
+* to do:
+	* done
+
 
 ***********************************************************************
 * 0 - setup
@@ -23,7 +30,7 @@
 	
 * open log
 	cap log 			close 
-	log using			"$logout/raw_cleaning_lm", append
+	log using			"$logout/dietary_comp", append
 	
 * load data
 	use 				"$export/HDDS/cleaned_ingredients.dta", clear
@@ -32,6 +39,17 @@
 ***********************************************************************
 * 1 - generate variables for intermediate dietary outcomes (2a in PAP)
 ***********************************************************************		
+
+* merge in control variables
+	merge m:1		hhid using "$export/c_var.dta"
+	*** 30,602 merged, 341 not matched
+	*** all from households 340000 and 347000
+	
+	drop if			_merge == 1
+	drop			_merge
+	
+	order 			village hhid aas hh_size ai tli sex age edu ///
+						solar
 
 * rename treatment and assignment variables
 	rename 			solar treat_assign
@@ -71,7 +89,7 @@
 
 * the share of all dishes prepared using a solar stove during a day
 	egen 			share_day = max(hh_da_use/hh_da_fuel), by(hhid week day)	
-	lab var			share_day "hare of SS Used Per Day"	
+	lab var			share_day "Share of SS Used Per Day"	
 	
 ** generate week_share variable			
 * generate a count of times ss used to prepare dishes within a week
@@ -98,8 +116,8 @@
 * the overall share of all dishes prepared using a solar stove
 	egen 			share_total = max(hh_t_use/hh_t_fuel), by(hhid)	
 	lab var			share_total "Share of SS Used Total"	
-	
 
+	
 ***********************************************************************
 * 2 - generate variables for final hdds outcomes
 ***********************************************************************		
@@ -153,7 +171,7 @@
 
 * drop observations with no HDDS 
 	drop if 			HDDS_ct_d == 0
-	*** none dropped
+	*** 58 dropped
 	
 * meal HDDS: the HDDS for a given meal, calculated as
 

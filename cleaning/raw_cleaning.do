@@ -448,7 +448,7 @@
 	merge m:1 		lozi using "$export/HDDS/food_match.dta"
 	drop if 		_merge == 2
 	sort 			_merge lozi
-	*** 30,736 observations matched, 694 observations didn't match
+	*** 30,736 observations matched, 207 observations didn't match
 
 	replace 		lozi = "" if _merge == 1
 	drop 			_merge
@@ -462,10 +462,8 @@
 	merge m:1 		lozi using "$export/HDDS/food_match.dta"
 	drop if 		_merge == 2
 	sort 			_merge lozi
-	*** 29,824 observations matched, 1,841 observations didn't match
+	*** 29,824 observations matched, 1,119 observations didn't match
 
-	cvxcxvxc
-	
 	replace 		lozi = "" if _merge == 1	
 	drop 			_merge
 	rename 			lozi lozi2
@@ -478,7 +476,7 @@
 	merge m:1 		lozi using "$export/HDDS/food_match.dta"	
 	drop if 		_merge == 2
 	sort 			_merge lozi
-	*** 32,933 observations matched, 1,413 observations didn't match
+	*** 30,016 observations matched, 927 observations didn't match
 	
 	replace 		lozi = "" if _merge == 1		
 	drop 			_merge
@@ -492,7 +490,7 @@
 	merge m:1 		lozi using "$export/HDDS/food_match.dta"
 	drop if 		_merge == 2
 	sort 			_merge lozi
-	*** 33,164 observations matched, 1,250 observations didn't match
+	*** 30,249 observations matched, 694 observations didn't match
 
 	replace 		lozi = "" if _merge == 1		
 	drop			_merge
@@ -506,7 +504,7 @@
 	merge m:1 		lozi using "$export/HDDS/food_match.dta"
 	drop if 		_merge == 2
 	sort 			_merge lozi	
-	*** 33,394 observations matched, 1,099 observations didn't match
+	*** 30,581 observations matched, 362 observations didn't match
 
 	replace 		lozi = "" if _merge == 1		
 	drop 			_merge
@@ -520,7 +518,7 @@
 	merge m:1 		lozi using "$export/HDDS/food_match.dta"
 	drop if 		_merge == 2
 	sort 			_merge lozi		
-	*** 33,518 observations matched, 1,069 observations didn't match
+	*** 330,857 observations matched, 86 observations didn't match
 
 	replace 		lozi = "" if _merge == 1		
 	drop 			_merge
@@ -534,7 +532,7 @@
 	merge m:1 		lozi using "$export/HDDS/food_match.dta"
 	drop if 		_merge == 2	
 	sort 			_merge lozi	
-	*** 33,569 observations matched, 1,060 observations didn't match
+	*** 330,933 observations matched, 10 observations didn't match
 
 	replace 		lozi = "" if _merge == 1		
 	drop 			_merge
@@ -605,6 +603,7 @@
 					english6 fg6 proc6 ///
 					english7 fg7 proc7, after(cook)
 
+					
 ***********************************************************************
 * 2 - create ingredient summary stats
 ***********************************************************************
@@ -630,30 +629,47 @@
 	
 * post frequency table of ingredients
 		estpost tab		ingredients, sort
-	
-* output table of ingredient frequencies
-		esttab 			 using "$output/descriptive/ing_tab.tex", replace booktabs ///
-							cells("b(label(freq)) pct(fmt(3)) cumpct(fmt(3))") ///
-							varlabels(, blist(Total "{hline @width}{break}")) ///
-							nonumber nomtitle noobs f
+	 
+* code for latex tables
+	esttab			using "$output/descriptive/ing_tab.tex", replace booktabs ///
+							prehead("\begin{tabular}{l*{2}{c}} \\ [-1.8ex]\hline \hline \\[-1.8ex] ") ///
+							cells("b(label(Frequency)) pct(label(Percent) fmt(2))") ///
+							nonumber nomtitle noobs fragment ///
+							postfoot("\midrule Total       &       81330&      100 \\ " ///
+							"\hline \hline \\[-1.8ex] \multicolumn{3}{J{\linewidth}}{\small " ///
+							"\noindent \textit{Note}: The table displays the number of times " ///
+							"the top 25 ingredient was recorded in the food diaries and the relative " ///
+							"frequency of that ingredient in the entire data set. In total " ///
+							"116 different incredients were recorded, excluding water and salt.}  \end{tabular}") 		
 
 * post frequency table of food groups
 		estpost tab			fg, sort
 	
+	
 * output table of food group frequencies
 		esttab 			 using "$output/descriptive/fg_tab.tex", replace booktabs ///
-							cells("b(label(freq)) pct(fmt(3)) cumpct(fmt(3))") ///
-							varlabels(, blist(Total "{hline @width}{break}")) ///
-							nonumber nomtitle noobs f
+							prehead("\begin{tabular}{l*{2}{c}} \\ [-1.8ex]\hline \hline \\[-1.8ex] ") ///
+							cells("b(label(Frequency)) pct(label(Percent) fmt(2))") ///
+							nonumber nomtitle noobs fragment ///
+							postfoot("\midrule Total       &       81330&      100 \\ " ///
+							"\hline \hline \\[-1.8ex] \multicolumn{3}{J{\linewidth}}{\small " ///
+							"\noindent \textit{Note}: The table displays the 81,330 " ///
+							"ingredients recorded in the food diaries categorized by " ///
+							"food group.}  \end{tabular}") 		
 	
 * post frequency table of processed foods
 		estpost tab			proc, sort
 	
 * output table of processed food frequencies
 		esttab 			 using "$output/descriptive/proc_tab.tex", replace booktabs ///
-							cells("b(label(freq)) pct(fmt(3)) cumpct(fmt(3))") ///
-							varlabels(, blist(Total "{hline @width}{break}")) ///
-							nonumber nomtitle noobs f
+							prehead("\begin{tabular}{l*{2}{c}} \\ [-1.8ex]\hline \hline \\[-1.8ex] ") ///
+							cells("b(label(Frequency)) pct(label(Percent) fmt(2))") ///
+							nonumber nomtitle noobs fragment ///
+							postfoot("\midrule Total       &       81330&      100 \\ " ///
+							"\hline \hline \\[-1.8ex] \multicolumn{3}{J{\linewidth}}{\small " ///
+							"\noindent \textit{Note}: The table displays the 81,330 " ///
+							"ingredients recorded in the food diaries categorized by " ///
+							"their level of processing prior to cooking or eating.}  \end{tabular}") 		
 	restore
 	
 ***********************************************************************

@@ -51,7 +51,7 @@
 if $pack == 1 {
 	
 	* for packages/commands, make a local containing any required packages
-		loc userpack "blindschemes mdesc estout distinct winsor2 mipolate" 
+		loc userpack "blindschemes mdesc estout distinct winsor2 mipolate egenmore" 
 	
 	* install packages that are on ssc	
 		foreach package in `userpack' {

@@ -15,7 +15,7 @@
 
 * assumes
 	* access to raw ingredient dictionary
-	* mipolate is installed
+	* mipolate
 
 * to do:
 	* done
