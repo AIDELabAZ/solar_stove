@@ -15,6 +15,7 @@
 * assumes
 	* access to cleaned ingredient dictionary
 	* egenmore
+	* xfill
 
 * to do:
 	* done
@@ -38,7 +39,7 @@
 
 
 ***********************************************************************
-**# 1 - generate variables for intermediate dietary outcomes (2a in PAP)
+**# 1 - clean and transform data
 ***********************************************************************		
 
 * merge in control variables
@@ -48,6 +49,13 @@
 	
 	drop if			_merge == 1
 	drop			_merge
+
+* household kept diary for 9 weeks
+	drop if			week > 6
+
+* only recorded breakfast
+	drop if			hhid == 226000
+	
 	
 	order 			village hhid aas hh_size ai tli sex age edu ///
 						solar
@@ -168,7 +176,7 @@
 **# 3 - generate legume variables and collapse
 ***********************************************************************		
 
-	collapse		(sum) legumes, ///
+	collapse		(max) legumes, ///
 					by(village hhid aas hh_size ai tli sex age edu treat_assign ///
 						week day meal dish ss_use cook hdds_dish sr_dish hdds_avg_dish sr_avg_dish hdds_meal ///
 						sr_meal hdds_avg_meal sr_avg_meal hdds_day sr_day ///
@@ -177,15 +185,36 @@
 	
 	lab var			legumes "Where Legumes Eaten?"
 	
-	fddfd
+	isid			hhid week day meal dish
+	
+* generate legumes (pulses) for dish
+	rename 			legumes p_dish
+	lab var			p_dish "Pulse: Dish"
+	
+* generate legumes (pulses) for meal
+	egen 			p_meal = total(p_dish), by(hhid week day meal)
+	lab var			p_meal "Pulse: Meal"
+	
+* generate legumes (pulses) for day
+	egen 			p_day = total(p_dish), by(hhid week day)
+	lab var			p_day "Pulse: Day
+	
+* generate legumes (pulses) for weak
+	egen 			p_week = total(p_dish), by(hhid week)
+	lab var			p_week "Pulse: Week"
+	
+* generate legumes (pulses) for total
+	egen 			p_total = total(p_dish), by(hhid)
+	lab var			p_total "Pulse: Total"
+	
 	
 ***********************************************************************
-**# 4 - generate variables for final outcomes: meals skipped
+**# 4 - generate variables for meals skipped
 ***********************************************************************	
 
 * generate indicator variable for the first meal observation in panel	
 	gen byte 			first_obs = 0
-	replace 			first_obs = 1 if dish_num == 1
+	replace 			first_obs = 1 if dish == 1
 	label var 			first_obs "First Observation in Meal"
 
 * check	
@@ -203,19 +232,19 @@
 * add up total hh breakfast meals 
 	sort 				hhid
 	by hhid: 			egen hhbr_tot = total(first_obs) if meal == 0
-	replace				hhbr_tot = 0 if meal != 0
+	xfill				hhbr_tot, i(hhid)
 	label var			hhbr_tot "Total Household Breakfast Meals"
 
 * add up total hh lunch meals 
 	sort 				hhid
 	by hhid: 			egen hhlun_tot = total(first_obs) if meal == 1
-	replace				hhlun_tot = 0 if meal != 1
+	xfill				hhlun_tot, i(hhid)
 	label var 			hhlun_tot "Total Household Lunch Meals"
 	
 * add up total hh dinner meals 
 	sort 				hhid
 	by hhid: 			egen hhdin_tot = total(first_obs) if meal == 2
-	replace				hhdin_tot = 0 if meal != 2	
+	xfill				hhdin_tot, i(hhid)
 	label var			hhdin_tot "Total Household Dinner Meals"
 	
 * add up total hh meals 
@@ -251,160 +280,139 @@
 * (ii) Total number of breakfast meals skipped over all six weeks.		
 * generate variable that calculates the difference in max breakfast meals (42) and how
 * many meals a hh consumed
-	gen 				hhbr_skipped_temp = mealct - hhbr_tot
-	
-* replace this var with missing if not a breakfast meal
-	replace				hhbr_skipped_temp = . if meal != 0
-* generate a variable for hh skipped that takes on the max value for hh 
-* breakfast meals skipped. this means that every observation for a hh will 
-* have the # br meals skipped
-	by hhid:  			egen hhbr_skipped = max(hhbr_skipped_temp) 
-	drop 				hhbr_skipped_temp
-	replace 			hhbr_skipped = 0 if hhbr_skipped < 0
+	gen 				hhbr_skipped = mealct - hhbr_tot
 	label var 			hhbr_skipped "Number of Breakfasts Skipped"
 
 * (iii) Total number of lunch meals skipped over all six weeks.			
-	gen 				hhlun_skipped_temp = mealct - hhlun_tot
-	replace				hhlun_skipped_temp = 0 if meal != 1	
-	by hhid:  			egen hhlun_skipped = max(hhlun_skipped_temp) 	
-	drop 				hhlun_skipped_temp	
+	gen 				hhlun_skipped = mealct - hhlun_tot
 	label var			hhlun_skipped "Number of Breakfasts Skipped"
 
 * (iv) Total number of dinner meals skipped over all six weeks.		
-	gen 				hhdin_skipped_temp = mealct - hhdin_tot
-	replace				hhdin_skipped_temp = 0 if meal != 2	
-	by hhid:  			egen hhdin_skipped = max(hhdin_skipped_temp) 
-	drop 				hhdin_skipped_temp		
+	gen 				hhdin_skipped = mealct - hhdin_tot
 	label var			hhdin_skipped "Number of Breakfasts Skipped"
 	
 
 ***********************************************************************
-* 5 - generate variables for final outcomes: avg number of dishes per meal
+**# 5 - generate variables for avg number of dishes per meal
 ***********************************************************************	
 	
 ** generate avg number of dishes in each meal type over 6 weeks	
 * add up total number of breakfast dishes 
-	egen				hhbrdish_tot_temp = count(dish) if meal == 0, by(hhid) 
-	replace				hhbrdish_tot_temp = 0 if meal != 0
-	by hhid:  			egen hhbrdish_tot = max(hhbrdish_tot_temp) 
+	gen					hhbrdish_tot_temp = 1 if meal == 0
+	egen				hhbrdish_tot = count(hhbrdish_tot_temp), by(hhid)
+	replace				hhbrdish_tot = hhbrdish_tot/hhbr_tot
 	drop 				hhbrdish_tot_temp		
 	label var			hhbrdish_tot "Total Number of Breakfast Dishes by HH"
 	
 * add up total number of lunch dishes
-	egen				hhlundish_tot_temp = count(dish) if meal == 1, by(hhid) 
-	replace				hhlundish_tot_temp = 0 if meal != 1	
-	by hhid:  			egen hhlundish_tot = max(hhlundish_tot_temp) 
+	gen					hhlundish_tot_temp = 1 if meal == 1
+	egen				hhlundish_tot = count(hhlundish_tot_temp), by(hhid)
+	replace				hhlundish_tot = hhlundish_tot/hhlun_tot
 	drop 				hhlundish_tot_temp			
 	label var			hhlundish_tot "Total Number of Lunch Dishes by HH"	
 	
 * add up total number of dinner dishes 
-	egen				hhdindish_tot_temp = count(dish) if meal == 2, by(hhid) 
-	replace				hhdindish_tot_temp = 0 if meal != 2
-	by hhid:  			egen hhdindish_tot = max(hhdindish_tot_temp) 
+	gen					hhdindish_tot_temp = 1 if meal == 2
+	egen				hhdindish_tot = count(hhdindish_tot_temp), by(hhid)
+	replace				hhdindish_tot = hhdindish_tot/hhdin_tot
 	drop 				hhdindish_tot_temp		
 	label var			hhdindish_tot "Total Number of Dinner Dishes by HH"	
 	
 * add up total number of dishes
-	egen				hhdish_tot = count(dish), by(hhid) 	
+	bys hhid: gen		hhdish_tot = _N
 	label var			hhdish_tot "Total Number of Dishes by HH"	
 
-* (i) Average number of dishes in a meal over the six weeks. (Add up the 
-	* number of dishes in each meal and divide by the total number of meals 
-	* the household ate in the six weeks).	
-	
-* generate average by dividing total dishes/meal by total dishes
-	gen					avg_dish = hhdish_tot/hhmeals_total
-	label var			avg_dish "Average Number of Dishes for All Meals"	
-	
-* (ii) Average number of dishes in breakfast over the six weeks. (Add up 
-	* the number of dishes in each breakfast and divide by the total 
-	* number of breakfast meals the household ate in the six weeks).
 
-* generate average by dividing total dishes/breakfast by total dishes
-	gen					avg_brdish_temp = hhbrdish_tot/hhbr_tot
-	by hhid:  			egen avg_brdish = max(avg_brdish_temp) 	
-	drop 				avg_brdish_temp	
-	label var			avg_brdish "Average Number of Breakfast Dishes"
-	
-* (iii) Average number of dishes in lunch over the six weeks. (Add up the 
-	* number of dishes in each lunch and divide by the total number of 
-	* lunch meals the household ate in the six weeks).
-
-* generate average by dividing total dishes/lunch by total dishes
-	gen					avg_lundish_temp = hhlundish_tot/hhlun_tot
-	by hhid:  			egen avg_lundish = max(avg_lundish_temp) 	
-	drop 				avg_lundish_temp	
-	label var			avg_lundish "Average Number of Lunch Dishes"
-	
-* (iv) Average number of dishes in dinner over the six weeks. (Add up 
-	* the number of dishes in each dinner and divide by the total number 
-	* of dinner meals the household ate in the six weeks).
-
-* generate average by dividing total dishes/dinner by total dishes
-	gen					avg_dindish_temp = hhdindish_tot/hhdin_tot
-	by hhid:  			egen avg_dindish = max(avg_dindish_temp) 	
-	drop 				avg_dindish_temp
-	label var			avg_dindish "Average Number of Dinner Dishes"
-	
-* load cleaned dietary data
-	save 				"$export/DSR/dietary.dta", replace	
-	
-
-* ***********************************************************************
-* 1b - merge in control variables and clean up
-* ***********************************************************************
-
-* load cleaned dietary data
-	use 			"$export/DSR/dietary.dta", clear
-
-* rename treatment and assignment variables
-	*rename 			solar treat_assign
-	*rename 			ss_count ss_use
-
-* merge in control variables
-	merge m:1 		hhid using "$export/c_var.dta", force
-	*** 30,659 observations matched, 2,915 observations not matched
-
-	drop if 		_merge == 1
-	*** 2915 observations deleted 
-	
-* drop merge variable
-	drop 			_merge
-
-		
 ***********************************************************************
-* 6 - generate legume variables
+**# 6 - generate meal_share variable
 ***********************************************************************		
-
-* generate indicator variable for legumes in dish
-	gen 			legume_ind = 1 if legumes != "0" & legumes != "" 
-	*** 1,035 observations
 	
-	lab var			legume_ind "Legume Dish Cooked"
+* generate total times ss used to prepare dishes within meal
+	egen			hh_m_use = total(ss_use), by(hhid week day meal)	
+	lab var			hh_m_use "SS Use: Meal"
 
-* generate a variable for the number of times legumes were cooked in a given day
-	egen			legume_ct_day = total(legume_ind), by(hhid week day)
-	lab var			legume_ct_day "Number of Times HH Cooked Legumes: Day"
+* sum of dishes per meal cooked using ANY fuel	
+	egen 			hh_m_fuel = count(dish), by(hhid week day meal)
+	lab var			hh_m_fuel "Fuel Used: Meal"
 
-* generate a variable for the number of times legumes were cooked in a given week
-	egen			legume_ct_week = total(legume_ind), by(hhid week)	
-	lab var			legume_ct_week "Number of Times HH Cooked Legumes: Week"	
+* the share of all dishes prepared using a solar stove during a meal
+	egen 			share_meal = max(hh_m_use/hh_m_fuel), by(hhid week day meal)
+	lab var			share_meal "Share of SS Used Per Meal"
 
-* generate a variable for the number of times legumes were cooked over 6 weeks
-	egen			legume_ct_tot = total(legume_ind), by(hhid)		
-	lab var			legume_ct_tot "Number of Times HH Cooked Legumes: Total"
+** generate day_share variable	
+* generate a count of times ss used to prepare dishes within a day
+	egen			hh_da_use = total(ss_use), by(hhid week day)
+	lab var			hh_da_use "SS Use: Day"
+
+* sum of dishes per day cooked using ANY fuel	
+	egen 			hh_da_fuel = count(dish), by(hhid week day)
+	lab var			hh_da_fuel "Fuel Used: Meal"
+
+* the share of all dishes prepared using a solar stove during a day
+	egen 			share_day = max(hh_da_use/hh_da_fuel), by(hhid week day)	
+	lab var			share_day "Share of SS Used Per Day"	
 	
-				
+** generate week_share variable			
+* generate a count of times ss used to prepare dishes within a week
+	egen 			hh_w_use = total(ss_use), by(hhid week)
+	lab var			hh_w_use "SS Use: Week"
+		
+* sum of dishes per week cooked using ANY fuel	
+	egen 			hh_w_fuel = count(dish), by(hhid week)
+	lab var			hh_w_fuel "Fuel Used: Week"	
+
+* the share of all dishes prepared using a solar stove during a week
+	egen 			share_week = max(hh_w_use/hh_w_fuel), by(hhid week)
+	lab var			share_week "Share of SS Used Per Week"	
+	
+** generate tot_share variable				
+* generate a count of times ss used to prepare dishes overall
+	egen 			hh_t_use = total(ss_use), by(hhid)
+	lab var			hh_t_use "SS Use: Total"
+	
+* sum of overall dishes cooked using ANY fuel	
+	egen 			hh_t_fuel = count(dish), by(hhid)
+	lab var			hh_t_fuel "Fuel Used: Total"	
+
+* the overall share of all dishes prepared using a solar stove
+	egen 			share_total = max(hh_t_use/hh_t_fuel), by(hhid)	
+	lab var			share_total "Share of SS Used Total"	
+
+	
 ***********************************************************************
-* 7 - end matter, clean up to save
+**# 7 - add cloud cover data
+***********************************************************************
+
+* add cloud cover data
+	gen 			cc = 100 if week == 1 & village == 1
+	replace 		cc = 11.75 if week == 2 & village == 1
+	replace 		cc= 99.99 if week == 3 & village == 1
+	replace 		cc = 0.00 if week == 4 & village == 1
+	replace 		cc = 0.00 if week == 5 & village == 1
+	replace 		cc = 0.00 if week == 6 & village == 1
+	replace 		cc = 100 if week == 1 & village == 0
+	replace 		cc = 1.7 if week == 2 & village == 0
+	replace 		cc = 2.06 if week == 3 & village == 0
+	replace 		cc = 0 if week == 4 & village == 0
+	replace 		cc = 0 if week == 5 & village == 0
+	replace 		cc = 0.01 if week == 6 & village == 0
+	replace 		cc = 100 if week == 1 & village == 2
+	replace 		cc = 35.84 if week == 2 & village == 2
+	replace 		cc = 0 if week == 3 & village == 2
+	replace 		cc = 0 if week == 4 & village == 2
+	replace 		cc = 0 if week == 5 & village == 2
+	replace 		cc = 0 if week == 6 & village == 2
+		
+	lab var 		cc "Cloud Cover"	
+
+	order			cc, after(aas)
+	
+***********************************************************************
+**# 8 - end matter, clean up to save
 ***********************************************************************
 	
 * prepare for export
-	lab var				food_group "Food Group"
-*	compress
-*	describe
-*	summarize      	
-	
+	compress	
 	save 				"$export/dietary_cleaned.dta", replace	
 	
 * close the log
