@@ -15,9 +15,7 @@
 	* estout
 
 * to do:
-	* check notes for each table and delete template language
-	* double-check each title
-	* double-check stats included for each estimator
+	* done
 
 ***********************************************************************
 **# 0 - setup
@@ -138,8 +136,9 @@
 **## 2.2 - final outcome: total fuel collection
 ************************************************************************
 
-collapse (sum)			f_time f_quant_ub c_quant_ub val_fuel_ub, ///
-							by(village hhid aas cc hh_size ai tli sex age edu treat_assign)
+collapse 				(sum) f_time f_quant_ub c_quant_ub val_fuel_ub ///
+						(mean) cc, ///
+							by(village hhid aas hh_size ai tli sex age edu treat_assign)
 
 * firewood time at overall use with and without controls using LPM	
 	reg 				f_time treat_assign i.aas i.village, vce(robust)

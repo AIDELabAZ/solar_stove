@@ -2,7 +2,7 @@
 * created on: February 2021
 * created by: lem
 * edited by: jdm
-* edited on: 12 Sep 2024
+* edited on: 19 Sep 2024
 * stata v.18.5
 
 * does
@@ -34,7 +34,7 @@
 
 	
 * load .csv and save as stata .dta
-	import delimited 				"$root/fuel_consumption.csv", clear
+	import delimited 	"$root/fuel_consumption.csv", clear
 
 
 ************************************************************************
@@ -186,10 +186,10 @@
 * drop household that collected for 9 weeks
 	drop if				week > 6
 
-* natalia uses a price of $8.33 for charcoal and $7.69 for firewood
+* natalia uses a price of $0.12 for charcoal and $0.13 for firewood
 * replace price with these values
-	replace				c_price = 8.33
-	generate			f_price = 7.69
+	replace				c_price = 0.12
+	generate			f_price = 0.13
 	drop				f_bght_price f_cltd_price
 	lab var				f_price "Price of firewood (USD)"
 	lab var				c_price "Price of charcoal (USD)"	
