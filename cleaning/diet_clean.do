@@ -115,7 +115,20 @@
 	replace			sci = 0 if sci == .
 	lab var			sci "Scientific Name"
 	drop			scientific_name
-
+	
+* generate ingredient count per dish
+	egen			ingred_dish = nvals(english), by(hhid week day meal dish)
+	lab var			ingred_dish "Unique Ingredients: Dish"
+	
+	egen			ingred_meal = nvals(english), by(hhid week day meal)
+	lab var			ingred_meal "Unique Ingredients: Meal"
+	
+	egen			ingred_day = nvals(english), by(hhid week day)
+	lab var			ingred_day "Unique Ingredients: Day"
+	
+	egen			ingred_week = nvals(english), by(hhid week)
+	lab var			ingred_week "Unique Ingredients: Week"
+	
 	
 ***********************************************************************
 **# 2 - generate variables for final hdds outcomes
@@ -181,7 +194,8 @@
 						week day meal dish ss_use cook hdds_dish sr_dish hdds_avg_dish sr_avg_dish hdds_meal ///
 						sr_meal hdds_avg_meal sr_avg_meal hdds_day sr_day ///
 						hdds_avg_day sr_avg_day hdds_week sr_week hdds_avg_week ///
-						sr_avg_week hdds_total sr_total)
+						sr_avg_week hdds_total sr_total ingred_dish ingred_meal ///
+						ingred_day ingred_week)
 	
 	lab var			legumes "Where Legumes Eaten?"
 	
