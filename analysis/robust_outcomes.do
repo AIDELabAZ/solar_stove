@@ -61,18 +61,34 @@
 ************************************************************************
 
 * histogram of responses per day by treatment
-	histogram 			day_count, discrete by(treat_assign)
+	twoway			histogram day_count, discrete by(treat_assign) ///
+						xlabel(1 7 14 21 28 35 42) ///
+						graphregion(fcolor(white)) xtitle("Day in Study") ///
+						legend(pos(6) cols(2) label( 1 "Treatment" 2"Control"))
+						
+		twoway			(histogram day_count if treat_assign == 1, color(teal%50) discrete ) ///
+						(histogram day_count if treat_assign == 0, color(sienna%50) discrete ), ///
+						xlabel(1 7 14 21 28 35 42) ///
+						graphregion(fcolor(white)) xtitle("Day in Study") ///
+						legend(pos(6) cols(2) label(1 "Treatment") label(2 "Control"))
 	
 
-	reghdfe 		ingred_dish ib(42).day_count, ///
+	reghdfe 		ingred_dish ib(42).day_count if treat_assign == 1, ///
 						absorb(hhid) cl(hhid) 
-	estimates 		store event_dish 
+	estimates 		store event_dish_t
 
-	coefplot 		event_dish, graphregion(fcolor(white))  xtitle("Event years", size(medlarge)) vertical omitted msymbol(s) ///
-						mc(black) mfcolor(white) yline(0, lc(black) lw(vthin)) recast(connected) lwidth(thick) ///
-						lcolor(black) ciopts(recast(rline) lwidth(thin) lcolor(black) lpattern(dash)) ///
-						xlabel(1 7 14 21 28 35 42, angle(0) nogrid) drop(_cons)
+	reghdfe 		ingred_dish ib(42).day_count if treat_assign == 0, ///
+						absorb(hhid) cl(hhid) 
+	estimates 		store event_dish_c
 	
+	coefplot 		(event_dish_t, lc(teal) lpattern(solid) ciopts(recast(rarea) color(teal%20)) ) ///
+					(event_dish_c, lc(sienna) lpattern(dash) ciopts(recast(rarea) color(sienna%20)) ), ///
+					graphregion(fcolor(white)) xtitle("Day in Study") ///
+						vertical omitted yline(0, lc(black) lw(vthin)) recast(connected) msize(vtiny) ///
+						xlabel(1 7 14 21 28 35 42, angle(0) nogrid) drop(_cons) ytitle("Coefficient Size") ///
+						legend(pos(6) cols(2) ) p1(label("Treatment")) p2(label("Control"))
+	
+
 reg ingred_dish day_count, vce(cluster hhid)
 
 reg ingred_dish day_count $$x_cov, vce(cluster hhid)
