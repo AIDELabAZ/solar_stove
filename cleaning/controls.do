@@ -51,7 +51,7 @@
 	replace 			Village = 1 if village == "Mapungu"
 	replace 			Village = 2 if village == "Nalitoya"
 	lab var 			Village "Village"
-	lab def 			village 0 "Lealui" 1 "Mapungu" 2 "Nalitoya"
+	lab def 			village 0 "Village L" 1 "Village M" 2 "Village N"
 	lab val 			Village village
 	
 	drop 				village

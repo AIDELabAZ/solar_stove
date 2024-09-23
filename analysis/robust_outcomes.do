@@ -60,7 +60,7 @@
 ************************************************************************
 **# 2 - fatigue
 ************************************************************************
-/*
+
 * histogram of responses per day by treatment		
 	twoway			(histogram day_count if treat_assign == 1, color(teal%50) discrete ) ///
 						(histogram day_count if treat_assign == 0, color(sienna%50) discrete ), ///
@@ -103,7 +103,7 @@ reg ingred_day day_count, vce(cluster hhid)
 reg ingred_day day_count $$x_cov, vce(cluster hhid)
 
 
-*/
+
 ************************************************************************
 **# 3 - LATE
 ************************************************************************

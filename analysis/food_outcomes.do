@@ -2,7 +2,7 @@
 * created on: Sep 2024
 * created by: jdm
 * edited by: jdm
-* edited on: 16 Sep 2024
+* edited on: 23 Sep 2024
 * stata v.18.5
 
 * does
@@ -40,7 +40,7 @@
 	use					"$ans/dietary_cleaned.dta", clear	
 						
 * set up global list of control variables, including village dummies
-	global 				x_cov hh_size ai tli sex age edu cc 	
+	global 				x_cov hh_size ai tli sex age i.edu cc 	
 
 	lab var				treat_assign "Solar Stove"
 	

@@ -34,7 +34,8 @@
 	log using			"$logout/raw_cleaning", append
 
 * import ingredient sheet and save as .dta
-	import 			excel using "$root/Lealui_mapungu_nalitoya_data28_02_2020.xlsx", sheet("Lealui_Mapungu_Nalitoya_ingridi") firstrow clear
+	import 			excel using "$root/Lealui_mapungu_nalitoya_data28_02_2020.xlsx", ///
+						sheet("Lealui_Mapungu_Nalitoya_ingridi") firstrow clear
 	
 ************************************************************************
 **# 1 - prepare ingredients data
@@ -602,78 +603,9 @@
 					english5 fg5 proc5 ///
 					english6 fg6 proc6 ///
 					english7 fg7 proc7, after(cook)
-
-					
-***********************************************************************
-* 2 - create ingredient summary stats
-***********************************************************************
-
-* preserve data set
-	preserve
-	
-* generate unique id for each dish	
-		egen			grp_id = group(hhid week day meal dish_num)
-
-* reshape from wide to long so all ingredients are stacked under "english"
-		reshape 		long english fg proc, i(grp_id) j(ingrdt_id)
-	
-* drop empty ingredients
-		drop if			english == ""
-		drop if			english == "water" | english == "salt"
-	
-* drop unneeded variables
-		drop			legumes
-	
-* encode english string var into a numeric variable
-		encode			english, gen(ingredients)
-	
-* post frequency table of ingredients
-		estpost tab		ingredients, sort
-	 
-* code for latex tables
-	esttab			using "$output/descriptive/ing_tab.tex", replace booktabs ///
-							prehead("\begin{tabular}{l*{2}{c}} \\ [-1.8ex]\hline \hline \\[-1.8ex] ") ///
-							cells("b(label(Frequency)) pct(label(Percent) fmt(2))") ///
-							nonumber nomtitle noobs fragment ///
-							postfoot("\midrule Total       &       81330&      100 \\ " ///
-							"\hline \hline \\[-1.8ex] \multicolumn{3}{J{\linewidth}}{\small " ///
-							"\noindent \textit{Note}: The table displays the number of times " ///
-							"the top 25 ingredient was recorded in the food diaries and the relative " ///
-							"frequency of that ingredient in the entire data set. In total " ///
-							"116 different incredients were recorded, excluding water and salt.}  \end{tabular}") 		
-
-* post frequency table of food groups
-		estpost tab			fg, sort
-	
-	
-* output table of food group frequencies
-		esttab 			 using "$output/descriptive/fg_tab.tex", replace booktabs ///
-							prehead("\begin{tabular}{l*{2}{c}} \\ [-1.8ex]\hline \hline \\[-1.8ex] ") ///
-							cells("b(label(Frequency)) pct(label(Percent) fmt(2))") ///
-							nonumber nomtitle noobs fragment ///
-							postfoot("\midrule Total       &       81330&      100 \\ " ///
-							"\hline \hline \\[-1.8ex] \multicolumn{3}{J{\linewidth}}{\small " ///
-							"\noindent \textit{Note}: The table displays the 81,330 " ///
-							"ingredients recorded in the food diaries categorized by " ///
-							"food group.}  \end{tabular}") 		
-	
-* post frequency table of processed foods
-		estpost tab			proc, sort
-	
-* output table of processed food frequencies
-		esttab 			 using "$output/descriptive/proc_tab.tex", replace booktabs ///
-							prehead("\begin{tabular}{l*{2}{c}} \\ [-1.8ex]\hline \hline \\[-1.8ex] ") ///
-							cells("b(label(Frequency)) pct(label(Percent) fmt(2))") ///
-							nonumber nomtitle noobs fragment ///
-							postfoot("\midrule Total       &       81330&      100 \\ " ///
-							"\hline \hline \\[-1.8ex] \multicolumn{3}{J{\linewidth}}{\small " ///
-							"\noindent \textit{Note}: The table displays the 81,330 " ///
-							"ingredients recorded in the food diaries categorized by " ///
-							"their level of processing prior to cooking or eating.}  \end{tabular}") 		
-	restore
 	
 ***********************************************************************
-* 3 - end matter, clean up to save
+**# 4 - end matter, clean up to save
 ***********************************************************************
 	
 	save 			"$export/HDDS/cleaned_ingredients.dta", replace	

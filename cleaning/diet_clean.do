@@ -2,7 +2,7 @@
 * created on: Sep 2024
 * created by: jdm
 * edited by: jdm
-* edited on: 13 Sep 2024
+* edited on: 23 Sep 2024
 * stata v.18.5
 
 * does
@@ -131,6 +131,81 @@
 	
 * clean food group to put it into 12 categories (not 18)
 	replace			fg = 14 if fg == 0
+	replace			fg = 5 if fg == 3 | fg == 4
+	replace			fg = 7 if fg == 6
+	replace			fg = 9 if fg == 8
+	replace			fg = 15 if fg == 17
+	replace			fg = 16 if fg == 18
+	lab define 		foodgroup 0 "None" 1 "Cereals" 2 "Tubers" 3 "Vitamin-A Vegetables" ///
+					4 "Leafy Greens" 5 "Vegetables" 6 "Vitamin-A Fruits" 7 "Fruits" ///
+					8 "Organ Meat" 9 "Meat" 10 "Eggs" 11 "Fish" 12 "Legumes, Nuts, & Seeds" ///
+					13 "Milk" 14 "Oils & Fats" 15 "Sweets" ///
+					16 "Spices, Condiments, & Beverages" 17 "Fried Snacks" ///
+					18 "Beverages", replace
+	
+
+					
+***********************************************************************
+**## 1.1 - create ingredient summary stats
+***********************************************************************
+
+	
+* encode english string var into a numeric variable
+	encode			english, gen(ingredients)
+	bys 			ingredients: gen size = _N
+	replace			ingredients = 0 if size < 566
+	lab define 		ingredients 0 "other", add
+	
+	gen				science = sci
+	replace			science = . if science == 0
+	lab values 		science sci
+	bys 			science: gen sizes = _N
+	replace			science = 0 if sizes < 139
+	lab define 		sci 0 "other", add
+	
+* post frequency table of ingredients
+		estpost tab		ingredients, sort nototal
+	 
+* code for latex tables
+	esttab			using "$output/descriptive/ing_tab.tex", replace booktabs ///
+							prehead("\begin{tabular}{l*{2}{c}} \\ [-1.8ex]\hline \hline \\[-1.8ex] ") ///
+							cells("b(label(Frequency) fmt(%9.0gc)) pct(label(Percent) fmt(2))") ///
+							nonumber nomtitle noobs fragment ///
+							postfoot("\midrule Total       &       93,606&      100 \\ " ///
+							"\hline \hline \\[-1.8ex] \multicolumn{3}{J{\linewidth}}{\small " ///
+							"\noindent \textit{Note}: The table displays the number of times " ///
+							"the top 25 ingredient was recorded in the food diaries and the relative " ///
+							"frequency of that ingredient in the entire data set. In total " ///
+							"116 different ingredients were recorded, excluding water.}  \end{tabular}")	
+
+* post frequency table of food groups
+		estpost tab			fg, sort nototal
+	
+* output table of food group frequencies
+		esttab 			 using "$output/descriptive/fg_tab.tex", replace booktabs ///
+							prehead("\begin{tabular}{l*{2}{c}} \\ [-1.8ex]\hline \hline \\[-1.8ex] ") ///
+							cells("b(label(Frequency) fmt(%9.0gc)) pct(label(Percent) fmt(2))") ///
+							nonumber nomtitle noobs fragment varlabels(`e(labels)') ///
+							postfoot("\midrule Total       &       93,606&      100 \\ " ///
+							"\hline \hline \\[-1.8ex] \multicolumn{3}{J{\linewidth}}{\small " ///
+							"\noindent \textit{Note}: The table displays the number of times " ///
+							"a food group is represented in the food diaries. There are 12 " ///
+							"total food groups.}  \end{tabular}") 		
+	
+* post frequency table of species
+		estpost tab			science, sort nototal
+	
+* output table of processed food frequencies
+		esttab 			 using "$output/descriptive/sci_tab.tex", replace booktabs ///
+							prehead("\begin{tabular}{l*{2}{c}} \\ [-1.8ex]\hline \hline \\[-1.8ex] ") ///
+							cells("b(label(Frequency) fmt(%9.0gc)) pct(label(Percent) fmt(2))") ///
+							nonumber nomtitle noobs fragment ///
+							postfoot("\midrule Total       &       81330&      100 \\ " ///
+							"\hline \hline \\[-1.8ex] \multicolumn{3}{J{\linewidth}}{\small " ///
+							"\noindent \textit{Note}: The table displays the number of times " ///
+							"a species is represented in the food diaries. There are 63 " ///
+							"unique species total.}  \end{tabular}") 				
+	
 	
 ***********************************************************************
 **# 2 - generate variables for final hdds outcomes
@@ -193,7 +268,8 @@
 
 	collapse		(max) legumes, ///
 					by(village hhid aas hh_size ai tli sex age edu treat_assign ///
-						week day meal dish ss_use cook hdds_dish sr_dish hdds_avg_dish sr_avg_dish hdds_meal ///
+						week day meal dish ss_use cook hdds_dish sr_dish ///
+						hdds_avg_dish sr_avg_dish hdds_meal ///
 						sr_meal hdds_avg_meal sr_avg_meal hdds_day sr_day ///
 						hdds_avg_day sr_avg_day hdds_week sr_week hdds_avg_week ///
 						sr_avg_week hdds_total sr_total ingred_dish ingred_meal ///
@@ -318,25 +394,25 @@
 	egen				hhbrdish_tot = count(hhbrdish_tot_temp), by(hhid)
 	replace				hhbrdish_tot = hhbrdish_tot/hhbr_tot
 	drop 				hhbrdish_tot_temp		
-	label var			hhbrdish_tot "Total Number of Breakfast Dishes by HH"
+	label var			hhbrdish_tot "Average Number of Breakfast Dishes"
 	
 * add up total number of lunch dishes
 	gen					hhlundish_tot_temp = 1 if meal == 1
 	egen				hhlundish_tot = count(hhlundish_tot_temp), by(hhid)
 	replace				hhlundish_tot = hhlundish_tot/hhlun_tot
 	drop 				hhlundish_tot_temp			
-	label var			hhlundish_tot "Total Number of Lunch Dishes by HH"	
+	label var			hhlundish_tot "Average Number of Lunch Dishes"	
 	
 * add up total number of dinner dishes 
 	gen					hhdindish_tot_temp = 1 if meal == 2
 	egen				hhdindish_tot = count(hhdindish_tot_temp), by(hhid)
 	replace				hhdindish_tot = hhdindish_tot/hhdin_tot
 	drop 				hhdindish_tot_temp		
-	label var			hhdindish_tot "Total Number of Dinner Dishes by HH"	
+	label var			hhdindish_tot "Average Number of Dinner Dishes"	
 	
 * add up total number of dishes
 	bys hhid: gen		hhdish_tot = _N
-	label var			hhdish_tot "Total Number of Dishes by HH"	
+	label var			hhdish_tot "Total Number of Dishes"	
 
 
 ***********************************************************************
@@ -426,7 +502,9 @@
 ***********************************************************************
 **# 8 - end matter, clean up to save
 ***********************************************************************
-	
+
+	lab var				treat_assign "Solar Stove"
+
 * prepare for export
 	compress	
 	save 				"$export/dietary_cleaned.dta", replace	
