@@ -25,7 +25,7 @@
 	global 			pack			0
 		
 * Specify Stata version in use
-    global stataVersion 18.5    // set Stata version
+    global stataVersion 17.0    // set Stata version
     version $stataVersion
 		
 ***********************************************************************
@@ -51,7 +51,7 @@
 if $pack == 1 {
 	
 	* for packages/commands, make a local containing any required packages
-		loc userpack "blindschemes mdesc estout distinct winsor2 mipolate egenmore" 
+		loc userpack "blindschemes mdesc estout distinct winsor2 mipolate egenmore reghdfe ftools coefplot ivreg2 ssc install ranktest" 
 	
 	* install packages that are on ssc	
 		foreach package in `userpack' {

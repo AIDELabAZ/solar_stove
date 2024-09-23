@@ -43,6 +43,7 @@
 	global 				x_cov hh_size ai tli sex age edu cc 	
 
 	lab var				treat_assign "Solar Stove"
+	lab var				ss_use "Solar Stove Use"
 	
 * generate day counter
 	gen					day_count = day if week == 1
@@ -59,7 +60,7 @@
 ************************************************************************
 **# 2 - fatigue
 ************************************************************************
-
+/*
 * histogram of responses per day by treatment		
 	twoway			(histogram day_count if treat_assign == 1, color(teal%50) discrete ) ///
 						(histogram day_count if treat_assign == 0, color(sienna%50) discrete ), ///
@@ -102,10 +103,119 @@ reg ingred_day day_count, vce(cluster hhid)
 reg ingred_day day_count $$x_cov, vce(cluster hhid)
 
 
-
+*/
 ************************************************************************
 **# 3 - LATE
 ************************************************************************
+
+
+* Q: Do households with solar stoves change the composition of their diet?
+
+* (1) Estimate LATE effect of being randomly assigned a solar stove on HDDS
+	* (i) Regress hdds ct for a dish on treatment assignment using use as instrument
+	* final hdds dish outcomes with and without controls using OLS
+
+		ivreg2 				hdds_dish (ss_use = treat_assign) i.aas i.village, cluster (hhid)
+		summarize 			hdds_dish if treat_assign == 0		
+		estadd scalar		dep_mean = r(mean)		
+		estadd local 		cov "No", replace			
+		eststo				dHDDSIVo	
+		
+		ivreg2 				hdds_dish (ss_use = treat_assign) $x_cov i.aas i.village, cluster (hhid)
+		summarize 			hdds_dish if treat_assign == 0		
+		estadd scalar		dep_mean = r(mean)	
+		estadd local 		cov "Yes", replace			
+		eststo				dHDDSIVoc	
+	
+	
+* (ii) Regress hdds for a meal on treatment assignment
+	* final hdds (avg) meal outcomes with and without controls using OLS
+	preserve
+		duplicates drop		hhid week day meal, force	
+		
+		ivreg2 				hdds_meal (share_meal = treat_assign) i.aas i.village, cluster (hhid) 
+		summarize 			hdds_meal if treat_assign == 0		
+		estadd scalar		dep_mean = r(mean)
+		estadd local 		cov "No", replace			
+		eststo mHDDSIVo	
+		
+		ivreg2				hdds_meal (share_meal = treat_assign) $x_cov i.aas i.village, cluster (hhid) 
+		summarize 			hdds_meal if treat_assign == 0		
+		estadd scalar		dep_mean = r(mean)	
+		estadd local 		cov "Yes", replace			
+		eststo mHDDSIVoc	
+	restore
+	
+	* final hdds (avg) day outcomes with and without controls using OLS
+	preserve
+		duplicates drop		hhid week day, force	
+		ivreg2				hdds_day (share_day = treat_assign) i.aas i.village, cluster (hhid) 
+		summarize 			hdds_day if treat_assign == 0		
+		estadd scalar		dep_mean = r(mean)	
+		estadd local 		cov "No", replace			
+		eststo daHDDSIVo	
+		
+		ivreg2				hdds_day (share_day = treat_assign) $x_cov i.aas i.village, cluster (hhid) 
+		summarize 			hdds_day if  treat_assign == 0		
+		estadd scalar		dep_mean = r(mean)			
+		estadd local 		cov "Yes", replace			
+		eststo daHDDSIVoc	
+	restore
+	
+* (iv) Regress hhds for a week on treatment assignment
+	* final hdds (avg) week outcomes with and without controls using OLS	
+	preserve
+		duplicates drop		hhid week, force	
+		ivreg2				hdds_week (share_week = treat_assign) i.aas i.village, cluster (hhid) 
+		summarize 			hdds_week if  treat_assign == 0		
+		estadd scalar		dep_mean = r(mean)		
+		estadd local 		cov "No", replace			
+		eststo wHDDSIVo
+		
+		ivreg2				hdds_week (share_week = treat_assign) $x_cov i.aas i.village, cluster (hhid)  
+		summarize 			hdds_week if  treat_assign == 0		
+		estadd scalar		dep_mean = r(mean)		
+		estadd local 		cov "Yes", replace			
+		eststo wHDDSIVoc	
+	restore 
+
+* (v) Regress hhds for overall (6 week) on treatment assignment
+	* final hdds (avg) overall outcomes with and without controls using OLS
+	preserve
+		duplicates drop		hhid, force	
+		ivreg2				hdds_total (share_total = treat_assign) i.aas i.village, robust
+		summarize 			hdds_total if  treat_assign == 0		
+		estadd scalar		dep_mean = r(mean)
+		estadd local 		cov "No", replace				
+		eststo tHDDSIVo	
+		
+		ivreg2				hdds_total (share_total = treat_assign) $x_cov i.aas i.village, robust
+		summarize 			hdds_total if  treat_assign == 0		
+		estadd scalar		dep_mean = r(mean)	
+		estadd local 		cov "Yes", replace				
+		eststo tHDDSIVoc	
+	restore
+	
+* table fo_2: IV HDDS ols
+	esttab dHDDSIVo dHDDSIVoc mHDDSIVo mHDDSIVoc daHDDSIVo daHDDSIVoc wHDDSIVo wHDDSIVoc tHDDSIVo tHDDSIVoc ///
+							using "$output/late_out.tex", b(3) se(3) replace ///
+							prehead("\begin{tabular}{l*{10}{c}} \\[-1.8ex]\hline \hline \\[-1.8ex] " ///
+							"& \multicolumn{2}{c}{Dish} & \multicolumn{2}{c}{Meal} & \multicolumn{2}{c}{Day} " ///
+							"& \multicolumn{2}{c}{Week} & \multicolumn{2}{c}{Overall} \\ \cline{2-3} " ///
+							"\cline{4-5} \cline{6-7} \cline{8-9} \cline{10-11} \\[-1.8ex] " ///	                   
+							"& \multicolumn{1}{c}{(1)} & \multicolumn{1}{c}{(2)} & \multicolumn{1}{c}{(3)} " ///
+							"& \multicolumn{1}{c}{(4)} &\multicolumn{1}{c}{(5)} & \multicolumn{1}{c}{(6)} " ///
+							"& \multicolumn{1}{c}{(7)} & \multicolumn{1}{c}{(8)} & \multicolumn{1}{c}{(9)} " ///
+							"& \multicolumn{1}{c}{(10)} \\ \midrule " ///
+							"\multicolumn{11}{l}{\emph{Panel A: Dietary Diversity Score}} \\ ") ///
+							keep(ss_use share_day share_meal share_week share_total) noobs ///
+							rename(ss_use "Solar Stove Use" share_meal "Solar Stove Use" ///
+							share_day "Solar Stove Use" share_week "Solar Stove Use" share_total "Solar Stove Use") ///
+							booktabs nonum nomtitle collabels(none) nobaselevels nogaps ///
+							fragment label stat(dep_mean N cov r2_a, labels( "Mean in Control" ///
+							"Observations" "Covariates" "Adjusted R$^2$") fmt(%4.3f %9.0fc %4.3f))
+
+
 
 ************************************************************************
 **# 4 - averages
