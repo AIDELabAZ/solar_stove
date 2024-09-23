@@ -60,18 +60,15 @@
 **# 2 - fatigue
 ************************************************************************
 
-* histogram of responses per day by treatment
-	twoway			histogram day_count, discrete by(treat_assign) ///
-						xlabel(1 7 14 21 28 35 42) ///
-						graphregion(fcolor(white)) xtitle("Day in Study") ///
-						legend(pos(6) cols(2) label( 1 "Treatment" 2"Control"))
-						
-		twoway			(histogram day_count if treat_assign == 1, color(teal%50) discrete ) ///
+* histogram of responses per day by treatment		
+	twoway			(histogram day_count if treat_assign == 1, color(teal%50) discrete ) ///
 						(histogram day_count if treat_assign == 0, color(sienna%50) discrete ), ///
 						xlabel(1 7 14 21 28 35 42) ///
 						graphregion(fcolor(white)) xtitle("Day in Study") ///
 						legend(pos(6) cols(2) label(1 "Treatment") label(2 "Control"))
-	
+
+* graph save
+	graph export 	"$figure/response.pdf", replace as(pdf)			
 
 	reghdfe 		ingred_dish ib(42).day_count if treat_assign == 1, ///
 						absorb(hhid) cl(hhid) 
@@ -87,8 +84,11 @@
 						vertical omitted yline(0, lc(black) lw(vthin)) recast(connected) msize(vtiny) ///
 						xlabel(1 7 14 21 28 35 42, angle(0) nogrid) drop(_cons) ytitle("Coefficient Size") ///
 						legend(pos(6) cols(2) ) p1(label("Treatment")) p2(label("Control"))
-	
 
+* graph save
+	graph export 	"$figure/event.pdf", replace as(pdf)		
+	
+	
 reg ingred_dish day_count, vce(cluster hhid)
 
 reg ingred_dish day_count $$x_cov, vce(cluster hhid)
