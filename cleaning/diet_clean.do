@@ -129,6 +129,8 @@
 	egen			ingred_week = nvals(english), by(hhid week)
 	lab var			ingred_week "Unique Ingredients: Week"
 	
+* clean food group to put it into 12 categories (not 18)
+	replace			fg = 14 if fg == 0
 	
 ***********************************************************************
 **# 2 - generate variables for final hdds outcomes

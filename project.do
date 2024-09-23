@@ -93,7 +93,7 @@ if $pack == 1 {
 ***********************************************************************
 	
 	do				"$code/cleaning/controls.do"	
-	do				"$code/cleaning/dietary_comp.do"
+	do				"$code/cleaning/diet_clean.do"
 	do				"$code/cleaning/fuel_use.do"
 	
 **********************************************************************

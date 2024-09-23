@@ -208,7 +208,7 @@ reg ingred_day day_count $$x_cov, vce(cluster hhid)
 							"& \multicolumn{1}{c}{(7)} & \multicolumn{1}{c}{(8)} & \multicolumn{1}{c}{(9)} " ///
 							"& \multicolumn{1}{c}{(10)} \\ \midrule " ///
 							"\multicolumn{11}{l}{\emph{Panel A: Dietary Diversity Score}} \\ ") ///
-							keep(ss_use share_day share_meal share_week share_total) noobs ///
+							drop(hh_size ai tli sex age edu cc _cons *aas *village) noobs ///
 							rename(ss_use "Solar Stove Use" share_meal "Solar Stove Use" ///
 							share_day "Solar Stove Use" share_week "Solar Stove Use" share_total "Solar Stove Use") ///
 							booktabs nonum nomtitle collabels(none) nobaselevels nogaps ///
