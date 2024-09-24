@@ -2,7 +2,7 @@
 * created on: Sep 2024
 * created by: jdm
 * edited by: jdm
-* edited on: 23 Sep 2024
+* edited on: 24 Sep 2024
 * stata v.18.5
 
 * does
@@ -55,8 +55,7 @@
 
 * only recorded breakfast
 	drop if			hhid == 226000
-	
-	
+		
 	order 			village hhid aas hh_size ai tli sex age edu ///
 						solar
 
@@ -176,7 +175,7 @@
 							"\noindent \textit{Note}: The table displays the number of times " ///
 							"the top 25 ingredient was recorded in the food diaries and the relative " ///
 							"frequency of that ingredient in the entire data set. In total " ///
-							"116 different ingredients were recorded, excluding water.}  \end{tabular}")	
+							"111 different ingredients were recorded, excluding water.}  \end{tabular}")	
 
 * post frequency table of food groups
 		estpost tab			fg, sort nototal

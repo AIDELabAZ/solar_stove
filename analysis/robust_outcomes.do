@@ -108,13 +108,13 @@ reg ingred_day day_count $$x_cov, vce(cluster hhid)
 **# 3 - LATE
 ************************************************************************
 
-
 * Q: Do households with solar stoves change the composition of their diet?
 
-* (1) Estimate LATE effect of being randomly assigned a solar stove on HDDS
-	* (i) Regress hdds ct for a dish on treatment assignment using use as instrument
-	* final hdds dish outcomes with and without controls using OLS
+************************************************************************
+**## 3.1 - LATE: HDDS
+************************************************************************
 
+* final hdds dish outcomes with and without controls using OLS
 		ivreg2 				hdds_dish (ss_use = treat_assign) i.aas i.village, cluster (hhid)
 		summarize 			hdds_dish if treat_assign == 0		
 		estadd scalar		dep_mean = r(mean)		
@@ -128,8 +128,7 @@ reg ingred_day day_count $$x_cov, vce(cluster hhid)
 		eststo				dHDDSIVoc	
 	
 	
-* (ii) Regress hdds for a meal on treatment assignment
-	* final hdds (avg) meal outcomes with and without controls using OLS
+* final hdds (avg) meal outcomes with and without controls using OLS
 	preserve
 		duplicates drop		hhid week day meal, force	
 		
@@ -146,7 +145,7 @@ reg ingred_day day_count $$x_cov, vce(cluster hhid)
 		eststo mHDDSIVoc	
 	restore
 	
-	* final hdds (avg) day outcomes with and without controls using OLS
+* final hdds (avg) day outcomes with and without controls using OLS
 	preserve
 		duplicates drop		hhid week day, force	
 		ivreg2				hdds_day (share_day = treat_assign) i.aas i.village, cluster (hhid) 
@@ -162,8 +161,7 @@ reg ingred_day day_count $$x_cov, vce(cluster hhid)
 		eststo daHDDSIVoc	
 	restore
 	
-* (iv) Regress hhds for a week on treatment assignment
-	* final hdds (avg) week outcomes with and without controls using OLS	
+* final hdds (avg) week outcomes with and without controls using OLS	
 	preserve
 		duplicates drop		hhid week, force	
 		ivreg2				hdds_week (share_week = treat_assign) i.aas i.village, cluster (hhid) 
@@ -179,8 +177,7 @@ reg ingred_day day_count $$x_cov, vce(cluster hhid)
 		eststo wHDDSIVoc	
 	restore 
 
-* (v) Regress hhds for overall (6 week) on treatment assignment
-	* final hdds (avg) overall outcomes with and without controls using OLS
+* final hdds (avg) overall outcomes with and without controls using OLS
 	preserve
 		duplicates drop		hhid, force	
 		ivreg2				hdds_total (share_total = treat_assign) i.aas i.village, robust
@@ -196,7 +193,7 @@ reg ingred_day day_count $$x_cov, vce(cluster hhid)
 		eststo tHDDSIVoc	
 	restore
 	
-* table fo_2: IV HDDS ols
+* table: panel a IV HDDS ols
 	esttab dHDDSIVo dHDDSIVoc mHDDSIVo mHDDSIVoc daHDDSIVo daHDDSIVoc wHDDSIVo wHDDSIVoc tHDDSIVo tHDDSIVoc ///
 							using "$output/late_out.tex", b(3) se(3) replace ///
 							prehead("\begin{tabular}{l*{10}{c}} \\[-1.8ex]\hline \hline \\[-1.8ex] " ///
@@ -214,7 +211,15 @@ reg ingred_day day_count $$x_cov, vce(cluster hhid)
 							booktabs nonum nomtitle collabels(none) nobaselevels nogaps ///
 							fragment label stat(dep_mean N cov r2_a, labels( "Mean in Control" ///
 							"Observations" "Covariates" "Adjusted R$^2$") fmt(%4.3f %9.0fc %4.3f))
+							
+							
+************************************************************************
+**## 3.2 - LATE: DSR
+************************************************************************
 
+************************************************************************
+**## 3.3 - LATE: legumes
+************************************************************************
 
 
 ************************************************************************

@@ -2,7 +2,7 @@
 * created on: Aug 2021
 * created by: lem
 * edited by: jdm
-* edited on: 23 Sep 2024
+* edited on: 24 Sep 2024
 * stata v.18.5
 
 * does
@@ -41,7 +41,7 @@
 ************************************************************************
 
 ************************************************************************
-**## 1.1 - intermediate outcomes
+**## 1.1 - intermediate and dietary outcomes
 ************************************************************************
 
 * sum dish
@@ -92,113 +92,100 @@
 						postfoot("\midrule \multicolumn{1}{l}{Total} &  30,314 & 15,896 & " ///
 							" 6,013 & 912 & 156\\ " "\hline \hline \\[-1.8ex] " ///
 							"\multicolumn{6}{J{\linewidth}}{\small " ///
-							"\noindent \textit{Note}: The table displays summary statistics for " ///
-							"treatment assignment, use of solar stoves, and continuous control variables.}  \end{tabular}") 	
+							"\noindent \textit{Note}: The table displays means and standard deviations, " ///
+							"in parentheses, treatment assignment, use of solar stoves, " ///
+							"and continuous control variables.}  \end{tabular}") 	
 							
 			
 ************************************************************************
-**## 1.2 - final outcomes: dietary composition by level of aggregation
+**## 1.2 - cooking frequency outcomes
 ************************************************************************
 
-* (1bii) household dietary diversity scores: average
-	
-* hdds: avg meal
-	preserve 
-		duplicates drop		hhid week day meal, force
-		estpost sum 		hdds_avg_meal
-		est store 			suma_hdds_m
+* sum breakfast
+	preserve
+		keep if				meal == 0
+		estpost sum 		hhbrdish_tot hhbr_skipped
+		est store 			sum_brk
+	restore
+
+* sum lunch
+	preserve
+		keep if				meal == 1
+		estpost sum 		hhlundish_tot hhlun_skipped
+		est store 			sum_lun
 	restore
 	
-* hdds: avg day	
-	preserve 
-		duplicates drop		hhid week day, force		
-		estpost sum 		hdds_avg_day					
-		est store 			suma_hdds_da
+* sum dinner
+	preserve
+		keep if				meal == 2
+		estpost sum 		hhdin_skipped hhdindish_tot
+		est store 			sum_din
 	restore
 	
-* hdds: avg week
-	preserve 
-		duplicates drop		hhid week, force	
-		estpost sum 		hdds_avg_week
-		est store 			suma_hdds_w		
-	restore	
-
-* hdds: avg total	
-	preserve 
-		duplicates drop		hhid, force	
-		estpost sum 		hdds_total
-		est store 			suma_hdds_t	
-	restore	
-	
-
-
-* (1d) number of dishes in a meal: avg	
-
-* avg number of dishes in meal total
-	preserve // dropping dupes to give clearer idea of hh breakdown
-		duplicates drop		hhid, force	
-		estpost sum 		hhbrdish_tot 
-		est store 			sum_avg_brdish
-		estpost sum 		hhlundish_tot
-		est store 			sum_avg_lundish
-		estpost sum 		hhdindish_tot				
-		est store 			sum_avg_dindish
-		estpost sum 		hhdish_tot
-		est store 			sum_avg_dish
-
-* (1e) total number meals skipped: count
+* sum total
+	estpost sum 		hhdish_tot hhtot_skipped
+	est store 			sum_tot
 		
-* total meals skipped	
-		estpost sum 		hhbr_skipped
-		est store 			sum_hhbr_skipped
-		estpost sum 		hhlun_skipped
-		est store 			sum_hhlun_skipped
-		estpost sum 		hhdin_skipped				
-		est store 			sum_hhdin_skipped
-		estpost sum 		hhtot_skipped
-		est store 			sum_hhtot_skipped
-	restore
-	
-* (1f) total legumes consumed: count 	
-	
-* number of times legumes consumed in a day
-	preserve 
-		duplicates drop		hhid week day, force	
-		estpost sum 		p_day
-		est store 			sum_legume_ct_day
-	restore
+* output table of descriptive statistics for categorical variables
+	esttab 			sum_brk sum_lun sum_din sum_tot ///
+						using "$output/descriptive/cook_tab.tex", replace booktabs ///
+						prehead("\begin{tabular}{l*{4}{c}} \\ [-1.8ex]\hline \hline \\[-1.8ex] ") ///
+						main(mean) aux(sd) label  mlabels("Breakfast" "Lunch" "Dinner" "Total") collabels(,none) ///
+						nomtitle nonumber fragment nogap noobs  ///
+						rename(hhbrdish_tot "Dishes per Meal" hhlundish_tot "Dishes per Meal" ///
+						hhdindish_tot "Dishes per Meal" hhdish_tot "Dishes per Meal" ///
+						hhbr_skipped "Meals Skipped" hhlun_skipped "Meals Skipped" ///
+						hhdin_skipped "Meals Skipped" hhtot_skipped "Meals Skipped" ) ///
+						postfoot("\midrule \multicolumn{1}{l}{Total} &  5,690 & 12,701 & " ///
+							" 11,923 & 30,314 \\ " "\hline \hline \\[-1.8ex] " ///
+							"\multicolumn{5}{J{\linewidth}}{\small " ///
+							"\noindent \textit{Note}: The table displays means and standard deviations, " ///
+							"in parentheses, for dishes per meal and meals skipped.}  \end{tabular}") 	
+		
+		
+************************************************************************
+**## 1.3 - fuel outcomes
+************************************************************************
 
-* number of times legumes consumed in a week	
-	preserve 
-		duplicates drop		hhid week, force	
-		estpost sum 		p_week
-		est store 			sum_legume_ct_week		
-	restore
-
-* number of times legumes consumed total
-	preserve 
-		duplicates drop		hhid, force	
-		estpost sum 		p_total		
-		est store 			sum_legume_ct_tot	
-	restore
-	
-* output table of descriptive statistics for outcome variables
-	esttab 				sum_assign sum_use sum_sharem sum_shareda sum_sharew ///
-							sum_sharet sumc_hdds_d sumc_hdds_m sumc_hdds_da ///
-							sumc_hdds_w sumc_hdds_t suma_hdds_m suma_hdds_da ///
-							suma_hdds_w suma_hdds_t sumc_sr_d sumc_sr_m ///
-							sumc_sr_da sumc_sr_w sumc_sr_t sum_avg_brdish ///
-							sum_avg_lundish sum_avg_dindish sum_avg_dish ///
-							sum_hhbr_skipped sum_hhlun_skipped sum_hhdin_skipped ///
-							sum_hhtot_skipped sum_legume_ct_day ///
-							sum_legume_ct_week sum_legume_ct_tot using "$output/descriptive/outcomev_tab.tex", replace booktabs ///
-						cells("indent count(label(count)) mean(fmt(3)) sd(fmt(3)) min(fmt(3)) max(fmt(3))") ///
-						 nonumber noobs nomtitle f
+* load fuel data
+	use					"$ans/fuel_cleaned.dta", clear	
 						
+* fuel week
+	preserve
+		duplicates drop		hhid week, force
+		estpost sum 		f_time f_quant_ub c_quant_ub val_fuel_ub
+		est store 			fuel_week
+	restore
+
+	
+* fuel total
+	preserve
+		duplicates drop		hhid, force
+		estpost sum 		f_time f_quant_ub c_quant_ub val_fuel_ub
+		est store 			fuel_tot
+	restore
+		
+* output table of descriptive statistics for categorical variables
+	esttab 			fuel_week fuel_tot ///
+						using "$output/descriptive/fuel_tab.tex", replace booktabs ///
+						prehead("\begin{tabular}{l*{2}{c}} \\ [-1.8ex]\hline \hline \\[-1.8ex] ") ///
+						main(mean) aux(sd) label  mlabels("Week" "Total") collabels(,none) ///
+						nomtitle nonumber fragment nogap noobs  ///
+						rename(f_time "Firewood Time (min)" f_quant_ub "Firewood Quantity (kg)" ///
+						c_quant_ub "Charcoal Quantity (kg)" val_fuel_ub "Fuel Value (USD)" ) ///
+						postfoot("\midrule \multicolumn{1}{l}{Total} &  870 & 157 \\ " "\hline \hline \\[-1.8ex] " ///
+							"\multicolumn{3}{J{\linewidth}}{\small " ///
+							"\noindent \textit{Note}: The table displays means and standard deviations, " ///
+							"in parentheses, for collected and purchased fuel.}  \end{tabular}") 	
+
+							
 ************************************************************************
 **# 2 - covariates
 ************************************************************************
 
+* re-load data
+	use					"$ans/dietary_cleaned.dta", clear		
+	
 ************************************************************************
 **## 2.1 - non-categorical covariates
 ************************************************************************
