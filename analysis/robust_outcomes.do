@@ -105,16 +105,18 @@ reg ingred_day day_count $$x_cov, vce(cluster hhid)
 
 
 ************************************************************************
-**# 3 - LATE
+**# 3 - LATE outcomes: food diversity
 ************************************************************************
 
-
 * Q: Do households with solar stoves change the composition of their diet?
+		
+************************************************************************
+**## 3.1 - household dietary diversity score
+************************************************************************
 
 * (1) Estimate LATE effect of being randomly assigned a solar stove on HDDS
 	* (i) Regress hdds ct for a dish on treatment assignment using use as instrument
 	* final hdds dish outcomes with and without controls using OLS
-
 		ivreg2 				hdds_dish (ss_use = treat_assign) i.aas i.village, cluster (hhid)
 		summarize 			hdds_dish if treat_assign == 0		
 		estadd scalar		dep_mean = r(mean)		
@@ -196,7 +198,7 @@ reg ingred_day day_count $$x_cov, vce(cluster hhid)
 		eststo tHDDSIVoc	
 	restore
 	
-* table fo_2: IV HDDS ols
+* table 2, Panel A: Solar stove assignment on HDDS
 	esttab dHDDSIVo dHDDSIVoc mHDDSIVo mHDDSIVoc daHDDSIVo daHDDSIVoc wHDDSIVo wHDDSIVoc tHDDSIVo tHDDSIVoc ///
 							using "$output/late_out.tex", b(3) se(3) replace ///
 							prehead("\begin{tabular}{l*{10}{c}} \\[-1.8ex]\hline \hline \\[-1.8ex] " ///
@@ -215,7 +217,218 @@ reg ingred_day day_count $$x_cov, vce(cluster hhid)
 							fragment label stat(dep_mean N cov r2_a, labels( "Mean in Control" ///
 							"Observations" "Covariates" "Adjusted R$^2$") fmt(%4.3f %9.0fc %4.3f))
 
+							************************************************************************
+**# 3.2 - species richness
+************************************************************************
 
+* (i) Regress sr for a dish on treatment assignment
+	* LATE sr dish outcomes with and without controls using OLS
+		ivreg2 				sr_dish (ss_use = treat_assign) i.aas i.village, cluster (hhid)
+		summarize 			sr_dish if treat_assign == 0		
+		estadd scalar		dep_mean = r(mean)		
+		estadd local 		cov "No", replace			
+		eststo				dsrIVo	
+		
+		ivreg2 				sr_dish (ss_use = treat_assign) $x_cov i.aas i.village, cluster (hhid)
+		summarize 			sr_dish if treat_assign == 0		
+		estadd scalar		dep_mean = r(mean)	
+		estadd local 		cov "Yes", replace			
+		eststo				dsrIVoc	
+	
+	
+* (ii) Regress sr for a meal on treatment assignment
+	* LATE sr meal outcomes with and without controls using OLS
+	preserve
+		duplicates drop		hhid week day meal, force	
+		
+		ivreg2 				sr_meal (share_meal = treat_assign) i.aas i.village, cluster (hhid) 
+		summarize 			sr_meal if treat_assign == 0		
+		estadd scalar		dep_mean = r(mean)
+		estadd local 		cov "No", replace			
+		eststo msrIVo	
+		
+		ivreg2				sr_meal (share_meal = treat_assign) $x_cov i.aas i.village, cluster (hhid) 
+		summarize 			sr_meal if treat_assign == 0		
+		estadd scalar		dep_mean = r(mean)	
+		estadd local 		cov "Yes", replace			
+		eststo msrIVoc	
+	restore
+	
+	* LATE sr day outcomes with and without controls using OLS
+	preserve
+		duplicates drop		hhid week day, force	
+		ivreg2				sr_day (share_day = treat_assign) i.aas i.village, cluster (hhid) 
+		summarize 			sr_day if treat_assign == 0		
+		estadd scalar		dep_mean = r(mean)	
+		estadd local 		cov "No", replace			
+		eststo dasrIVo	
+		
+		ivreg2				sr_day (share_day = treat_assign) $x_cov i.aas i.village, cluster (hhid) 
+		summarize 			sr_day if  treat_assign == 0		
+		estadd scalar		dep_mean = r(mean)			
+		estadd local 		cov "Yes", replace			
+		eststo dasrIVoc	
+	restore
+	
+* (iv) Regress hhds for a week on treatment assignment
+	* LATE sr week outcomes with and without controls using OLS	
+	preserve
+		duplicates drop		hhid week, force	
+		ivreg2				sr_week (share_week = treat_assign) i.aas i.village, cluster (hhid) 
+		summarize 			sr_week if  treat_assign == 0		
+		estadd scalar		dep_mean = r(mean)		
+		estadd local 		cov "No", replace			
+		eststo wsrIVo
+		
+		ivreg2				sr_week (share_week = treat_assign) $x_cov i.aas i.village, cluster (hhid)  
+		summarize 			sr_week if  treat_assign == 0		
+		estadd scalar		dep_mean = r(mean)		
+		estadd local 		cov "Yes", replace			
+		eststo wsrIVoc	
+	restore 
+
+* (v) Regress hhds for overall (6 week) on treatment assignment
+	* LATE sr overall outcomes with and without controls using OLS
+	preserve
+		duplicates drop		hhid, force	
+		ivreg2				sr_total (share_total = treat_assign) i.aas i.village, robust
+		summarize 			sr_total if  treat_assign == 0		
+		estadd scalar		dep_mean = r(mean)
+		estadd local 		cov "No", replace				
+		eststo tsrIVo	
+		
+		ivreg2				sr_total (share_total = treat_assign) $x_cov i.aas i.village, robust
+		summarize 			sr_total if  treat_assign == 0		
+		estadd scalar		dep_mean = r(mean)	
+		estadd local 		cov "Yes", replace				
+		eststo tsrIVoc	
+	restore
+								
+							
+* table 2, Panel B: Solar stove assignment on SR
+	esttab 			dsrIVo dsrIVoc msrIVo msrIVoc dasrIVo dasrIVoc wsrIVo wsrIVoc tsrIVo tsrIVoc ///
+						using "$output/late_out.tex", b(3) se(3) append ///
+							prehead("\midrule \multicolumn{11}{l}{\emph{Panel B: Species Richness}} \\ ") ///
+							drop(hh_size ai tli sex age edu cc _cons *aas *village) noobs ///
+							rename(ss_use "Solar Stove Use" share_meal "Solar Stove Use" ///
+							share_day "Solar Stove Use" share_week "Solar Stove Use" share_total "Solar Stove Use") ///
+							booktabs nonum nomtitle collabels(none) nobaselevels nogaps ///
+							fragment label stat(dep_mean N cov r2_a, labels( "Mean in Control" ///
+							"Observations" "Covariates" "Adjusted R$^2$") fmt(%4.3f %9.0fc %4.3f)) 
+
+
+************************************************************************
+**## 3.3 - frequency of legumes
+************************************************************************	
+
+* LATE legumes dish outcomes with and without controls using OLS
+		ivreg2 				p_dish (ss_use = treat_assign) i.aas i.village, cluster (hhid)
+		summarize 			p_dish if treat_assign == 0	
+		estadd scalar		dep_mean = r(mean)
+		estadd local 		cov "No", replace			
+		est					store dPIV
+		
+		ivreg2				p_dish (ss_use = treat_assign) $x_cov i.aas i.village, cluster (hhid)
+		summarize 			p_dish if treat_assign == 0		
+		estadd scalar		dep_mean = r(mean)		
+		estadd local 		cov "Yes", replace			
+		est					store dPIVc
+	
+* LATE legumes meal outcomes with and without controls using OLS
+		preserve
+			duplicates drop		hhid week day meal, force
+			
+			ivreg2			p_meal (share_meal = treat_assign) i.aas i.village, cluster (hhid)
+			summarize 		p_meal if treat_assign == 0	
+			estadd scalar	dep_mean = r(mean)	
+			estadd local 	cov "No", replace		
+			est				store mPIV
+			
+			ivreg2			p_meal (share_meal = treat_assign) $x_cov i.aas i.village, cluster (hhid)
+			summarize 		p_meal if treat_assign == 0		
+			estadd scalar	dep_mean = r(mean)			
+			estadd local 	cov "Yes", replace		
+			est				store mPIVc
+		restore
+			
+* LATE legumes day outcomes with and without controls using OLS
+		preserve
+			duplicates drop		hhid week day, force
+			
+			ivreg2			p_day (share_day = treat_assign) i.aas i.village, cluster (hhid)
+			summarize 		p_day if treat_assign == 0	
+			estadd scalar	dep_mean = r(mean)		
+			estadd local 	cov "No", replace		
+			est				store daPIV	
+			
+			ivreg2			p_day (share_day = treat_assign) $x_cov i.aas i.village, cluster (hhid)
+			summarize 		p_day if treat_assign == 0	
+			estadd scalar	dep_mean = r(mean)		
+			estadd local 	cov "Yes", replace			
+			est				store daPIVc
+		restore
+	
+* LATE legumes week outcomes with and without controls using OLS
+		preserve
+			duplicates drop		hhid week, force	
+			
+			ivreg2			p_week (share_week = treat_assign) i.aas i.village, cluster (hhid)
+			summarize 		p_week if treat_assign == 0	
+			estadd scalar	dep_mean = r(mean)	
+			estadd local 	cov "No", replace		
+			est				store wPIV
+			
+			ivreg2			p_week (share_week = treat_assign) $x_cov i.aas i.village, cluster (hhid)
+			summarize 		p_week if treat_assign == 0	
+			estadd scalar	dep_mean = r(mean)		
+			estadd local 	cov "Yes", replace			
+			est				store wPIVc
+		restore 
+
+* LATE legumes overall outcomes with and without controls using OLS
+		preserve
+			duplicates drop		hhid, force	
+	
+			ivreg2			p_total (share_total = treat_assign) i.aas i.village, robust
+			summarize 		p_total if treat_assign == 0	
+			estadd scalar	dep_mean = r(mean)	
+			estadd local 	cov "No", replace			
+			est				store tPIV
+			
+			ivreg2			p_total (share_total = treat_assign) $x_cov i.aas i.village, robust
+			summarize 		p_total if treat_assign == 0	
+			estadd scalar	dep_mean = r(mean)	
+			estadd local 	cov "Yes", replace		
+			est				store tPIVc	
+		restore
+
+
+* Table 2, Panel C: Solar stove assignment on legumes
+	esttab 			dPIV dPIVc mPIV mPIVc daPIV daPIVc wPIV wPIVc tPIV tPIVc ///
+						using "$output/late_out.tex", b(3) se(3) append ///
+							prehead("\midrule \multicolumn{11}{l}{\emph{Panel C: Count of Legume Consumption}} \\ ") ///
+							drop(hh_size ai tli sex age edu cc _cons *aas *village) noobs ///
+							booktabs nonum nomtitle collabels(none) nobaselevels nogaps ///
+							fragment label stat(dep_mean N cov r2_a, labels( "Mean in Control" ///
+							"Observations" "Covariates" "Adjusted R$^2$") fmt(%4.3f %9.0fc %4.3f)) ///
+							postfoot("\hline \hline \\[-1.8ex] \multicolumn{11}{J{\linewidth}}{\small " ///
+							"\noindent \textit{Note}: Dependent variables are different measure of " ///
+							" household dietary composition. In Panel A, we use dietary diversity " ///
+							"score. In Panel B, we use species richness. In Panel C, we calculate " ///
+							"the number of times legumes are eaten. All regressions include two levels of strata " ///
+							"fixed effects: village and Agricultural and Aquatic Systems (AAS) group. " ///
+							"For regressions with more than one observation per houhold (columns 1-8), " ///
+							"we calculate Liang-Zeger cluster-robust standard errors since the unit " ///
+							"of randomization is the household. For regressions with only one " ///
+							"observation per household (columns 9-10), we calculate Eicker-Huber-White " ///
+							"(EHW) robust standard errors. Standard errors are presented in " ///
+							"parentheses (*** p$<$0.001, ** p$<$0.01, * p$<$0.05).}  \end{tabular}") 
+
+							
+							
+							
+							
+							
 
 ************************************************************************
 **# 4 - averages
