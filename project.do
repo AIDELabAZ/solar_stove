@@ -100,8 +100,10 @@ if $pack == 1 {
 * 3 - run analysis .do files
 **********************************************************************	
 	
-	do				"$code/analysis/itt_outcomes.do"
-	do				"$code/analysis/late_outcomes"
+	do				"$code/analysis/desc_stata.do"
+	do				"$code/analysis/food_outcomes"
+	do				"$code/analysis/fuel_outcomes"
+	do				"$code/analysis/robust_outcomes"
 
 ***********************************************************************
 * END

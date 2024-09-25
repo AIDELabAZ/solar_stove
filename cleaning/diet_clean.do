@@ -18,7 +18,7 @@
 	* xfill
 
 * to do:
-	* done
+	* generate more disaggregated meal skipping and ingredient counting
 
 
 ***********************************************************************
@@ -79,7 +79,15 @@
 	
 * drop non-used ingredients
 	drop			dish
-	rename			dish_num dish
+	
+	bys 			hhid week day meal dish_num: ///
+						gen dish = 1 if _n==1
+	order 			dish, after(dish_num)
+	bys 			hhid week day meal: ///
+						replace dish = sum(dish)
+	lab var			dish "Dish"
+	
+	drop			dish_num
 	drop if			english == ""
 	drop if			english == "water"
 	
@@ -148,7 +156,6 @@
 **## 1.1 - create ingredient summary stats
 ***********************************************************************
 
-	
 * encode english string var into a numeric variable
 	encode			english, gen(ingredients)
 	bys 			ingredients: gen size = _N
@@ -308,69 +315,76 @@
 	replace 			first_obs = 1 if dish == 1
 	label var 			first_obs "First Observation in Meal"
 
-* check	
 * add up total meals per day grouped by hhid, week, day
-	sort 				hhid week day
-	by hhid week day: 	egen hhmeals_day = total(first_obs) 
+	bys 				hhid week day: 	///
+							egen hhmeals_day = total(first_obs) 
 	label var			hhmeals_day "Household Meals Per Day"		
 	
 * check
 * add up total meals per week grouped by hhid and week	
-	sort 				hhid week
-	by hhid week: 		egen hhmeals_week = total(first_obs) 
+	bys 				hhid week: ///
+							egen hhmeals_week = total(first_obs) 
 	label var			hhmeals_week "Household Meals Per Week"	
 					
 * add up total hh breakfast meals 
-	sort 				hhid
-	by hhid: 			egen hhbr_tot = total(first_obs) if meal == 0
+	bys 				hhid: ///
+							egen hhbr_tot = total(first_obs) if meal == 0
 	xfill				hhbr_tot, i(hhid)
 	label var			hhbr_tot "Total Household Breakfast Meals"
 
-* add up total hh lunch meals 
-	sort 				hhid
-	by hhid: 			egen hhlun_tot = total(first_obs) if meal == 1
+* add up total hh lunch meals
+	bys 				hhid: 	///
+							egen hhlun_tot = total(first_obs) if meal == 1
 	xfill				hhlun_tot, i(hhid)
 	label var 			hhlun_tot "Total Household Lunch Meals"
 	
 * add up total hh dinner meals 
-	sort 				hhid
-	by hhid: 			egen hhdin_tot = total(first_obs) if meal == 2
+	by 					hhid: ///
+							egen hhdin_tot = total(first_obs) if meal == 2
 	xfill				hhdin_tot, i(hhid)
 	label var			hhdin_tot "Total Household Dinner Meals"
 	
 * add up total hh meals 
-	sort 				hhid
-	by hhid: 			egen hhmeals_total = total(first_obs) 
+	bys 				hhid: 	///
+							egen hhmeals_total = total(first_obs) 
 	label var 			hhmeals_total "Total Household Meals"	
 	
-* generate variable that stores max value of potential meals over the RCT period	
-	* calculate number of possible meals @ 3 meals a day, 7 days a week, for 6 weeks
-	display  			3*7*6
-	*** answer = 126
+* generate variable that stores max value of potential meals over the RCT period
+
+	* calculate number of possible meals @ 3 meals a day	
+	gen 				mealct_day = 3	
+	label var 			mealct_day "Number of Possible Meals in a Day"
 	
+	* calculate number of possible meals @ 3 meals a day, 7 days a week	
+	gen 				mealct_week = 21	
+	label var 			mealct_week "Number of Possible Meals in a Week"
+
+	* calculate number of possible meals @ 3 meals a day, 7 days a week, for 6 weeks	
 	gen 				mealct_tot = 126	
 	label var 			mealct_tot "Number of Possible Meals"
 	
-	* calculate max possible breakfast/lunch/dinner meals over the RCT period
-		* divide total possible meals by number of meal types (3)
-	display  			126/3
-	*** br, lunch, dinner each have 42 max meals over the time period
-
+	* calculate max possible breakfast/lunch/dinner meals over the RCT period (126/3)
 	gen 				mealct = 42
 	label var			mealct "Number of Possible Breakfast/Lunch/Dinner Meals"
 	
 * generate variables for the difference between max potential meals and total hh meals	
 
-* (i) Total number of meals skipped over all six weeks.	
+	* Number of meals skipped in a day	
+	gen 				hhday_skip = mealct_day - hhmeals_day
+	label var			hhday_skip "Number of Meals Skipped in the Day"	
+	
+	* Number of meals skipped in a week	
+	gen 				hhweek_skip = mealct_week - hhmeals_week
+	label var			hhweek_skip "Number of Meals Skipped in the Week"	
+
+	* total number of meals skipped over all six weeks.	
 	gen 				hhtot_skipped = mealct_tot - hhmeals_total
 	label var			hhtot_skipped "Total Number of Meals Skipped per Household"		
-	
-	replace 			hhtot_skipped = 0 if hhtot_skipped < 0
-	
 
-* (ii) Total number of breakfast meals skipped over all six weeks.		
-* generate variable that calculates the difference in max breakfast meals (42) and how
-* many meals a hh consumed
+* generate variable that calculates the difference in max breakfast meals (42) and meals a hh consumed
+
+do this as the day and week level
+
 	gen 				hhbr_skipped = mealct - hhbr_tot
 	label var 			hhbr_skipped "Number of Breakfasts Skipped"
 

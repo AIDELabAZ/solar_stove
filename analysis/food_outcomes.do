@@ -2,7 +2,7 @@
 * created on: Sep 2024
 * created by: jdm
 * edited by: jdm
-* edited on: 23 Sep 2024
+* edited on: 24 Sep 2024
 * stata v.18.5
 
 * does
@@ -15,7 +15,9 @@
 	* estout
 
 * to do:
-	* done
+	* return to dish and meal data. look at dishes in a meal (hhid week day meal)
+	* dishes in a day (hhid week day) etc. in addition to by breakfast/lunch/dinner
+	* also do the same with meals skipped (how often is a meal skipped given a household could eat 126 meals)
 
 ***********************************************************************
 **# 0 - setup
@@ -465,6 +467,15 @@
 ************************************************************************
 **## 4.1 - # of dishes prepared
 ************************************************************************		
+	
+	reg ingred_dish treat_assign i.aas i.village, vce(robust)
+	
+	
+ 	preserve
+		duplicates drop		hhid week day, force
+		
+		reg					hhmeals_day treat_assign i.aas i.village, vce(robust) 
+	restore
 	
 * number of breakfast dishes prepared for a hh over the time period using OLS
  	preserve
