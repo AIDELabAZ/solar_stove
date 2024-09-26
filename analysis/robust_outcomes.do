@@ -438,6 +438,238 @@ reg ingred_day day_count $$x_cov, vce(cluster hhid)
 ************************************************************************
 
 
+
+************************************************************************
+**# 5 - # of dishes prepared by meal
+************************************************************************		
+	
+* number of breakfast dishes prepared for a hh in a day using OLS
+ 	preserve
+		duplicates drop		hhid week day, force
+		
+		reg					brdish_day treat_assign i.aas i.village, vce(robust) 
+		summarize 			brdish_day if treat_assign == 0	
+		estadd scalar		dep_mean = r(mean)		
+		estadd local 		cov "No", replace			
+		est					store bnump		
+	
+		reg 				brdish_day treat_assign $x_cov i.aas i.village, vce(robust) 
+		summarize 			brdish_day if treat_assign == 0	
+		estadd scalar		dep_mean = r(mean)		
+		estadd local 		cov "Yes", replace			
+		est					store bnumpc	
+	restore				
+
+* number of breakfast dishes prepared for a hh in a week using OLS
+ 	preserve
+		duplicates drop		hhid week, force
+		
+		reg					brdish_week treat_assign i.aas i.village, vce(robust) 
+		summarize 			brdish_week if treat_assign == 0	
+		estadd scalar		dep_mean = r(mean)		
+		estadd local 		cov "No", replace			
+		est					store bnump		
+	
+		reg 				brdish_week treat_assign $x_cov i.aas i.village, vce(robust) 
+		summarize 			brdish_week if treat_assign == 0	
+		estadd scalar		dep_mean = r(mean)		
+		estadd local 		cov "Yes", replace			
+		est					store bnumpc	
+	restore				
+		
+* number of breakfast dishes prepared for a hh over the time period using OLS
+ 	preserve
+		duplicates drop		hhid, force
+		
+		reg					brdish_tot treat_assign i.aas i.village, vce(robust) 
+		summarize 			brdish_tot if treat_assign == 0	
+		estadd scalar		dep_mean = r(mean)		
+		estadd local 		cov "No", replace			
+		est					store bnump		
+	
+		reg 				brdish_tot treat_assign $x_cov i.aas i.village, vce(robust) 
+		summarize 			brdish_tot if treat_assign == 0	
+		estadd scalar		dep_mean = r(mean)		
+		estadd local 		cov "Yes", replace			
+		est					store bnumpc	
+	restore				
+
+* number of lunch dishes prepared for a hh in a day using OLS
+ 	preserve
+		duplicates drop		hhid week day, force
+		
+		reg					lundish_day treat_assign i.aas i.village, vce(robust) 
+		summarize 			lundish_day if treat_assign == 0	
+		estadd scalar		dep_mean = r(mean)		
+		estadd local 		cov "No", replace			
+		est					store bnump		
+	
+		reg 				lundish_day treat_assign $x_cov i.aas i.village, vce(robust) 
+		summarize 			lundish_day if treat_assign == 0	
+		estadd scalar		dep_mean = r(mean)		
+		estadd local 		cov "Yes", replace			
+		est					store bnumpc	
+	restore				
+
+* number of lunch dishes prepared for a hh in a week using OLS
+ 	preserve
+		duplicates drop		hhid week, force
+		
+		reg					lundish_week treat_assign i.aas i.village, vce(robust) 
+		summarize 			lundish_week if treat_assign == 0	
+		estadd scalar		dep_mean = r(mean)		
+		estadd local 		cov "No", replace			
+		est					store bnump		
+	
+		reg 				lundish_week treat_assign $x_cov i.aas i.village, vce(robust) 
+		summarize 			lundish_week if treat_assign == 0	
+		estadd scalar		dep_mean = r(mean)		
+		estadd local 		cov "Yes", replace			
+		est					store bnumpc	
+	restore				
+		
+* number of lunch dishes prepared for a hh over the time period using OLS
+ 	preserve
+		duplicates drop		hhid, force
+		
+		reg					lundish_tot treat_assign i.aas i.village, vce(robust) 
+		summarize 			lundish_tot if treat_assign == 0	
+		estadd scalar		dep_mean = r(mean)		
+		estadd local 		cov "No", replace			
+		est					store bnump		
+	
+		reg 				lundish_tot treat_assign $x_cov i.aas i.village, vce(robust) 
+		summarize 			lundish_tot if treat_assign == 0	
+		estadd scalar		dep_mean = r(mean)		
+		estadd local 		cov "Yes", replace			
+		est					store bnumpc	
+	restore			
+
+* number of dinner dishes prepared for a hh in a day using OLS
+ 	preserve
+		duplicates drop		hhid week day, force
+		
+		reg					dindish_day treat_assign i.aas i.village, vce(robust) 
+		summarize 			dindish_day if treat_assign == 0	
+		estadd scalar		dep_mean = r(mean)		
+		estadd local 		cov "No", replace			
+		est					store bnump		
+	
+		reg 				dindish_day treat_assign $x_cov i.aas i.village, vce(robust) 
+		summarize 			dindish_day if treat_assign == 0	
+		estadd scalar		dep_mean = r(mean)		
+		estadd local 		cov "Yes", replace			
+		est					store bnumpc	
+	restore				
+
+* number of dinner dishes prepared for a hh in a week using OLS
+ 	preserve
+		duplicates drop		hhid week, force
+		
+		reg					dindish_week treat_assign i.aas i.village, vce(robust) 
+		summarize 			dindish_week if treat_assign == 0	
+		estadd scalar		dep_mean = r(mean)		
+		estadd local 		cov "No", replace			
+		est					store bnump		
+	
+		reg 				dindish_week treat_assign $x_cov i.aas i.village, vce(robust) 
+		summarize 			dindish_week if treat_assign == 0	
+		estadd scalar		dep_mean = r(mean)		
+		estadd local 		cov "Yes", replace			
+		est					store bnumpc	
+	restore				
+		
+* number of dinner dishes prepared for a hh over the time period using OLS
+ 	preserve
+		duplicates drop		hhid, force
+		
+		reg					dindish_tot treat_assign i.aas i.village, vce(robust) 
+		summarize 			dindish_tot if treat_assign == 0	
+		estadd scalar		dep_mean = r(mean)		
+		estadd local 		cov "No", replace			
+		est					store bnump		
+	
+		reg 				dindish_tot treat_assign $x_cov i.aas i.village, vce(robust) 
+		summarize 			dindish_tot if treat_assign == 0	
+		estadd scalar		dep_mean = r(mean)		
+		estadd local 		cov "Yes", replace			
+		est					store bnumpc	
+	restore		
+
+				
+************************************************************************
+**# 6 - # of meals skipped
+************************************************************************		
+
+* number of breakfast skipped for a hh over the time period using OLS
+ 	preserve
+		duplicates drop		hhid, force
+		
+		reg					hhbr_skipped treat_assign i.aas i.village, vce(robust) 
+		summarize 			hhbr_skipped if treat_assign == 0	
+		estadd scalar		dep_mean = r(mean)		
+		estadd local 		cov "No", replace			
+		est					store bskip		
+	
+		reg 				hhbr_skipped treat_assign $x_cov i.aas i.village, vce(robust) 
+		summarize 			hhbr_skipped if treat_assign == 0	
+		estadd scalar		dep_mean = r(mean)		
+		estadd local 		cov "Yes", replace			
+		est					store bskipc	
+	restore				
+	
+* number of lunch skipped for a hh over the time period using OLS
+ 	preserve
+		duplicates drop		hhid, force
+		
+		reg					hhlun_skipped treat_assign i.aas i.village, vce(robust) 
+		summarize 			hhlun_skipped if treat_assign == 0	
+		estadd scalar		dep_mean = r(mean)		
+		estadd local 		cov "No", replace		
+		est					store lskip	
+		
+		reg					hhlun_skipped treat_assign $x_cov i.aas i.village, vce(robust) 
+		summarize 			hhlun_skipped if treat_assign == 0	
+		estadd scalar		dep_mean = r(mean)	
+		estadd local 		cov "Yes", replace			
+		est					store lskipc	
+	restore	
+						   	
+* number of dinner skipped for a hh over the time period using OLS
+ 	preserve
+		duplicates drop		hhid, force
+		
+		reg					hhdin_skipped treat_assign i.aas i.village, vce(robust)  
+		summarize 			hhdin_skipped if treat_assign == 0	
+		estadd scalar		dep_mean = r(mean)		
+		estadd local 		cov "No", replace		
+		est					store dskip			
+		
+		reg					hhdin_skipped  treat_assign $x_cov i.aas i.village, vce(robust) 
+		summarize 			hhdin_skipped  if treat_assign == 0	
+		estadd scalar		dep_mean = r(mean)		
+		estadd local 		cov "Yes", replace			
+		est					store dskipc		
+	restore
+
+* number of all meals skipped for a hh over the time period using OLS
+ 	preserve
+		duplicates drop		hhid, force	
+		
+		reg 				hhtot_skipped treat_assign i.aas i.village, vce(robust) 
+		summarize 			hhtot_skipped if treat_assign == 0	
+		estadd scalar		dep_mean = r(mean)		
+		estadd local 		cov "No", replace			
+		est					store tskip		
+		
+		reg 				hhtot_skipped treat_assign $x_cov i.aas i.village, vce(robust) 
+		summarize 			hhtot_skipped if treat_assign == 0	
+		estadd scalar		dep_mean = r(mean)
+		estadd local 		cov "Yes", replace			
+		est					store tskipc			
+	restore		
+
+
 * close the log
 	log				close
 	

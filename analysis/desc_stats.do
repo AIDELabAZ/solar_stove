@@ -15,8 +15,7 @@
 	* estout
 
 * to do:
-	* add avg HDDS, SR, and legumes
-	* create summary table for other outcomes
+	* revise table in section 1.2 with new variables on frequency
 
 ***********************************************************************
 **# 0 - setup
@@ -104,26 +103,26 @@
 * sum breakfast
 	preserve
 		keep if				meal == 0
-		estpost sum 		hhbrdish_tot hhbr_skipped
+		estpost sum 		brdish_tot br_skip
 		est store 			sum_brk
 	restore
 
 * sum lunch
 	preserve
 		keep if				meal == 1
-		estpost sum 		hhlundish_tot hhlun_skipped
+		estpost sum 		lundish_tot lun_skip
 		est store 			sum_lun
 	restore
 	
 * sum dinner
 	preserve
 		keep if				meal == 2
-		estpost sum 		hhdin_skipped hhdindish_tot
+		estpost sum 		din_skip dindish_tot
 		est store 			sum_din
 	restore
 	
 * sum total
-	estpost sum 		hhdish_tot hhtot_skipped
+	estpost sum 		dish_tot tot_skipped
 	est store 			sum_tot
 		
 * output table of descriptive statistics for categorical variables

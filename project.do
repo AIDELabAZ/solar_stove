@@ -80,7 +80,7 @@ if $pack == 1 {
 
 * Set log preferences
 	set 		logtype text    // so logs can be opened without Stata
-/*
+
 ***********************************************************************
 * 1 - run ingredients data cleaning .do file
 ***********************************************************************
@@ -100,7 +100,7 @@ if $pack == 1 {
 * 3 - run analysis .do files
 **********************************************************************	
 	
-	do				"$code/analysis/desc_stata.do"
+	do				"$code/analysis/desc_stats.do"
 	do				"$code/analysis/food_outcomes"
 	do				"$code/analysis/fuel_outcomes"
 	do				"$code/analysis/robust_outcomes"

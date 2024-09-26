@@ -18,7 +18,7 @@
 	* xfill
 
 * to do:
-	* generate more disaggregated meal skipping and ingredient counting
+	* done
 
 
 ***********************************************************************
@@ -28,6 +28,8 @@
 * define paths
 	global	root	=	"$data/raw/dietary"
 	global	export	=	"$data/refined"
+	global	output	=	"$data/analysis/tables"
+	global	figure	=	"$data/analysis/figures"
 	global	logout	=	"$data/logs"
 	
 * open log
@@ -81,7 +83,7 @@
 	drop			dish
 	
 	bys 			hhid week day meal dish_num: ///
-						gen dish = 1 if _n==1
+						gen dish = 1 if _n == 1
 	order 			dish, after(dish_num)
 	bys 			hhid week day meal: ///
 						replace dish = sum(dish)
@@ -310,122 +312,152 @@
 **# 4 - generate variables for meals skipped
 ***********************************************************************	
 
-* generate indicator variable for the first meal observation in panel	
-	gen byte 			first_obs = 0
-	replace 			first_obs = 1 if dish == 1
-	label var 			first_obs "First Observation in Meal"
+* generate variable for total meals eaten
+	gen					day_temp = 1 if dish == 1
 
-* add up total meals per day grouped by hhid, week, day
-	bys 				hhid week day: 	///
-							egen hhmeals_day = total(first_obs) 
-	label var			hhmeals_day "Household Meals Per Day"		
+	egen				meal_day = count(day_temp), by(hhid week day)
+	label var			meal_day "Meals Per Day"		
 	
-* check
-* add up total meals per week grouped by hhid and week	
-	bys 				hhid week: ///
-							egen hhmeals_week = total(first_obs) 
-	label var			hhmeals_week "Household Meals Per Week"	
-					
-* add up total hh breakfast meals 
-	bys 				hhid: ///
-							egen hhbr_tot = total(first_obs) if meal == 0
-	xfill				hhbr_tot, i(hhid)
-	label var			hhbr_tot "Total Household Breakfast Meals"
+	egen				meal_week = count(day_temp), by(hhid week)
+	label var			meal_week "Meals Per Week"	
 
-* add up total hh lunch meals
-	bys 				hhid: 	///
-							egen hhlun_tot = total(first_obs) if meal == 1
-	xfill				hhlun_tot, i(hhid)
-	label var 			hhlun_tot "Total Household Lunch Meals"
+	egen				meal_total = count(day_temp), by(hhid)
+	label var 			meal_total "Total Meals"	
+
+* generate variable for breakfast meals eaten	
+	gen					br_day_temp = 1 if meal == 0 & dish == 1
+
+	egen				br_day = count(br_day_temp), by(hhid week day)
+	label var			br_day "Breakfasts Per Day"	
 	
-* add up total hh dinner meals 
-	by 					hhid: ///
-							egen hhdin_tot = total(first_obs) if meal == 2
-	xfill				hhdin_tot, i(hhid)
-	label var			hhdin_tot "Total Household Dinner Meals"
+	egen				br_week = count(br_day_temp), by(hhid week)
+	label var			br_week "Breakfasts Per Week"	
+
+	egen				br_tot = count(br_day_temp), by(hhid)
+	label var			br_tot "Total Breakfasts"
+
+* generate variable for lunch meals eaten	
+	gen					lun_day_temp = 1 if meal == 1 & dish == 1
+
+	egen				lun_day = count(lun_day_temp), by(hhid week day)
+	label var			lun_day "Lunches Per Day"	
 	
-* add up total hh meals 
-	bys 				hhid: 	///
-							egen hhmeals_total = total(first_obs) 
-	label var 			hhmeals_total "Total Household Meals"	
+	egen				lun_week = count(lun_day_temp), by(hhid week)
+	label var			lun_week "Lunches Per Week"	
+
+	egen				lun_tot = count(lun_day_temp), by(hhid)
+	label var 			lun_tot "Total Lunchs"
+
+* generate variable for dinner meals eaten	
+	gen					din_day_temp = 1 if meal == 2 & dish == 1
+
+	egen				din_day = count(din_day_temp), by(hhid week day)
+	label var			din_day "Dinners Per Day"	
 	
-* generate variable that stores max value of potential meals over the RCT period
-
-	* calculate number of possible meals @ 3 meals a day	
-	gen 				mealct_day = 3	
-	label var 			mealct_day "Number of Possible Meals in a Day"
+	egen				din_week = count(din_day_temp), by(hhid week)
+	label var			din_week "Dinners Per Week"	
+	 
+	egen				din_tot = count(din_day_temp), by(hhid)
+	label var			din_tot "Total Dinners"
 	
-	* calculate number of possible meals @ 3 meals a day, 7 days a week	
-	gen 				mealct_week = 21	
-	label var 			mealct_week "Number of Possible Meals in a Week"
-
-	* calculate number of possible meals @ 3 meals a day, 7 days a week, for 6 weeks	
-	gen 				mealct_tot = 126	
-	label var 			mealct_tot "Number of Possible Meals"
+* generate variables for the difference between max potential meals and total hh meals		
+	gen 				day_skip = 3 - meal_day
+	label var			day_skip "Number of Meals Skipped in the Day"	
 	
-	* calculate max possible breakfast/lunch/dinner meals over the RCT period (126/3)
-	gen 				mealct = 42
-	label var			mealct "Number of Possible Breakfast/Lunch/Dinner Meals"
+	gen 				week_skip = 21 - meal_week
+	label var			week_skip "Number of Meals Skipped in the Week"	
+
+	gen 				tot_skip = 126 - meal_total
+	label var			tot_skip "Total Number of Meals Skipped"		
+
+* generate variable that calculates the difference in max breakfast meals and meals a hh consumed	
+	gen 				brday_skip = 1 - br_day
+	label var			brday_skip "Was Breakfast Skipped that Day?"	
+
+	gen 				brweek_skip = 7 - br_week
+	label var 			brweek_skip "Number of Breakfasts Skipped in the Week"
 	
-* generate variables for the difference between max potential meals and total hh meals	
+	gen 				brtot_skip = 42 - br_tot
+	label var 			brtot_skip "Total Number of Breakfasts Skipped"
 
-	* Number of meals skipped in a day	
-	gen 				hhday_skip = mealct_day - hhmeals_day
-	label var			hhday_skip "Number of Meals Skipped in the Day"	
+* generate variable that calculates the difference in max lunch meals and meals a hh consumed
+	gen 				lunday_skip = 1 - lun_day
+	label var			lunday_skip "Was Lunch Skipped that Day?"	
+
+	gen 				lunweek_skip = 7 - lun_week
+	label var 			lunweek_skip "Number of Lunches Skipped in the Week"
+		
+	gen 				luntot_skip = 42 - lun_tot
+	label var			luntot_skip "Total Number of Lunches Skipped"
+
+* generate variable that calculates the difference in max dinner meals and meals a hh consumed
+	gen 				dinday_skip = 1 - din_day
+	label var			dinday_skip "Was Dinner Skipped that Day?"	
+
+	gen 				dinweek_skip = 7 - din_week
+	label var 			dinweek_skip "Number of Dinner Skipped in the Week"
 	
-	* Number of meals skipped in a week	
-	gen 				hhweek_skip = mealct_week - hhmeals_week
-	label var			hhweek_skip "Number of Meals Skipped in the Week"	
+	gen 				dintot_skip = 42 - din_tot
+	label var			dintot_skip "Total Number of Dinners Skipped"
 
-	* total number of meals skipped over all six weeks.	
-	gen 				hhtot_skipped = mealct_tot - hhmeals_total
-	label var			hhtot_skipped "Total Number of Meals Skipped per Household"		
+* drop unneeded variables
+	drop				day_temp br_day_temp lun_day_temp din_day_temp
 
-* generate variable that calculates the difference in max breakfast meals (42) and meals a hh consumed
-
-do this as the day and week level
-
-	gen 				hhbr_skipped = mealct - hhbr_tot
-	label var 			hhbr_skipped "Number of Breakfasts Skipped"
-
-* (iii) Total number of lunch meals skipped over all six weeks.			
-	gen 				hhlun_skipped = mealct - hhlun_tot
-	label var			hhlun_skipped "Number of Breakfasts Skipped"
-
-* (iv) Total number of dinner meals skipped over all six weeks.		
-	gen 				hhdin_skipped = mealct - hhdin_tot
-	label var			hhdin_skipped "Number of Breakfasts Skipped"
 	
-
 ***********************************************************************
 **# 5 - generate variables for avg number of dishes per meal
 ***********************************************************************	
+
+* add up total number of dishes
+	gen					dish_tot_temp = 1
 	
-** generate avg number of dishes in each meal type over 6 weeks	
+	egen				dish_day = count(dish_tot_temp), by(hhid week day)	
+	label var			dish_day "Number of Dishes in a Day"
+	
+	egen				dish_week = count(dish_tot_temp), by(hhid week)	
+	label var			dish_week "Number of Dishes in a Week"
+	
+	egen				dish_tot = count(dish_tot_temp), by(hhid)		
+	label var			dish_tot "Total Number of Dishes"
+	
 * add up total number of breakfast dishes 
-	gen					hhbrdish_tot_temp = 1 if meal == 0
-	egen				hhbrdish_tot = count(hhbrdish_tot_temp), by(hhid)
-	replace				hhbrdish_tot = hhbrdish_tot/hhbr_tot
-	drop 				hhbrdish_tot_temp		
-	label var			hhbrdish_tot "Average Number of Breakfast Dishes"
+	gen					brdish_tot_temp = 1 if meal == 0
+	
+	egen				brdish_day = count(brdish_tot_temp), by(hhid week day)	
+	label var			brdish_day "Number of Breakfast Dishes in a Day"
+	
+	egen				brdish_week = count(brdish_tot_temp), by(hhid week)	
+	label var			brdish_week "Number of Breakfast Dishes in a Week"
+	
+	egen				brdish_tot = count(brdish_tot_temp), by(hhid)		
+	label var			brdish_tot "Total Number of Breakfast Dishes"
 	
 * add up total number of lunch dishes
-	gen					hhlundish_tot_temp = 1 if meal == 1
-	egen				hhlundish_tot = count(hhlundish_tot_temp), by(hhid)
-	replace				hhlundish_tot = hhlundish_tot/hhlun_tot
-	drop 				hhlundish_tot_temp			
-	label var			hhlundish_tot "Average Number of Lunch Dishes"	
+	gen					lundish_tot_temp = 1 if meal == 1
+	
+	egen				lundish_day = count(lundish_tot_temp), by(hhid week day)	
+	label var			lundish_day "Number of Lunch Dishes in a Day"
+	
+	egen				lundish_week = count(lundish_tot_temp), by(hhid week)	
+	label var			lundish_week "Number of Lunch Dishes in a Week"
+	
+	egen				lundish_tot = count(lundish_tot_temp), by(hhid)		
+	label var			lundish_tot "Total Number of Lunch Dishes"
 	
 * add up total number of dinner dishes 
-	gen					hhdindish_tot_temp = 1 if meal == 2
-	egen				hhdindish_tot = count(hhdindish_tot_temp), by(hhid)
-	replace				hhdindish_tot = hhdindish_tot/hhdin_tot
-	drop 				hhdindish_tot_temp		
-	label var			hhdindish_tot "Average Number of Dinner Dishes"	
+	gen					dindish_tot_temp = 1 if meal == 2
 	
-* add up total number of dishes
-	bys hhid: gen		hhdish_tot = _N
-	label var			hhdish_tot "Total Number of Dishes"	
+	egen				dindish_day = count(dindish_tot_temp), by(hhid week day)	
+	label var			dindish_day "Number of Dinner Dishes in a Day"
+	
+	egen				dindish_week = count(dindish_tot_temp), by(hhid week)	
+	label var			dindish_week "Number of Dinner Dishes in a Week"
+	
+	egen				dindish_tot = count(dindish_tot_temp), by(hhid)		
+	label var			dindish_tot "Total Number of Dinner Dishes"
+
+* drop unneeded variables
+	drop				dish_tot_temp brdish_tot_temp lundish_tot_temp dindish_tot_temp
 
 
 ***********************************************************************

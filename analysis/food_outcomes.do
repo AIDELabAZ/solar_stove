@@ -468,94 +468,68 @@
 **## 4.1 - # of dishes prepared
 ************************************************************************		
 	
-	reg ingred_dish treat_assign i.aas i.village, vce(robust)
-	
-	
+* number of dishes prepared for a hh in a day using OLS
  	preserve
 		duplicates drop		hhid week day, force
 		
-		reg					hhmeals_day treat_assign i.aas i.village, vce(robust) 
-	restore
-	
-* number of breakfast dishes prepared for a hh over the time period using OLS
- 	preserve
-		duplicates drop		hhid, force
-		
-		reg					hhbrdish_tot treat_assign i.aas i.village, vce(robust) 
-		summarize 			hhbrdish_tot if treat_assign == 0	
+		reg					dish_day treat_assign i.aas i.village, vce(cluster hhid)
+		summarize 			dish_day if treat_assign == 0	
 		estadd scalar		dep_mean = r(mean)		
 		estadd local 		cov "No", replace			
-		est					store bnump		
+		est					store dday		
 	
-		reg 				hhbrdish_tot treat_assign $x_cov i.aas i.village, vce(robust) 
-		summarize 			hhbrdish_tot if treat_assign == 0	
+		reg 				dish_day treat_assign $x_cov i.aas i.village, vce(cluster hhid)
+		summarize 			dish_day if treat_assign == 0	
 		estadd scalar		dep_mean = r(mean)		
 		estadd local 		cov "Yes", replace			
-		est					store bnumpc	
+		est					store ddayc	
 	restore				
-	
-* number of lunch dishes prepared for a hh over the time period using OLS
- 	preserve
-		duplicates drop		hhid, force
-		
-		reg					hhlundish_tot treat_assign i.aas i.village, vce(robust) 
-		summarize 			hhlundish_tot if treat_assign == 0	
-		estadd scalar		dep_mean = r(mean)		
-		estadd local 		cov "No", replace		
-		est					store lnump	
-		
-		reg					hhlundish_tot treat_assign $x_cov i.aas i.village, vce(robust) 
-		summarize 			hhlundish_tot if treat_assign == 0	
-		estadd scalar		dep_mean = r(mean)	
-		estadd local 		cov "Yes", replace			
-		est					store lnumpc	
-	restore	
-						   	
-* number of dinner dishes prepared for a hh over the time period using OLS
- 	preserve
-		duplicates drop		hhid, force
-		
-		reg					hhdindish_tot treat_assign i.aas i.village, vce(robust)  
-		summarize 			hhdindish_tot if treat_assign == 0	
-		estadd scalar		dep_mean = r(mean)		
-		estadd local 		cov "No", replace		
-		est					store dnump			
-		
-		reg					hhdindish_tot  treat_assign $x_cov i.aas i.village, vce(robust) 
-		summarize 			hhdindish_tot  if treat_assign == 0	
-		estadd scalar		dep_mean = r(mean)		
-		estadd local 		cov "Yes", replace			
-		est					store dnumpc		
-	restore
 
-* number of all dishes prepared for a hh over the time period using OLS
+* number of dishes prepared for a hh in a week using OLS
  	preserve
-		duplicates drop		hhid, force	
+		duplicates drop		hhid week, force
 		
-		reg 				hhdish_tot treat_assign i.aas i.village, vce(robust) 
-		summarize 			hhdish_tot if treat_assign == 0	
+		reg					dish_week treat_assign i.aas i.village, vce(cluster hhid)
+		summarize 			dish_week if treat_assign == 0	
 		estadd scalar		dep_mean = r(mean)		
 		estadd local 		cov "No", replace			
-		est					store tnump			
-		
-		reg 				hhdish_tot treat_assign $x_cov i.aas i.village, vce(robust) 
-		summarize 			hhdish_tot if treat_assign == 0	
-		estadd scalar		dep_mean = r(mean)
+		est					store dweek		
+	
+		reg 				dish_week treat_assign $x_cov i.aas i.village, vce(cluster hhid)
+		summarize 			dish_week if treat_assign == 0	
+		estadd scalar		dep_mean = r(mean)		
 		estadd local 		cov "Yes", replace			
-		est					store tnumpc			
+		est					store dweekc	
+	restore				
+		
+* number of dishes prepared for a hh over the time period using OLS
+ 	preserve
+		duplicates drop		hhid, force
+		
+		reg					dish_tot treat_assign i.aas i.village, vce(robust) 
+		summarize 			dish_tot if treat_assign == 0	
+		estadd scalar		dep_mean = r(mean)		
+		estadd local 		cov "No", replace			
+		est					store dtot		
+	
+		reg 				dish_tot treat_assign $x_cov i.aas i.village, vce(robust) 
+		summarize 			dish_tot if treat_assign == 0	
+		estadd scalar		dep_mean = r(mean)		
+		estadd local 		cov "Yes", replace			
+		est					store dtotc	
 	restore		
-
+	
 * table 3, Panel A: Solar stove assignment on dishes prepared
-	esttab 			bnump bnumpc lnump lnumpc dnump dnumpc tnump tnumpc ///
+	esttab 			dday ddayc dweek dweekc dtot dtotc ///
 						using "$output/freq_out.tex", b(3) se(3) replace ///
-							prehead("\begin{tabular}{l*{8}{c}} \\[-1.8ex]\hline \hline \\[-1.8ex] " ///
-							"& \multicolumn{2}{c}{Breakfast} & \multicolumn{2}{c}{Lunch} & " ///
-							"\multicolumn{2}{c}{Dinner} & \multicolumn{2}{c}{Overall} \\ \cline{2-3} " ///
-							"\cline{4-5} \cline{6-7} \cline{8-9} \\[-1.8ex] " ///	                   
+							prehead("\begin{tabular}{l*{6}{c}} \\[-1.8ex]\hline \hline \\[-1.8ex] " ///
+							"& \multicolumn{2}{c}{Day} & \multicolumn{2}{c}{Week} & " ///
+							"\multicolumn{2}{c}{Overall} \\ \cline{2-3} " ///
+							"\cline{4-5} \cline{6-7} \\[-1.8ex] " ///	                   
 							"& \multicolumn{1}{c}{(1)} & \multicolumn{1}{c}{(2)} & \multicolumn{1}{c}{(3)} " ///
 							"& \multicolumn{1}{c}{(4)} &\multicolumn{1}{c}{(5)} & \multicolumn{1}{c}{(6)} " ///
-							"& \multicolumn{1}{c}{(7)} & \multicolumn{1}{c}{(8)}  \\ \midrule " ///
-							"\multicolumn{9}{l}{\emph{Panel A: Number of Dishes Per Meal}} \\ ") ///
+							"\\ \midrule " ///
+							"\multicolumn{7}{l}{\emph{Panel A: Number of Dishes Prepared}} \\ ") ///
 							keep(treat_assign) noobs ///
 							booktabs nonum nomtitle collabels(none) nobaselevels nogaps ///
 							fragment label stat(dep_mean N cov r2_a, labels( "Mean in Control" ///
@@ -566,83 +540,66 @@
 **## 4.2 - # of meals skipped
 ************************************************************************		
 
-* number of breakfast skipped for a hh over the time period using OLS
+* number of meals skipped in a day using OLS
  	preserve
-		duplicates drop		hhid, force
+		duplicates drop		hhid week day, force
 		
-		reg					hhbr_skipped treat_assign i.aas i.village, vce(robust) 
-		summarize 			hhbr_skipped if treat_assign == 0	
+		reg					day_skip treat_assign i.aas i.village, vce(cluster hhid)
+		summarize 			day_skip if treat_assign == 0	
 		estadd scalar		dep_mean = r(mean)		
 		estadd local 		cov "No", replace			
-		est					store bskip		
+		est					store dskip		
 	
-		reg 				hhbr_skipped treat_assign $x_cov i.aas i.village, vce(robust) 
-		summarize 			hhbr_skipped if treat_assign == 0	
+		reg 				day_skip treat_assign $x_cov i.aas i.village, vce(cluster hhid)
+		summarize 			day_skip if treat_assign == 0	
 		estadd scalar		dep_mean = r(mean)		
 		estadd local 		cov "Yes", replace			
-		est					store bskipc	
+		est					store dskipc	
 	restore				
 	
-* number of lunch skipped for a hh over the time period using OLS
+* number of meals skipped in a week using OLS
  	preserve
-		duplicates drop		hhid, force
+		duplicates drop		hhid week, force
 		
-		reg					hhlun_skipped treat_assign i.aas i.village, vce(robust) 
-		summarize 			hhlun_skipped if treat_assign == 0	
+		reg					week_skip treat_assign i.aas i.village, vce(cluster hhid)
+		summarize 			week_skip if treat_assign == 0	
 		estadd scalar		dep_mean = r(mean)		
 		estadd local 		cov "No", replace		
-		est					store lskip	
+		est					store wskip	
 		
-		reg					hhlun_skipped treat_assign $x_cov i.aas i.village, vce(robust) 
-		summarize 			hhlun_skipped if treat_assign == 0	
+		reg					week_skip treat_assign $x_cov i.aas i.village, vce(cluster hhid)
+		summarize 			week_skip if treat_assign == 0	
 		estadd scalar		dep_mean = r(mean)	
 		estadd local 		cov "Yes", replace			
-		est					store lskipc	
+		est					store wskipc	
 	restore	
 						   	
-* number of dinner skipped for a hh over the time period using OLS
+* number of meals skipped overall using OLS
  	preserve
 		duplicates drop		hhid, force
 		
-		reg					hhdin_skipped treat_assign i.aas i.village, vce(robust)  
-		summarize 			hhdin_skipped if treat_assign == 0	
+		reg					tot_skip treat_assign i.aas i.village, vce(robust)  
+		summarize 			tot_skip if treat_assign == 0	
 		estadd scalar		dep_mean = r(mean)		
 		estadd local 		cov "No", replace		
-		est					store dskip			
+		est					store tskip			
 		
-		reg					hhdin_skipped  treat_assign $x_cov i.aas i.village, vce(robust) 
-		summarize 			hhdin_skipped  if treat_assign == 0	
+		reg					tot_skip  treat_assign $x_cov i.aas i.village, vce(robust) 
+		summarize 			tot_skip  if treat_assign == 0	
 		estadd scalar		dep_mean = r(mean)		
 		estadd local 		cov "Yes", replace			
-		est					store dskipc		
+		est					store tskipc		
 	restore
 
-* number of all meals skipped for a hh over the time period using OLS
- 	preserve
-		duplicates drop		hhid, force	
-		
-		reg 				hhtot_skipped treat_assign i.aas i.village, vce(robust) 
-		summarize 			hhtot_skipped if treat_assign == 0	
-		estadd scalar		dep_mean = r(mean)		
-		estadd local 		cov "No", replace			
-		est					store tskip		
-		
-		reg 				hhtot_skipped treat_assign $x_cov i.aas i.village, vce(robust) 
-		summarize 			hhtot_skipped if treat_assign == 0	
-		estadd scalar		dep_mean = r(mean)
-		estadd local 		cov "Yes", replace			
-		est					store tskipc			
-	restore		
-
 * table 3, Panel B: Solar stove assignment on skipped meals
-	esttab 			bskip bskipc lskip lskipc dskip dskipc tskip tskipc ///
+	esttab 			dskip dskipc wskip wskipc tskip tskipc ///
 						using "$output/freq_out.tex", b(3) se(3) append ///
-							prehead("\midrule \multicolumn{9}{l}{\emph{Panel B: Number of Meals Skipped}} \\ ") ///
+							prehead("\midrule \multicolumn{7}{l}{\emph{Panel B: Number of Meals Skipped}} \\ ") ///
 							keep(treat_assign) noobs ///
 							booktabs nonum nomtitle collabels(none) nobaselevels nogaps ///
 							fragment label stat(dep_mean N cov r2_a, labels( "Mean in Control" ///
 							"Observations" "Covariates" "Adjusted R$^2$") fmt(%4.3f %9.0fc %4.3f)) ///
-							postfoot("\hline \hline \\[-1.8ex] \multicolumn{9}{J{\linewidth}}{\small " ///
+							postfoot("\hline \hline \\[-1.8ex] \multicolumn{7}{J{\linewidth}}{\small " ///
 							"\noindent \textit{Note}: Dependent variables are different measure of " ///
 							" frequency of cooking. In Panel A, we use the number of dishes cooked " ///
 							"in a meal. In Panel B, we use the number of meals skipped. " ///
