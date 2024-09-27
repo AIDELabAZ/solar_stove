@@ -102,42 +102,38 @@
 
 * sum breakfast
 	preserve
-		keep if				meal == 0
-		estpost sum 		brdish_tot br_skip
+		duplicates drop		hhid week day, force
+		estpost sum 		dish_day day_skip
 		est store 			sum_brk
 	restore
 
 * sum lunch
 	preserve
-		keep if				meal == 1
-		estpost sum 		lundish_tot lun_skip
+		duplicates drop		hhid week, force
+		estpost sum 		dish_week week_skip
 		est store 			sum_lun
 	restore
 	
 * sum dinner
 	preserve
-		keep if				meal == 2
-		estpost sum 		din_skip dindish_tot
+		duplicates drop		hhid, force
+		estpost sum 		dish_tot tot_skip
 		est store 			sum_din
 	restore
-	
-* sum total
-	estpost sum 		dish_tot tot_skipped
-	est store 			sum_tot
 		
 * output table of descriptive statistics for categorical variables
-	esttab 			sum_brk sum_lun sum_din sum_tot ///
+	esttab 			sum_brk sum_lun sum_din ///
 						using "$output/descriptive/cook_tab.tex", replace booktabs ///
-						prehead("\begin{tabular}{l*{4}{c}} \\ [-1.8ex]\hline \hline \\[-1.8ex] ") ///
-						main(mean) aux(sd) label  mlabels("Breakfast" "Lunch" "Dinner" "Total") collabels(,none) ///
+						prehead("\begin{tabular}{l*{3}{c}} \\ [-1.8ex]\hline \hline \\[-1.8ex] ") ///
+						main(mean) aux(sd) label  mlabels("Day" "Week" "Total") collabels(,none) ///
 						nomtitle nonumber fragment nogap noobs  ///
 						rename(hhbrdish_tot "Dishes per Meal" hhlundish_tot "Dishes per Meal" ///
 						hhdindish_tot "Dishes per Meal" hhdish_tot "Dishes per Meal" ///
 						hhbr_skipped "Meals Skipped" hhlun_skipped "Meals Skipped" ///
 						hhdin_skipped "Meals Skipped" hhtot_skipped "Meals Skipped" ) ///
-						postfoot("\midrule \multicolumn{1}{l}{Total} &  5,690 & 12,701 & " ///
-							" 11,923 & 30,314 \\ " "\hline \hline \\[-1.8ex] " ///
-							"\multicolumn{5}{J{\linewidth}}{\small " ///
+						postfoot("\midrule \multicolumn{1}{l}{Total} &  6,013 & 912 & " ///
+							" 156 \\ " "\hline \hline \\[-1.8ex] " ///
+							"\multicolumn{4}{J{\linewidth}}{\small " ///
 							"\noindent \textit{Note}: The table displays means and standard deviations, " ///
 							"in parentheses, for dishes per meal and meals skipped.}  \end{tabular}") 	
 		
