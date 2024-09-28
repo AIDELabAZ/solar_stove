@@ -434,7 +434,7 @@ reg ingred_day day_count $$x_cov, vce(cluster hhid)
 **## 4.1 - household dietary diversity score (avg)
 ************************************************************************
 
-* late hdds dish (avg) outcomes with and without controls using OLS
+/* late hdds dish (avg) outcomes with and without controls using OLS
 		ivreg2 				hdds_avg_dish (ss_use = treat_assign) i.aas i.village, cluster (hhid)
 		summarize 			hdds_avg_dish if treat_assign == 0		
 		estadd scalar		dep_mean = r(mean)		
@@ -497,7 +497,7 @@ reg ingred_day day_count $$x_cov, vce(cluster hhid)
 		eststo 				wHDDSmIVoc	
 	restore 
 
-* final hdds (avg) overall outcomes with and without controls using OLS HELP
+* final hdds (avg) overall outcomes with and without controls using OLS **** LEM
 	preserve
 		duplicates drop		hhid, force	
 		ivreg2				hdds_total (share_total = treat_assign) i.aas i.village, robust
@@ -534,7 +534,7 @@ reg ingred_day day_count $$x_cov, vce(cluster hhid)
 							
 
 ************************************************************************
-**## 4.2 - species richness 
+**## 4.2 - species richness (avg)
 ************************************************************************
 
 * (i) Regress sr for a dish on treatment assignment
@@ -604,7 +604,7 @@ reg ingred_day day_count $$x_cov, vce(cluster hhid)
 	restore 
 
 * (v) Regress hhds for overall (6 week) on treatment assignment
-	* LATE sr overall outcomes with and without controls using OLS HELP
+	* LATE sr overall outcomes with and without controls using OLS *** LEM
 	preserve
 		duplicates drop		hhid, force	
 		ivreg2				sr_total (share_total = treat_assign) i.aas i.village, robust
@@ -631,248 +631,338 @@ reg ingred_day day_count $$x_cov, vce(cluster hhid)
 							booktabs nonum nomtitle collabels(none) nobaselevels nogaps ///
 							fragment label stat(dep_mean N cov r2_a, labels( "Mean in Control" ///
 							"Observations" "Covariates" "Adjusted R$^2$") fmt(%4.3f %9.0fc %4.3f)) 
-
-
-
-
-
-
-
-
-
-
-
+							
+			*/				
 ************************************************************************
-**# 5 - # of dishes prepared by meal
+**## 5.1 - # of dishes prepared
 ************************************************************************		
 	
-* number of breakfast dishes prepared for a hh in a day using OLS
+* number of dishes prepared for a hh in a day using OLS
  	preserve
 		duplicates drop		hhid week day, force
 		
-		reg					brdish_day treat_assign i.aas i.village, vce(robust) 
-		summarize 			brdish_day if treat_assign == 0	
+		ivreg2				dish_day (share_day = treat_assign) i.aas i.village, cluster(hhid)
+		summarize 			dish_day if treat_assign == 0	
 		estadd scalar		dep_mean = r(mean)		
 		estadd local 		cov "No", replace			
-		est					store bnump		
+		est					store ddayIV		
 	
-		reg 				brdish_day treat_assign $x_cov i.aas i.village, vce(robust) 
-		summarize 			brdish_day if treat_assign == 0	
+		ivreg2 				dish_day (share_day = treat_assign) $x_cov i.aas i.village, cluster (hhid)
+		summarize 			dish_day if treat_assign == 0	
 		estadd scalar		dep_mean = r(mean)		
 		estadd local 		cov "Yes", replace			
-		est					store bnumpc	
+		est					store ddayIVc	
 	restore				
 
-* number of breakfast dishes prepared for a hh in a week using OLS
+* number of dishes prepared for a hh in a week using OLS
  	preserve
 		duplicates drop		hhid week, force
 		
-		reg					brdish_week treat_assign i.aas i.village, vce(robust) 
-		summarize 			brdish_week if treat_assign == 0	
+		ivreg2				dish_week (share_week = treat_assign) i.aas i.village, cluster (hhid)
+		summarize 			dish_week if treat_assign == 0	
 		estadd scalar		dep_mean = r(mean)		
 		estadd local 		cov "No", replace			
-		est					store bnump		
+		est					store dweekIV		
 	
-		reg 				brdish_week treat_assign $x_cov i.aas i.village, vce(robust) 
-		summarize 			brdish_week if treat_assign == 0	
+		ivreg2				dish_week (share_week = treat_assign) $x_cov i.aas i.village, cluster (hhid)
+		summarize 			dish_week if treat_assign == 0	
 		estadd scalar		dep_mean = r(mean)		
 		estadd local 		cov "Yes", replace			
-		est					store bnumpc	
+		est					store dweekIVc	
 	restore				
 		
-* number of breakfast dishes prepared for a hh over the time period using OLS
+* number of dishes prepared for a hh over the time period using OLS
  	preserve
 		duplicates drop		hhid, force
 		
-		reg					brdish_tot treat_assign i.aas i.village, vce(robust) 
-		summarize 			brdish_tot if treat_assign == 0	
+		ivreg2				dish_tot (share_total = treat_assign) i.aas i.village, robust
+		summarize 			dish_tot if treat_assign == 0	
 		estadd scalar		dep_mean = r(mean)		
 		estadd local 		cov "No", replace			
-		est					store bnump		
+		est					store dtotIV		
 	
-		reg 				brdish_tot treat_assign $x_cov i.aas i.village, vce(robust) 
-		summarize 			brdish_tot if treat_assign == 0	
+		ivreg2				dish_tot (share_total = treat_assign) $x_cov i.aas i.village, robust
+		summarize 			dish_tot if treat_assign == 0	
 		estadd scalar		dep_mean = r(mean)		
 		estadd local 		cov "Yes", replace			
-		est					store bnumpc	
-	restore				
-
-* number of lunch dishes prepared for a hh in a day using OLS
- 	preserve
-		duplicates drop		hhid week day, force
-		
-		reg					lundish_day treat_assign i.aas i.village, vce(robust) 
-		summarize 			lundish_day if treat_assign == 0	
-		estadd scalar		dep_mean = r(mean)		
-		estadd local 		cov "No", replace			
-		est					store bnump		
-	
-		reg 				lundish_day treat_assign $x_cov i.aas i.village, vce(robust) 
-		summarize 			lundish_day if treat_assign == 0	
-		estadd scalar		dep_mean = r(mean)		
-		estadd local 		cov "Yes", replace			
-		est					store bnumpc	
-	restore				
-
-* number of lunch dishes prepared for a hh in a week using OLS
- 	preserve
-		duplicates drop		hhid week, force
-		
-		reg					lundish_week treat_assign i.aas i.village, vce(robust) 
-		summarize 			lundish_week if treat_assign == 0	
-		estadd scalar		dep_mean = r(mean)		
-		estadd local 		cov "No", replace			
-		est					store bnump		
-	
-		reg 				lundish_week treat_assign $x_cov i.aas i.village, vce(robust) 
-		summarize 			lundish_week if treat_assign == 0	
-		estadd scalar		dep_mean = r(mean)		
-		estadd local 		cov "Yes", replace			
-		est					store bnumpc	
-	restore				
-		
-* number of lunch dishes prepared for a hh over the time period using OLS
- 	preserve
-		duplicates drop		hhid, force
-		
-		reg					lundish_tot treat_assign i.aas i.village, vce(robust) 
-		summarize 			lundish_tot if treat_assign == 0	
-		estadd scalar		dep_mean = r(mean)		
-		estadd local 		cov "No", replace			
-		est					store bnump		
-	
-		reg 				lundish_tot treat_assign $x_cov i.aas i.village, vce(robust) 
-		summarize 			lundish_tot if treat_assign == 0	
-		estadd scalar		dep_mean = r(mean)		
-		estadd local 		cov "Yes", replace			
-		est					store bnumpc	
-	restore			
-
-* number of dinner dishes prepared for a hh in a day using OLS
- 	preserve
-		duplicates drop		hhid week day, force
-		
-		reg					dindish_day treat_assign i.aas i.village, vce(robust) 
-		summarize 			dindish_day if treat_assign == 0	
-		estadd scalar		dep_mean = r(mean)		
-		estadd local 		cov "No", replace			
-		est					store bnump		
-	
-		reg 				dindish_day treat_assign $x_cov i.aas i.village, vce(robust) 
-		summarize 			dindish_day if treat_assign == 0	
-		estadd scalar		dep_mean = r(mean)		
-		estadd local 		cov "Yes", replace			
-		est					store bnumpc	
-	restore				
-
-* number of dinner dishes prepared for a hh in a week using OLS
- 	preserve
-		duplicates drop		hhid week, force
-		
-		reg					dindish_week treat_assign i.aas i.village, vce(robust) 
-		summarize 			dindish_week if treat_assign == 0	
-		estadd scalar		dep_mean = r(mean)		
-		estadd local 		cov "No", replace			
-		est					store bnump		
-	
-		reg 				dindish_week treat_assign $x_cov i.aas i.village, vce(robust) 
-		summarize 			dindish_week if treat_assign == 0	
-		estadd scalar		dep_mean = r(mean)		
-		estadd local 		cov "Yes", replace			
-		est					store bnumpc	
-	restore				
-		
-* number of dinner dishes prepared for a hh over the time period using OLS
- 	preserve
-		duplicates drop		hhid, force
-		
-		reg					dindish_tot treat_assign i.aas i.village, vce(robust) 
-		summarize 			dindish_tot if treat_assign == 0	
-		estadd scalar		dep_mean = r(mean)		
-		estadd local 		cov "No", replace			
-		est					store bnump		
-	
-		reg 				dindish_tot treat_assign $x_cov i.aas i.village, vce(robust) 
-		summarize 			dindish_tot if treat_assign == 0	
-		estadd scalar		dep_mean = r(mean)		
-		estadd local 		cov "Yes", replace			
-		est					store bnumpc	
+		est					store dtotIVc	
 	restore		
+	
+* table 3, Panel A: Solar stove assignment on dishes prepared
+	esttab 			ddayIV ddayIVc dweekIV dweekIVc dtotIV dtotIVc ///
+						using "$output/late_numdish.tex", b(3) se(3) replace ///
+							prehead("\begin{tabular}{l*{6}{c}} \\[-1.8ex]\hline \hline \\[-1.8ex] " ///
+							"& \multicolumn{2}{c}{Day} & \multicolumn{2}{c}{Week} & " ///
+							"\multicolumn{2}{c}{Overall} \\ \cline{2-3} " ///
+							"\cline{4-5} \cline{6-7} \\[-1.8ex] " ///	                   
+							"& \multicolumn{1}{c}{(1)} & \multicolumn{1}{c}{(2)} & \multicolumn{1}{c}{(3)} " ///
+							"& \multicolumn{1}{c}{(4)} &\multicolumn{1}{c}{(5)} & \multicolumn{1}{c}{(6)} " ///
+							"\\ \midrule " ///
+							"\multicolumn{7}{l}{\emph{Panel A: Number of Dishes Prepared}} \\ ") ///
+							drop(hh_size ai tli sex age edu cc _cons *aas *village) noobs ///
+							rename(ss_use "Solar Stove Use" share_meal "Solar Stove Use" ///
+							share_day "Solar Stove Use" share_week "Solar Stove Use" share_total "Solar Stove Use") ///
+							booktabs nonum nomtitle collabels(none) nobaselevels nogaps ///
+							fragment label stat(dep_mean N cov r2_a, labels( "Mean in Control" ///
+							"Observations" "Covariates" "Adjusted R$^2$") fmt(%4.3f %9.0fc %4.3f))
 
-				
+
 ************************************************************************
 **# 6 - # of meals skipped
 ************************************************************************		
 
-* number of breakfast skipped for a hh over the time period using OLS
+* number of meals skipped in a day using OLS
  	preserve
-		duplicates drop		hhid, force
+		duplicates drop		hhid week day, force
 		
-		reg					hhbr_skipped treat_assign i.aas i.village, vce(robust) 
-		summarize 			hhbr_skipped if treat_assign == 0	
+		ivreg2				day_skip (share_day = treat_assign) i.aas i.village, cluster (hhid)
+		summarize 			day_skip if treat_assign == 0	
 		estadd scalar		dep_mean = r(mean)		
 		estadd local 		cov "No", replace			
-		est					store bskip		
+		est					store dskipIV		
 	
-		reg 				hhbr_skipped treat_assign $x_cov i.aas i.village, vce(robust) 
-		summarize 			hhbr_skipped if treat_assign == 0	
+		ivreg2 				day_skip (share_day = treat_assign) $x_cov i.aas i.village, cluster (hhid)
+		summarize 			day_skip if treat_assign == 0	
 		estadd scalar		dep_mean = r(mean)		
 		estadd local 		cov "Yes", replace			
-		est					store bskipc	
+		est					store dskipIVc	
 	restore				
 	
-* number of lunch skipped for a hh over the time period using OLS
+* number of meals skipped in a week using OLS
  	preserve
-		duplicates drop		hhid, force
+		duplicates drop		hhid week, force
 		
-		reg					hhlun_skipped treat_assign i.aas i.village, vce(robust) 
-		summarize 			hhlun_skipped if treat_assign == 0	
+		ivreg2				week_skip (share_week = treat_assign) i.aas i.village, cluster (hhid)
+		summarize 			week_skip if treat_assign == 0	
 		estadd scalar		dep_mean = r(mean)		
 		estadd local 		cov "No", replace		
-		est					store lskip	
+		est					store wskipIV	
 		
-		reg					hhlun_skipped treat_assign $x_cov i.aas i.village, vce(robust) 
-		summarize 			hhlun_skipped if treat_assign == 0	
+		ivreg2				week_skip (share_week = treat_assign) $x_cov i.aas i.village, cluster (hhid)
+		summarize 			week_skip if treat_assign == 0	
 		estadd scalar		dep_mean = r(mean)	
 		estadd local 		cov "Yes", replace			
-		est					store lskipc	
+		est					store wskipIVc	
 	restore	
 						   	
-* number of dinner skipped for a hh over the time period using OLS
+* number of meals skipped overall using OLS
  	preserve
 		duplicates drop		hhid, force
 		
-		reg					hhdin_skipped treat_assign i.aas i.village, vce(robust)  
-		summarize 			hhdin_skipped if treat_assign == 0	
+		ivreg2				tot_skip (share_total = treat_assign) i.aas i.village, robust 
+		summarize 			tot_skip if treat_assign == 0	
 		estadd scalar		dep_mean = r(mean)		
 		estadd local 		cov "No", replace		
-		est					store dskip			
+		est					store tskipIV			
 		
-		reg					hhdin_skipped  treat_assign $x_cov i.aas i.village, vce(robust) 
-		summarize 			hhdin_skipped  if treat_assign == 0	
+		ivreg2				tot_skip  (share_total = treat_assign) $x_cov i.aas i.village, robust
+		summarize 			tot_skip  if treat_assign == 0	
 		estadd scalar		dep_mean = r(mean)		
 		estadd local 		cov "Yes", replace			
-		est					store dskipc		
+		est					store tskipIVc		
 	restore
 
-* number of all meals skipped for a hh over the time period using OLS
- 	preserve
-		duplicates drop		hhid, force	
-		
-		reg 				hhtot_skipped treat_assign i.aas i.village, vce(robust) 
-		summarize 			hhtot_skipped if treat_assign == 0	
-		estadd scalar		dep_mean = r(mean)		
-		estadd local 		cov "No", replace			
-		est					store tskip		
-		
-		reg 				hhtot_skipped treat_assign $x_cov i.aas i.village, vce(robust) 
-		summarize 			hhtot_skipped if treat_assign == 0	
-		estadd scalar		dep_mean = r(mean)
-		estadd local 		cov "Yes", replace			
-		est					store tskipc			
-	restore		
+* table 3, Panel B: Solar stove assignment on skipped meals
+	esttab 			dskipIV dskipIVc wskipIV wskipIVc tskipIV tskipIVc ///
+						using "$output/late_numdish.tex", b(3) se(3) append ///
+							prehead("\midrule \multicolumn{7}{l}{\emph{Panel B: Number of Meals Skipped}} \\ ") ///
+							drop(hh_size ai tli sex age edu cc _cons *aas *village) noobs ///
+							rename(ss_use "Solar Stove Use" share_meal "Solar Stove Use" ///
+							share_day "Solar Stove Use" share_week "Solar Stove Use" share_total "Solar Stove Use") ///
+							booktabs nonum nomtitle collabels(none) nobaselevels nogaps ///
+							fragment label stat(dep_mean N cov r2_a, labels( "Mean in Control" ///
+							"Observations" "Covariates" "Adjusted R$^2$") fmt(%4.3f %9.0fc %4.3f)) ///
+							postfoot("\hline \hline \\[-1.8ex] \multicolumn{7}{J{\linewidth}}{\small " ///
+							"\noindent \textit{Note}: Dependent variables are different measure of " ///
+							" frequency of cooking. In Panel A, we use the number of dishes cooked " ///
+							"in a meal. In Panel B, we use the number of meals skipped. " ///
+							"All regressions include two levels of strata " ///
+							"fixed effects: village and Agricultural and Aquatic Systems (AAS) group. " ///
+							"Eicker-Huber-White (EHW) robust standard errors. Standard errors are presented in " ///
+							"parentheses (*** p$<$0.001, ** p$<$0.01, * p$<$0.05).}  \end{tabular}") 
+						
+						
 
+						
+						
+************************************************************************
+**# 7 - late outcome: fuel collection
+************************************************************************
 
+* merge in 	hh_w_fuel and hh_t_fuel values
+	merge m:1  hhid week using "$ans/fuel_cleaned.dta"
+
+/* load data
+	use					"$ans/fuel_cleaned.dta", clear	
+	
+	
+	order				village village hhid aas cc hh_size ai tli sex age ///
+							edu treat_assign week */
+
+* Q: Do households assigned solar stoves spend less on fuel?
+
+************************************************************************
+**## 7.1 - late outcome: weekly fuel collection
+************************************************************************
+
+* firewood time at week-level use with and without controls using LPM	
+	ivreg2 				f_time (hh_w_fuel = treat_assign) i.aas i.village, cluster (hhid)
+	summarize 			f_time if treat_assign == 0	
+	estadd scalar		dep_mean = r(mean)		
+	estadd local 		cov "No", replace	
+	eststo 				wFTIV
+	
+	ivreg2 				f_time (hh_w_fuel = treat_assign) $x_cov i.aas i.village, cluster (hhid)
+	summarize 			f_time if treat_assign == 0	
+	estadd scalar		dep_mean = r(mean)		
+	estadd local 		cov "Yes", replace		
+	eststo 				wFTIVc	
+	
+* firewood quantity at week-level use with and without controls using LPM	
+	ivreg2 				f_quant_ub (hh_w_fuel = treat_assign) i.aas i.village, cluster (hhid)
+	summarize 			f_quant_ub if treat_assign == 0	
+	estadd scalar		dep_mean = r(mean)		
+	estadd local 		cov "No", replace	
+	eststo 				wFQIV
+	
+	ivreg2 				f_quant_ub (hh_w_fuel = treat_assign) $x_cov i.aas i.village, cluster (hhid)
+	summarize 			f_quant_ub if treat_assign == 0	
+	estadd scalar		dep_mean = r(mean)		
+	estadd local 		cov "Yes", replace		
+	eststo 				wFQIVc	
+	
+* charcoal quantity at week-level use with and without controls using LPM	
+	ivreg2 				c_quant_ub (hh_w_fuel = treat_assign) i.aas i.village, cluster (hhid)
+	summarize 			c_quant_ub if treat_assign == 0	
+	estadd scalar		dep_mean = r(mean)		
+	estadd local 		cov "No", replace	
+	eststo 				wCQIV
+	
+	ivreg2 				c_quant_ub (hh_w_fuel = treat_assign) $x_cov i.aas i.village, cluster (hhid)
+	summarize 			c_quant_ub if treat_assign == 0	
+	estadd scalar		dep_mean = r(mean)		
+	estadd local 		cov "Yes", replace		
+	eststo 				wCQIVc	
+	
+* fuel value at week-level use with and without controls using LPM	
+	ivreg2 				val_fuel_ub (hh_w_fuel = treat_assign) i.aas i.village, cluster (hhid)
+	summarize 			val_fuel_ub if treat_assign == 0	
+	estadd scalar		dep_mean = r(mean)		
+	estadd local 		cov "No", replace	
+	eststo 				wFVIV
+	
+	ivreg2 				val_fuel_ub (hh_w_fuel = treat_assign) $x_cov i.aas i.village, cluster (hhid)
+	summarize 			val_fuel_ub if treat_assign == 0	
+	estadd scalar		dep_mean = r(mean)		
+	estadd local 		cov "Yes", replace		
+	eststo 				wFVIVc	
+	
+  
+* table 4, Panel A: Solar stove assignment on weekly fuel outcomes
+	esttab 			wFTIV wFTIVc wFQIV wFQIVc wCQIV wCQIVc wFVIV wFVIVc ///
+						using "$output/fuel_late.tex", b(2) se(2) replace ///
+							prehead("\begin{tabular}{l*{8}{c}} \\[-1.8ex]\hline \hline \\[-1.8ex] " ///
+							"& \multicolumn{2}{c}{Firewood} & \multicolumn{2}{c}{Firewood} " ///
+							"& \multicolumn{2}{c}{Charcoal} & \multicolumn{2}{c}{Fuel} \\ " ///
+							"& \multicolumn{2}{c}{Time (min)} & \multicolumn{2}{c}{Quantity (kg)} " ///
+							"& \multicolumn{2}{c}{Quantity (kg)} & \multicolumn{2}{c}{Value (USD)} \\ " ///
+							"\cline{2-3} \cline{4-5} \cline{6-7} \cline{8-9} \\[-1.8ex] " ///	                   
+							"& \multicolumn{1}{c}{(1)} & \multicolumn{1}{c}{(2)} & \multicolumn{1}{c}{(3)} " ///
+							"& \multicolumn{1}{c}{(4)} &\multicolumn{1}{c}{(5)} & \multicolumn{1}{c}{(6)} " ///
+							"& \multicolumn{1}{c}{(7)} & \multicolumn{1}{c}{(8)}  \\ \midrule " ///
+							"\multicolumn{9}{l}{\emph{Panel A: Weekly Fuel Outcomes}} \\ ") ///
+							drop(hh_size ai tli sex age edu cc _cons *aas *village) noobs ///
+							rename(ss_use "Solar Stove Use" share_meal "Solar Stove Use" ///
+							share_day "Solar Stove Use" share_week "Solar Stove Use" share_total "Solar Stove Use") ///
+					
+							booktabs nonum nomtitle collabels(none) nobaselevels nogaps ///
+							fragment label stat(dep_mean N cov r2_a, labels( "Mean in Control" ///
+							"Observations" "Covariates" "Adjusted R$^2$") fmt(%4.3f %9.0fc %4.3f)) 
+							
+
+************************************************************************
+**## 7.2 - late outcome: total fuel collection
+************************************************************************
+
+collapse 				(sum) f_time f_quant_ub c_quant_ub val_fuel_ub ///
+						(mean) cc, ///
+							by(village hhid aas hh_size ai tli sex age edu treat_assign)
+
+* firewood time at overall use with and without controls using LPM	
+	ivreg2 				f_time (hh_t_fuel = treat_assign) i.aas i.village, robust
+	summarize 			f_time if treat_assign == 0	
+	estadd scalar		dep_mean = r(mean)		
+	estadd local 		cov "No", replace	
+	eststo 				tFTIV
+	
+	ivreg2 				f_time (hh_t_fuel = treat_assign) $x_cov i.aas i.village, robust
+	summarize 			f_time if treat_assign == 0	
+	estadd scalar		dep_mean = r(mean)		
+	estadd local 		cov "Yes", replace		
+	eststo 				tFTIVc	
+	
+* firewood quantity at overall use with and without controls using LPM	
+	ivreg2 				f_quant_ub (hh_t_fuel = treat_assign) i.aas i.village, robust
+	summarize 			f_quant_ub if treat_assign == 0	
+	estadd scalar		dep_mean = r(mean)		
+	estadd local 		cov "No", replace	
+	eststo 				tFQIV
+	
+	ivreg2 				f_quant_ub (hh_t_fuel = treat_assign) $x_cov i.aas i.village, robust
+	summarize 			f_quant_ub if treat_assign == 0	
+	estadd scalar		dep_mean = r(mean)		
+	estadd local 		cov "Yes", replace		
+	eststo 				tFQIVc	
+	
+* charcoal quantity at overall use with and without controls using LPM	
+	ivreg2 				c_quant_ub (hh_t_fuel = treat_assign) i.aas i.village, robust
+	summarize 			c_quant_ub if treat_assign == 0	
+	estadd scalar		dep_mean = r(mean)		
+	estadd local 		cov "No", replace	
+	eststo 				tCQIV
+	
+	ivreg2 				c_quant_ub (hh_t_fuel = treat_assign) $x_cov i.aas i.village, robust
+	summarize 			c_quant_ub if treat_assign == 0	
+	estadd scalar		dep_mean = r(mean)		
+	estadd local 		cov "Yes", replace		
+	eststo 				tCQIVc	
+	
+* fuel value at overall use with and without controls using LPM	
+	ivreg2 				val_fuel_ub (hh_t_fuel = treat_assign) i.aas i.village, robust
+	summarize 			val_fuel_ub if treat_assign == 0	
+	estadd scalar		dep_mean = r(mean)		
+	estadd local 		cov "No", replace	
+	eststo 				tFVIV
+	
+	ivreg2 				val_fuel_ub (hh_t_fuel = treat_assign) $x_cov i.aas i.village, robust
+	summarize 			val_fuel_ub if treat_assign == 0	
+	estadd scalar		dep_mean = r(mean)		
+	estadd local 		cov "Yes", replace		
+	eststo 				tFVIVc	
+	
+
+* table 4, Panel B: Solar stove assignment on overall fuel
+	esttab 			tFTIV tFTIVc tFQIV tFQIVc tCQIV tCQIVc tFVIV tFVIVc ///
+						using "$output/fuel_late.tex", b(2) se(2) append ///
+							prehead("\midrule \multicolumn{9}{l}{\emph{Panel B: Overall Fuel Outcomes}} \\ ") ///
+							drop(hh_size ai tli sex age edu cc _cons *aas *village) noobs ///
+							rename(ss_use "Solar Stove Use" share_meal "Solar Stove Use" ///
+							share_day "Solar Stove Use" share_week "Solar Stove Use" share_total "Solar Stove Use") ///	
+							booktabs nonum nomtitle collabels(none) nobaselevels nogaps ///
+							fragment label stat(dep_mean N cov r2_a, labels( "Mean in Control" ///
+							"Observations" "Covariates" "Adjusted R$^2$") fmt(%4.3f %9.0fc %4.3f)) ///
+							postfoot("\hline \hline \\[-1.8ex] \multicolumn{9}{J{\linewidth}}{\small " ///
+							"\noindent \textit{Note}: Dependent variables are different measure of " ///
+							" fuel collection at different levels of aggregation. " ///
+							"In Panel A, we use values measured each week " ///
+							"In Panel B, we sum weekly values to the overall six week total. " ///
+							"All regressions include two levels of strata " ///
+							"fixed effects: village and Agricultural and Aquatic Systems (AAS) group. " ///
+							"Eicker-Huber-White (EHW) robust standard errors. Standard errors are presented in " ///
+							"parentheses (*** p$<$0.001, ** p$<$0.01, * p$<$0.05).}  \end{tabular}") 
+						
+
+						
 * close the log
 	log				close
 	
