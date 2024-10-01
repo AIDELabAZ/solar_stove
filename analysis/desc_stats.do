@@ -127,17 +127,16 @@
 						prehead("\begin{tabular}{l*{3}{c}} \\ [-1.8ex]\hline \hline \\[-1.8ex] ") ///
 						main(mean) aux(sd) label  mlabels("Day" "Week" "Total") collabels(,none) ///
 						nomtitle nonumber fragment nogap noobs  ///
-						rename(hhbrdish_tot "Dishes per Meal" hhlundish_tot "Dishes per Meal" ///
-						hhdindish_tot "Dishes per Meal" hhdish_tot "Dishes per Meal" ///
-						hhbr_skipped "Meals Skipped" hhlun_skipped "Meals Skipped" ///
-						hhdin_skipped "Meals Skipped" hhtot_skipped "Meals Skipped" ) ///
+						rename(dish_day "Dishes per Meal" dish_week "Dishes per Meal" ///
+						dish_tot "Dishes per Meal" day_skip "Meals Skipped" ///
+						week_skip "Meals Skipped" tot_skip "Meals Skipped") ///
 						postfoot("\midrule \multicolumn{1}{l}{Total} &  6,013 & 912 & " ///
 							" 156 \\ " "\hline \hline \\[-1.8ex] " ///
 							"\multicolumn{4}{J{\linewidth}}{\small " ///
 							"\noindent \textit{Note}: The table displays means and standard deviations, " ///
 							"in parentheses, for dishes per meal and meals skipped.}  \end{tabular}") 	
 		
-		
+		fdsfs
 ************************************************************************
 **## 1.3 - fuel outcomes
 ************************************************************************
