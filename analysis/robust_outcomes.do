@@ -781,17 +781,19 @@ reg ingred_day day_count $$x_cov, vce(cluster hhid)
 							"Eicker-Huber-White (EHW) robust standard errors. Standard errors are presented in " ///
 							"parentheses (*** p$<$0.001, ** p$<$0.01, * p$<$0.05).}  \end{tabular}") 
 						
-						
-
-						
-						
+							
 ************************************************************************
 **# 7 - late outcome: fuel collection
 ************************************************************************
 
-* merge in 	hh_w_fuel and hh_t_fuel values
-	merge m:1  hhid week using "$ans/fuel_cleaned.dta"
+* collapse to week
+duplicates drop		hhid week, force
 
+* merge in 	hh_w_fuel and hh_t_fuel values
+	merge 1:1  		hhid week using "$ans/fuel_cleaned.dta"
+
+	keep if			_merge == 3
+	
 /* load data
 	use					"$ans/fuel_cleaned.dta", clear	
 	
@@ -806,7 +808,7 @@ reg ingred_day day_count $$x_cov, vce(cluster hhid)
 ************************************************************************
 
 * firewood time at week-level use with and without controls using LPM	
-	ivreg2 				f_time (hh_w_fuel = treat_assign) i.aas i.village, cluster (hhid)
+	ivreg2 				f_time (share_week = treat_assign) i.aas i.village, cluster (hhid)
 	summarize 			f_time if treat_assign == 0	
 	estadd scalar		dep_mean = r(mean)		
 	estadd local 		cov "No", replace	
@@ -874,7 +876,6 @@ reg ingred_day day_count $$x_cov, vce(cluster hhid)
 							drop(hh_size ai tli sex age edu cc _cons *aas *village) noobs ///
 							rename(ss_use "Solar Stove Use" share_meal "Solar Stove Use" ///
 							share_day "Solar Stove Use" share_week "Solar Stove Use" share_total "Solar Stove Use") ///
-					
 							booktabs nonum nomtitle collabels(none) nobaselevels nogaps ///
 							fragment label stat(dep_mean N cov r2_a, labels( "Mean in Control" ///
 							"Observations" "Covariates" "Adjusted R$^2$") fmt(%4.3f %9.0fc %4.3f)) 
@@ -886,10 +887,10 @@ reg ingred_day day_count $$x_cov, vce(cluster hhid)
 
 collapse 				(sum) f_time f_quant_ub c_quant_ub val_fuel_ub ///
 						(mean) cc, ///
-							by(village hhid aas hh_size ai tli sex age edu treat_assign)
+							by(share_total village hhid aas hh_size ai tli sex age edu treat_assign)
 
 * firewood time at overall use with and without controls using LPM	
-	ivreg2 				f_time (hh_t_fuel = treat_assign) i.aas i.village, robust
+	ivreg2 				f_time (share_total = treat_assign) i.aas i.village, robust
 	summarize 			f_time if treat_assign == 0	
 	estadd scalar		dep_mean = r(mean)		
 	estadd local 		cov "No", replace	
