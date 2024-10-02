@@ -1,4 +1,4 @@
-# solar_stove
+# Food Without Fire: Nutritional and Environmental Impacts from a Solar Stove Field Experiment
 Code for solar stove RCT project
  ## Index
 
