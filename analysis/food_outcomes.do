@@ -245,7 +245,7 @@
 							"& \multicolumn{1}{c}{(4)} &\multicolumn{1}{c}{(5)} & \multicolumn{1}{c}{(6)} " ///
 							"& \multicolumn{1}{c}{(7)} & \multicolumn{1}{c}{(8)} & \multicolumn{1}{c}{(9)} " ///
 							"& \multicolumn{1}{c}{(10)} \\ \midrule " ///
-							"\multicolumn{11}{l}{\emph{Panel A: Dietary Diversity Score}} \\ ") ///
+							"\multicolumn{11}{l}{\emph{Panel A: Household Dietary Diversity Score}} \\ ") ///
 							keep(treat_assign) noobs ///
 							booktabs nonum nomtitle collabels(none) nobaselevels nogaps ///
 							fragment label stat(dep_mean N cov r2_a, labels( "Mean in Control" ///
@@ -341,7 +341,7 @@
 * table 2, Panel B: Solar stove assignment on SR
 	esttab 			dSR dSRc mSR mSRc daSR daSRc wSR wSRc tSR tSRc ///
 						using "$output/diverse_out.tex", b(3) se(3) append ///
-							prehead("\midrule \multicolumn{11}{l}{\emph{Panel B: Species Richness}} \\ ") ///
+							prehead("\midrule \multicolumn{11}{l}{\emph{Panel B: Dietary Species Richness}} \\ ") ///
 							keep(treat_assign) noobs ///
 							booktabs nonum nomtitle collabels(none) nobaselevels nogaps ///
 							fragment label stat(dep_mean N cov r2_a, labels( "Mean in Control" ///

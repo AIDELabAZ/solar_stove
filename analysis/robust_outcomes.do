@@ -201,7 +201,7 @@
 							"& \multicolumn{1}{c}{(4)} &\multicolumn{1}{c}{(5)} & \multicolumn{1}{c}{(6)} " ///
 							"& \multicolumn{1}{c}{(7)} & \multicolumn{1}{c}{(8)} & \multicolumn{1}{c}{(9)} " ///
 							"& \multicolumn{1}{c}{(10)} \\ \midrule " ///
-							"\multicolumn{11}{l}{\emph{Panel A: Dietary Diversity Score}} \\ ") ///
+							"\multicolumn{11}{l}{\emph{Panel A: Household Dietary Diversity Score}} \\ ") ///
 							drop(hh_size ai tli sex age edu cc _cons *aas *village) noobs ///
 							rename(ss_use "Solar Stove Use" share_meal "Solar Stove Use" ///
 							share_day "Solar Stove Use" share_week "Solar Stove Use" share_total "Solar Stove Use") ///
@@ -297,7 +297,7 @@
 * table C1 Panel B: Solar stove use on species richness 
 	esttab 			dsrIVo dsrIVoc msrIVo msrIVoc dasrIVo dasrIVoc wsrIVo wsrIVoc tsrIVo tsrIVoc ///
 						using "$output/late_out.tex", b(3) se(3) append ///
-							prehead("\midrule \multicolumn{11}{l}{\emph{Panel B: Species Richness}} \\ ") ///
+							prehead("\midrule \multicolumn{11}{l}{\emph{Panel B: Dietary Species Richness}} \\ ") ///
 							drop(hh_size ai tli sex age edu cc _cons *aas *village) noobs ///
 							rename(ss_use "Solar Stove Use" share_meal "Solar Stove Use" ///
 							share_day "Solar Stove Use" share_week "Solar Stove Use" share_total "Solar Stove Use") ///
