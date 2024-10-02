@@ -136,7 +136,6 @@
 							"\noindent \textit{Note}: The table displays means and standard deviations, " ///
 							"in parentheses, for dishes per meal and meals skipped.}  \end{tabular}") 	
 		
-		fdsfs
 ************************************************************************
 **## 1.3 - fuel outcomes
 ************************************************************************
