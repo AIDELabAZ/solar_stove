@@ -130,7 +130,7 @@
 							"Covariates" "Adjusted R$^2$") fmt(%9.0fc %4.3f)) ///
 							postfoot("\hline \hline \\[-1.8ex] \multicolumn{11}{J{\linewidth}}{\small " ///
 							"\noindent \textit{Note}: Dependent variable is the number of dishes, or " ///
-							"the share of dishes in a gven meal, day, week, etc., for which a " ///
+							"the share of dishes in a given meal, day, week, etc., for which a " ///
 							"solar stove was used. All regressions include two levels of strata " ///
 							"fixed effects: village and Agricultural and Aquatic Systems (AAS) group. " ///
 							"For regressions with more than one observation per houhold (columns 1-8), " ///
@@ -448,8 +448,8 @@
 							" household dietary composition. In Panel A, we use dietary diversity " ///
 							"score. In Panel B, we use species richness. In Panel C, we calculate " ///
 							"the number of times legumes are eaten. All regressions include two levels of strata " ///
-							"fixed effects: village and Agricultural and Aquatic Systems (AAS) group. " ///
-							"For regressions with more than one observation per houhold (columns 1-8), " ///
+							"fixed effects: village and nutrition sensitive landscapes (NSL) group. " ///
+							"For regressions with more than one observation per household (columns 1-8), " ///
 							"we calculate Liang-Zeger cluster-robust standard errors since the unit " ///
 							"of randomization is the household. For regressions with only one " ///
 							"observation per household (columns 9-10), we calculate Eicker-Huber-White " ///
@@ -604,7 +604,7 @@
 							" frequency of cooking. In Panel A, we use the number of dishes cooked " ///
 							"in a meal. In Panel B, we use the number of meals skipped. " ///
 							"All regressions include two levels of strata " ///
-							"fixed effects: village and Agricultural and Aquatic Systems (AAS) group. " ///
+							"fixed effects: village and nutrition sensitive landscapes (NSL) group. " ///
 							"Eicker-Huber-White (EHW) robust standard errors. Standard errors are presented in " ///
 							"parentheses (*** p$<$0.001, ** p$<$0.01, * p$<$0.05).}  \end{tabular}") 
 						

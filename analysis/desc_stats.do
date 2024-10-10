@@ -225,7 +225,7 @@
 		est store 			group_t	
 		
 		esttab 			 group_t using "$output/descriptive/catvars_tab.tex", append booktabs ///
-							posthead("\multicolumn{3}{l}{\emph{AAS Group}} \\ ") ///
+							posthead("\multicolumn{3}{l}{\emph{NSL Group}} \\ ") ///
 							cells("b( fmt(%9.0gc)) pct( fmt(2))") ///
 							nonumber nomtitle fragment nomtitles noobs mlabels(,none) collabels(,none)
 							

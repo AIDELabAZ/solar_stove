@@ -207,7 +207,7 @@ collapse 				(sum) f_time f_quant_ub c_quant_ub val_fuel_ub ///
 							"In Panel A, we use values measured each week " ///
 							"In Panel B, we sum weekly values to the overall six week total. " ///
 							"All regressions include two levels of strata " ///
-							"fixed effects: village and Agricultural and Aquatic Systems (AAS) group. " ///
+							"fixed effects: village and nutrition sensitive landscapes (NSL) group. " ///
 							"Eicker-Huber-White (EHW) robust standard errors. Standard errors are presented in " ///
 							"parentheses (*** p$<$0.001, ** p$<$0.01, * p$<$0.05).}  \end{tabular}") 
 						
