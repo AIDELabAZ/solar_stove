@@ -143,6 +143,7 @@
 	replace			fg = 5 if fg == 3 | fg == 4
 	replace			fg = 7 if fg == 6
 	replace			fg = 9 if fg == 8
+	replace			fg = 12 if fg == 19
 	replace			fg = 15 if fg == 17
 	replace			fg = 16 if fg == 18
 	lab define 		foodgroup 0 "None" 1 "Cereals" 2 "Tubers" 3 "Vitamin-A Vegetables" ///

@@ -33,10 +33,10 @@ all_villages_ing_dish_meals_l_fg<-read.csv(here("anonymized_source_files","all_v
   mutate(hdds=if_else(hdds==""|hdds=="na", NA, hdds),
          #hdds= 1.cereals, 2.eggs,	3.fish and other seafood,	4.fruits, 5.hdds	legumes, nuts and seeds, 6.	meat, 7.milk and milk products, 8.oils and fats	spices, 9.condiments and beverages, 10.sweets, 11.vegetables, 12.white tubers and roots
  
-         wdds=if_else(wdds==""|wdds=="na", NA, wdds),
+         wdds=if_else(wdds==""|wdds=="na", NA, wdds))
           #wdds= 1.dark green leafy vegetables, 2.eggs, 3.legumes, nuts and seeds, 4.meat, insects and fish, 5.milk and milk products, 6.organ meat, 7.other fruits and vegetables, 8.other vitamin a rich fruits and vegetables, 9.starchy staples
 
-         zfbdrfg=if_else(zfbdrfg==""|zfbdrfg=="na", NA, zfbdrfg))
+       #  zfbdrfg=if_else(zfbdrfg==""|zfbdrfg=="na", NA, zfbdrfg))
           #zfbdrfg= 1.Cereals, starchy roots and tubers, 2. vegetables, 3. frits, 4. fish, insects, and animal source foods, 5. dairy, 6. legumes, pulses and nuts
 main_hh_covariates<-read.csv(here("anonymized_source_files", "main_hh_covariates.csv"))
 

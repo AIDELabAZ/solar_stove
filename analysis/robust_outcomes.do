@@ -15,7 +15,7 @@
 	* estout
 
 * to do:
-	* everything
+	* done
 
 ***********************************************************************
 **# 0 - setup
@@ -206,7 +206,7 @@
 							rename(ss_use "Solar Stove Use" share_meal "Solar Stove Use" ///
 							share_day "Solar Stove Use" share_week "Solar Stove Use" share_total "Solar Stove Use") ///
 							booktabs nonum nomtitle collabels(none) nobaselevels nogaps ///
-							fragment label stat(dep_mean N cov r2_a, labels( "Mean in Control" ///
+							fragment label stat(dep_mean N cov r2, labels( "Mean in Control" ///
 							"Observations" "Covariates" "Adjusted R$^2$") fmt(%4.3f %9.0fc %4.3f))
 							
 							
@@ -302,7 +302,7 @@
 							rename(ss_use "Solar Stove Use" share_meal "Solar Stove Use" ///
 							share_day "Solar Stove Use" share_week "Solar Stove Use" share_total "Solar Stove Use") ///
 							booktabs nonum nomtitle collabels(none) nobaselevels nogaps ///
-							fragment label stat(dep_mean N cov r2_a, labels( "Mean in Control" ///
+							fragment label stat(dep_mean N cov r2, labels( "Mean in Control" ///
 							"Observations" "Covariates" "Adjusted R$^2$") fmt(%4.3f %9.0fc %4.3f)) 
 
 
@@ -400,7 +400,7 @@
 							rename(ss_use "Solar Stove Use" share_meal "Solar Stove Use" ///
 							share_day "Solar Stove Use" share_week "Solar Stove Use" share_total "Solar Stove Use") ///							
 							booktabs nonum nomtitle collabels(none) nobaselevels nogaps ///
-							fragment label stat(dep_mean N cov r2_a, labels( "Mean in Control" ///
+							fragment label stat(dep_mean N cov r2, labels( "Mean in Control" ///
 							"Observations" "Covariates" "Adjusted R$^2$") fmt(%4.3f %9.0fc %4.3f)) ///
 							postfoot("\hline \hline \\[-1.8ex] \multicolumn{11}{J{\linewidth}}{\small " ///
 							"\noindent \textit{Note}: Dependent variables are different measure of " ///
@@ -491,7 +491,7 @@
 							rename(ss_use "Solar Stove Use" share_meal "Solar Stove Use" ///
 							share_day "Solar Stove Use" share_week "Solar Stove Use" share_total "Solar Stove Use") ///
 							booktabs nonum nomtitle collabels(none) nobaselevels nogaps ///
-							fragment label stat(dep_mean N cov r2_a, labels( "Mean in Control" ///
+							fragment label stat(dep_mean N cov r2, labels( "Mean in Control" ///
 							"Observations" "Covariates" "Adjusted R$^2$") fmt(%4.3f %9.0fc %4.3f))
 
 
@@ -558,7 +558,7 @@
 							rename(ss_use "Solar Stove Use" share_meal "Solar Stove Use" ///
 							share_day "Solar Stove Use" share_week "Solar Stove Use" share_total "Solar Stove Use") ///
 							booktabs nonum nomtitle collabels(none) nobaselevels nogaps ///
-							fragment label stat(dep_mean N cov r2_a, labels( "Mean in Control" ///
+							fragment label stat(dep_mean N cov r2, labels( "Mean in Control" ///
 							"Observations" "Covariates" "Adjusted R$^2$") fmt(%4.3f %9.0fc %4.3f)) ///
 							postfoot("\hline \hline \\[-1.8ex] \multicolumn{7}{J{\linewidth}}{\small " ///
 							"\noindent \textit{Note}: Dependent variables are different measure of " ///
@@ -664,7 +664,7 @@
 							drop(hh_size ai tli sex age edu cc _cons *aas *village) noobs ///
 							rename(ss_use "Solar Stove Use" share_week "Solar Stove Use")  ///
 							booktabs nonum nomtitle collabels(none) nobaselevels nogaps ///
-							fragment label stat(dep_mean N cov r2_a, labels( "Mean in Control" ///
+							fragment label stat(dep_mean N cov r2, labels( "Mean in Control" ///
 							"Observations" "Covariates" "Adjusted R$^2$") fmt(%4.3f %9.0fc %4.3f)) 
 							
 
@@ -736,7 +736,7 @@
 							drop(hh_size ai tli sex age edu cc _cons *aas *village) noobs ///
 							rename(ss_use "Solar Stove Use" share_total "Solar Stove Use")  ///
 							booktabs nonum nomtitle collabels(none) nobaselevels nogaps ///
-							fragment label stat(dep_mean N cov r2_a, labels( "Mean in Control" ///
+							fragment label stat(dep_mean N cov r2, labels( "Mean in Control" ///
 							"Observations" "Covariates" "Adjusted R$^2$") fmt(%4.3f %9.0fc %4.3f)) ///
 							postfoot("\hline \hline \\[-1.8ex] \multicolumn{9}{J{\linewidth}}{\small " ///
 							"\noindent \textit{Note}: Dependent variables are different measure of " ///
@@ -747,218 +747,6 @@
 							"fixed effects: village and nutrition sensitive landscapes (NSL) group. " ///
 							"Eicker-Huber-White (EHW) robust standard errors. Standard errors are presented in " ///
 							"parentheses (*** p$<$0.001, ** p$<$0.01, * p$<$0.05).}  \end{tabular}") 
-						
-
-						
-				
-************************************************************************
-************************************************************************
-
-* Q: Do households with solar stoves change the composition of their diet?
-		
-************************************************************************
-************************************************************************
-
-/* late hdds dish (avg) outcomes with and without controls using OLS
-		ivreg2 				hdds_avg_dish (ss_use = treat_assign) i.aas i.village, cluster (hhid)
-		summarize 			hdds_avg_dish if treat_assign == 0		
-		estadd scalar		dep_mean = r(mean)		
-		estadd local 		cov "No", replace			
-		eststo				dHDDSmIVo	
-		
-		ivreg2 				hdds_avg_dish (ss_use = treat_assign) $x_cov i.aas i.village, cluster (hhid)
-		summarize 			hdds_avg_dish if treat_assign == 0		
-		estadd scalar		dep_mean = r(mean)	
-		estadd local 		cov "Yes", replace			
-		eststo				dHDDSmIVoc	
-	
-	
-* late hdds (avg) meal outcomes with and without controls using OLS
-	preserve
-		duplicates drop		hhid week day meal, force	
-		
-		ivreg2 				hdds_avg_meal (share_meal = treat_assign) i.aas i.village, cluster (hhid) 
-		summarize 			hdds_avg_meal if treat_assign == 0		
-		estadd scalar		dep_mean = r(mean)
-		estadd local 		cov "No", replace			
-		eststo 				mHDDSmIVo	
-		
-		ivreg2				hdds_avg_meal (share_meal = treat_assign) $x_cov i.aas i.village, cluster (hhid) 
-		summarize 			hdds_avg_meal if treat_assign == 0		
-		estadd scalar		dep_mean = r(mean)	
-		estadd local 		cov "Yes", replace			
-		eststo 				mHDDSmIVoc	
-	restore
-	
-* late hdds (avg) day outcomes with and without controls using OLS
-	preserve
-		duplicates drop		hhid week day, force	
-		ivreg2				hdds_avg_day (share_day = treat_assign) i.aas i.village, cluster (hhid) 
-		summarize 			hdds_avg_day if treat_assign == 0		
-		estadd scalar		dep_mean = r(mean)	
-		estadd local 		cov "No", replace			
-		eststo 				daHDDSmIVo	
-		
-		ivreg2				hdds_avg_day (share_day = treat_assign) $x_cov i.aas i.village, cluster (hhid) 
-		summarize 			hdds_avg_day if  treat_assign == 0		
-		estadd scalar		dep_mean = r(mean)			
-		estadd local 		cov "Yes", replace			
-		eststo 				daHDDSmIVoc	
-	restore
-	
-* late hdds (avg) week outcomes with and without controls using OLS	
-	preserve
-		duplicates drop		hhid week, force	
-		ivreg2				hdds_avg_week (share_week = treat_assign) i.aas i.village, cluster (hhid) 
-		summarize 			hdds_avg_week if  treat_assign == 0		
-		estadd scalar		dep_mean = r(mean)		
-		estadd local 		cov "No", replace			
-		eststo 				wHDDSmIVo
-		
-		ivreg2				hdds_avg_week (share_week = treat_assign) $x_cov i.aas i.village, cluster (hhid)  
-		summarize 			hdds_avg_week if  treat_assign == 0		
-		estadd scalar		dep_mean = r(mean)		
-		estadd local 		cov "Yes", replace			
-		eststo 				wHDDSmIVoc	
-	restore 
-
-* final hdds (avg) overall outcomes with and without controls using OLS **** LEM
-	preserve
-		duplicates drop		hhid, force	
-		ivreg2				hdds_total (share_total = treat_assign) i.aas i.village, robust
-		summarize 			hdds_total if  treat_assign == 0		
-		estadd scalar		dep_mean = r(mean)
-		estadd local 		cov "No", replace				
-		eststo 				tHDDSIVo	
-		
-		ivreg2				hdds_total (share_total = treat_assign) $x_cov i.aas i.village, robust
-		summarize 			hdds_total if  treat_assign == 0		
-		estadd scalar		dep_mean = r(mean)	
-		estadd local 		cov "Yes", replace				
-		eststo 				tHDDSIVoc	
-	restore
-	
-* table: panel a IV HDDS (avg) ols
-	esttab dHDDSmIVo dHDDSmIVoc mHDDSmIVo mHDDSmIVoc daHDDSmIVo daHDDSmIVoc wHDDSmIVo wHDDSmIVoc tHDDSIVo tHDDSIVoc ///
-							using "$output/late_out.tex", b(3) se(3) replace ///
-							prehead("\begin{tabular}{l*{10}{c}} \\[-1.8ex]\hline \hline \\[-1.8ex] " ///
-							"& \multicolumn{2}{c}{Dish} & \multicolumn{2}{c}{Meal} & \multicolumn{2}{c}{Day} " ///
-							"& \multicolumn{2}{c}{Week} & \multicolumn{2}{c}{Overall} \\ \cline{2-3} " ///
-							"\cline{4-5} \cline{6-7} \cline{8-9} \cline{10-11} \\[-1.8ex] " ///	                   
-							"& \multicolumn{1}{c}{(1)} & \multicolumn{1}{c}{(2)} & \multicolumn{1}{c}{(3)} " ///
-							"& \multicolumn{1}{c}{(4)} &\multicolumn{1}{c}{(5)} & \multicolumn{1}{c}{(6)} " ///
-							"& \multicolumn{1}{c}{(7)} & \multicolumn{1}{c}{(8)} & \multicolumn{1}{c}{(9)} " ///
-							"& \multicolumn{1}{c}{(10)} \\ \midrule " ///
-							"\multicolumn{11}{l}{\emph{Panel A: Dietary Diversity Score (Average)}} \\ ") ///
-							drop(hh_size ai tli sex age edu cc _cons *aas *village) noobs ///
-							rename(ss_use "Solar Stove Use" share_meal "Solar Stove Use" ///
-							share_day "Solar Stove Use" share_week "Solar Stove Use" share_total "Solar Stove Use") ///
-							booktabs nonum nomtitle collabels(none) nobaselevels nogaps ///
-							fragment label stat(dep_mean N cov r2_a, labels( "Mean in Control" ///
-							"Observations" "Covariates" "Adjusted R$^2$") fmt(%4.3f %9.0fc %4.3f))
-							
-
-************************************************************************
-**## 4.2 - species richness (avg)
-************************************************************************
-
-* (i) Regress sr for a dish on treatment assignment
-	* LATE sr dish (avg) outcomes with and without controls using OLS
-		ivreg2 				sr_avg_dish (ss_use = treat_assign) i.aas i.village, cluster (hhid)
-		summarize 			sr_avg_dish if treat_assign == 0		
-		estadd scalar		dep_mean = r(mean)		
-		estadd local 		cov "No", replace			
-		eststo				dsrmIVo	
-		
-		ivreg2 				sr_avg_dish (ss_use = treat_assign) $x_cov i.aas i.village, cluster (hhid)
-		summarize 			sr_avg_dish if treat_assign == 0		
-		estadd scalar		dep_mean = r(mean)	
-		estadd local 		cov "Yes", replace			
-		eststo				dsrmIVoc	
-	
-	
-* (ii) Regress sr for a meal on treatment assignment
-	* LATE sr meal (avg) outcomes with and without controls using OLS
-	preserve
-		duplicates drop		hhid week day meal, force	
-		
-		ivreg2 				sr_avg_meal (share_meal = treat_assign) i.aas i.village, cluster (hhid) 
-		summarize 			sr_avg_meal if treat_assign == 0		
-		estadd scalar		dep_mean = r(mean)
-		estadd local 		cov "No", replace			
-		eststo 				msrmIVo	
-		
-		ivreg2				sr_avg_meal (share_meal = treat_assign) $x_cov i.aas i.village, cluster (hhid) 
-		summarize 			sr_avg_meal if treat_assign == 0		
-		estadd scalar		dep_mean = r(mean)	
-		estadd local 		cov "Yes", replace			
-		eststo 				msrmIVoc	
-	restore
-	
-	* LATE sr day (avg) outcomes with and without controls using OLS
-	preserve
-		duplicates drop		hhid week day, force	
-		ivreg2				sr_avg_day (share_day = treat_assign) i.aas i.village, cluster (hhid) 
-		summarize 			sr_avg_day if treat_assign == 0		
-		estadd scalar		dep_mean = r(mean)	
-		estadd local 		cov "No", replace			
-		eststo 				dasrmIVo	
-		
-		ivreg2				sr_avg_day (share_day = treat_assign) $x_cov i.aas i.village, cluster (hhid) 
-		summarize 			sr_avg_day if  treat_assign == 0		
-		estadd scalar		dep_mean = r(mean)			
-		estadd local 		cov "Yes", replace			
-		eststo 				dasrmIVoc	
-	restore
-	
-* (iv) Regress hhds for a week on treatment assignment
-	* LATE sr week (avg) outcomes with and without controls using OLS	
-	preserve
-		duplicates drop		hhid week, force	
-		ivreg2				sr_avg_week (share_week = treat_assign) i.aas i.village, cluster (hhid) 
-		summarize 			sr_avg_week if  treat_assign == 0		
-		estadd scalar		dep_mean = r(mean)		
-		estadd local 		cov "No", replace			
-		eststo 				wsrmIVo
-		
-		ivreg2				sr_avg_week (share_week = treat_assign) $x_cov i.aas i.village, cluster (hhid)  
-		summarize 			sr_avg_week if  treat_assign == 0		
-		estadd scalar		dep_mean = r(mean)		
-		estadd local 		cov "Yes", replace			
-		eststo 				wsrmIVoc	
-	restore 
-
-* (v) Regress hhds for overall (6 week) on treatment assignment
-	* LATE sr overall outcomes with and without controls using OLS *** LEM
-	preserve
-		duplicates drop		hhid, force	
-		ivreg2				sr_total (share_total = treat_assign) i.aas i.village, robust
-		summarize 			sr_total if  treat_assign == 0		
-		estadd scalar		dep_mean = r(mean)
-		estadd local 		cov "No", replace				
-		eststo 				tsrIVo	
-		
-		ivreg2				sr_total (share_total = treat_assign) $x_cov i.aas i.village, robust
-		summarize 			sr_total if  treat_assign == 0		
-		estadd scalar		dep_mean = r(mean)	
-		estadd local 		cov "Yes", replace				
-		eststo 				tsrIVoc	
-	restore
-								
-							
-* table 2, Panel B: Solar stove assignment on SR
-	esttab 			dsrmIVo dsrmIVoc msrmIVo msrmIVoc dasrmIVo dasrmIVoc wsrmIVo wsrmIVoc tsrIVo tsrIVoc ///
-						using "$output/late_out.tex", b(3) se(3) append ///
-							prehead("\midrule \multicolumn{11}{l}{\emph{Panel B: Species Richness (Average)}} \\ ") ///
-							drop(hh_size ai tli sex age edu cc _cons *aas *village) noobs ///
-							rename(ss_use "Solar Stove Use" share_meal "Solar Stove Use" ///
-							share_day "Solar Stove Use" share_week "Solar Stove Use" share_total "Solar Stove Use") ///
-							booktabs nonum nomtitle collabels(none) nobaselevels nogaps ///
-							fragment label stat(dep_mean N cov r2_a, labels( "Mean in Control" ///
-							"Observations" "Covariates" "Adjusted R$^2$") fmt(%4.3f %9.0fc %4.3f)) 
-							
-			*/										
-						
 						
 						
 * close the log

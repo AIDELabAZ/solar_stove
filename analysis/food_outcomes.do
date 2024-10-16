@@ -126,7 +126,7 @@
 							"& \multicolumn{1}{c}{(7)} & \multicolumn{1}{c}{(8)} & \multicolumn{1}{c}{(9)} " ///
 							"& \multicolumn{1}{c}{(10)} \\ \midrule")  keep(treat_assign) noobs ///
 							booktabs nonum nomtitle collabels(none) nobaselevels nogaps ///
-							fragment label stat(N cov r2_a, labels("Observations" ///
+							fragment label stat(N cov r2, labels("Observations" ///
 							"Covariates" "Adjusted R$^2$") fmt(%9.0fc %4.3f)) ///
 							postfoot("\hline \hline \\[-1.8ex] \multicolumn{11}{J{\linewidth}}{\small " ///
 							"\noindent \textit{Note}: Dependent variable is the number of dishes, or " ///
@@ -248,7 +248,7 @@
 							"\multicolumn{11}{l}{\emph{Panel A: Household Dietary Diversity Score}} \\ ") ///
 							keep(treat_assign) noobs ///
 							booktabs nonum nomtitle collabels(none) nobaselevels nogaps ///
-							fragment label stat(dep_mean N cov r2_a, labels( "Mean in Control" ///
+							fragment label stat(dep_mean N cov r2, labels( "Mean in Control" ///
 							"Observations" "Covariates" "Adjusted R$^2$") fmt(%4.3f %9.0fc %4.3f))
 
 							
@@ -344,7 +344,7 @@
 							prehead("\midrule \multicolumn{11}{l}{\emph{Panel B: Dietary Species Richness}} \\ ") ///
 							keep(treat_assign) noobs ///
 							booktabs nonum nomtitle collabels(none) nobaselevels nogaps ///
-							fragment label stat(dep_mean N cov r2_a, labels( "Mean in Control" ///
+							fragment label stat(dep_mean N cov r2, labels( "Mean in Control" ///
 							"Observations" "Covariates" "Adjusted R$^2$") fmt(%4.3f %9.0fc %4.3f)) 
 
 
@@ -441,7 +441,7 @@
 							prehead("\midrule \multicolumn{11}{l}{\emph{Panel C: Count of Legume Consumption}} \\ ") ///
 							keep(treat_assign) noobs ///
 							booktabs nonum nomtitle collabels(none) nobaselevels nogaps ///
-							fragment label stat(dep_mean N cov r2_a, labels( "Mean in Control" ///
+							fragment label stat(dep_mean N cov r2, labels( "Mean in Control" ///
 							"Observations" "Covariates" "Adjusted R$^2$") fmt(%4.3f %9.0fc %4.3f)) ///
 							postfoot("\hline \hline \\[-1.8ex] \multicolumn{11}{J{\linewidth}}{\small " ///
 							"\noindent \textit{Note}: Dependent variables are different measure of " ///
@@ -532,7 +532,7 @@
 							"\multicolumn{7}{l}{\emph{Panel A: Number of Dishes Prepared}} \\ ") ///
 							keep(treat_assign) noobs ///
 							booktabs nonum nomtitle collabels(none) nobaselevels nogaps ///
-							fragment label stat(dep_mean N cov r2_a, labels( "Mean in Control" ///
+							fragment label stat(dep_mean N cov r2, labels( "Mean in Control" ///
 							"Observations" "Covariates" "Adjusted R$^2$") fmt(%4.3f %9.0fc %4.3f))
 							
 							
@@ -597,7 +597,7 @@
 							prehead("\midrule \multicolumn{7}{l}{\emph{Panel B: Number of Meals Skipped}} \\ ") ///
 							keep(treat_assign) noobs ///
 							booktabs nonum nomtitle collabels(none) nobaselevels nogaps ///
-							fragment label stat(dep_mean N cov r2_a, labels( "Mean in Control" ///
+							fragment label stat(dep_mean N cov r2, labels( "Mean in Control" ///
 							"Observations" "Covariates" "Adjusted R$^2$") fmt(%4.3f %9.0fc %4.3f)) ///
 							postfoot("\hline \hline \\[-1.8ex] \multicolumn{7}{J{\linewidth}}{\small " ///
 							"\noindent \textit{Note}: Dependent variables are different measure of " ///

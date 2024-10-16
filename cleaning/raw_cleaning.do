@@ -547,10 +547,10 @@
 						3 "Vitamin-A Vegetables" 4 "Leafy Greens" ///
 						5 "Vegetables" 6 "Vitamin-A Fruits" 7 "Fruits" ///
 						8 "Organ Meat" 9 "Flesh Meat" 10 "Eggs" ///
-						11 "Fish" 12 "Legumes & Nuts" 13 "Milk" ///
+						11 "Fish" 12 "Pulses" 13 "Milk" ///
 						14 "Oils & Fats" 15 "Sweets" ///
 						16 "Spices & Condiments" 17 "Fried Snacks" ///
-						18 "Beverages"
+						18 "Beverages" 19 "Nuts & seeds", replace
 						
 
 	lab define 		process 0 "None" 1 "Unprocessed" 2 "Proccessed Food" ///
@@ -565,7 +565,7 @@
 		replace 		fg`x' = 1 if foodgroup`x' == "Grains"
 		replace 		fg`x' = 9 if foodgroup`x' == "Meat and poultry"
 		replace 		fg`x' = 13 if foodgroup`x' == "Milk and milk products"
-		replace 		fg`x' = 12 if foodgroup`x' == "Nuts and seeds"
+		replace 		fg`x' = 19 if foodgroup`x' == "Nuts and seeds"
 		replace 		fg`x' = 8 if foodgroup`x' == "Organ meat"
 		replace 		fg`x' = 18 if foodgroup`x' == "Other beverages and foods"
 		replace 		fg`x' = 7 if foodgroup`x' == "Other fruits"
