@@ -2,7 +2,7 @@
 * created on: February 2021
 * created by: lem
 * edited by: jdm
-* edited on: 19 Sep 2024
+* edited on: 5 Jan 2025
 * stata v.18.5
 
 * does
@@ -114,89 +114,59 @@
 * collapse to combine firewood and firewood/dung
 	collapse (sum)		times_cltd time_cltd price_cltd quant_cltd times_bght ///
 						price_bght quant_bght ///
-			 (max)		cltd bght, by(village hhid week fuel)
+			 (max)		cltd bght, by(village hhid week)
 	
 	replace				price_cltd = . if price_cltd == 0
 	replace				price_bght = . if price_bght == 0
-	
-* reshape panel
-	isid				village hhid week fuel
-	reshape wide 		cltd times_cltd time_cltd price_cltd quant_cltd bght ///
-							times_bght price_bght quant_bght, ///
-							i(village hhid week) j(fuel)
 
-* rename variables
-	order				cltd0 times_cltd0 time_cltd0 price_cltd0 quant_cltd0 ///
-							bght0 times_bght0 price_bght0 quant_bght0 ///
-							cltd1 times_cltd1 time_cltd1 price_cltd1 quant_cltd1 ///
-							bght1 times_bght1 price_bght1 quant_bght1, ///
-							after(week)
-		
-	drop				cltd0 times_cltd0 time_cltd0 price_cltd0 quant_cltd0
-		
-	replace				bght0 = 0 if bght0 == .
-	rename				bght0 c_bhgt	
-	lab var				c_bhgt "Was charcoal bought?"	
+* rename variables		
+	replace				bght = 0 if bght == .
+	rename				bght charcoal	
+	lab var				charcoal "Was charcoal bought?"	
 	
-	replace				times_bght0 = 0 if times_bght0 == .
-	rename				times_bght0 c_times	
+	replace				times_bght = 0 if times_bght == .
+	rename				times_bght c_times	
 	lab var				c_times "Number of times charcoal was bought"	
 	
-	rename				price_bght0 c_price
+	rename				price_bght c_price
 	lab var				c_price "Price of charcoal (kwacha)"	
 	
-	replace				quant_bght0 = 0 if quant_bght0 == .
-	rename				quant_bght0 c_quant
+	replace				quant_bght = 0 if quant_bght == .
+	rename				quant_bght c_quant
 	lab var				c_quant "Quantity of charcoal (kg)"
 		
-	replace				cltd1 = 0 if cltd1 == .
-	rename				cltd1 f_cltd
-	lab var				f_cltd "Was firewood collected?"	
+	replace				cltd = 0 if cltd == .
+	rename				cltd firewood
+	lab var				firewood "Was firewood collected?"	
 	
-	replace				times_cltd1 = 0 if times_cltd1 == .
-	rename				times_cltd1 f_cltd_times	
-	lab var				f_cltd_times "Number of times firewood was collected"	
+	replace				times_cltd = 0 if times_cltd == .
+	rename				times_cltd f_times	
+	lab var				f_times "Number of times firewood was collected"	
 	
-	replace				time_cltd1 = 0 if time_cltd1 == .
-	rename				time_cltd1 f_time
+	replace				time_cltd = 0 if time_cltd == .
+	rename				time_cltd f_time
 	lab var				f_time "Time spent collecting firewood (min)"		
 	
-	rename				price_cltd1 f_cltd_price
-	lab var				f_cltd_price "Price of firewood collected (kwacha)"	
+	rename				price_cltd f_price
+	lab var				f_price "Price of firewood collected (kwacha)"	
 	
-	replace				quant_cltd1 = 0 if quant_cltd1 == .
-	rename				quant_cltd1 f_cltd_quant
-	lab var				f_cltd_quant "Quantity of firewood collected (kg)"
+	replace				quant_cltd = 0 if quant_cltd == .
+	rename				quant_cltd f_quant
+	lab var				f_quant "Quantity of firewood collected (kg)"
 	
-	replace				bght1 = 0 if bght1 == .
-	rename				bght1 f_bhgt	
-	lab var				f_bhgt "Was firewood bought?"	
-	
-	replace				times_bght1 = 0 if times_bght1 == .
-	rename				times_bght1 f_bght_times	
-	lab var				f_bght_times "Number of times firewood was bought"	
-	
-	rename				price_bght1 f_bght_price
-	lab var				f_bght_price "Price of bought firewood (kwacha)"	
-	
-	replace				quant_bght1 = 0 if quant_bght1 == .
-	rename				quant_bght1 f_bght_quant
-	lab var				f_bght_quant "Quantity of firewood bought (kg)"
-
 * drop household that collected for 9 weeks
 	drop if				week > 6
 
 * natalia uses a price of $0.12 for charcoal and $0.13 for firewood
 * replace price with these values
 	replace				c_price = 0.12
-	generate			f_price = 0.13
-	drop				f_bght_price f_cltd_price
+	replace				f_price = 0.13
 	lab var				f_price "Price of firewood (USD)"
 	lab var				c_price "Price of charcoal (USD)"	
 
 * generate upper and lower bound values	
-	gen					f_quant_lb = f_cltd_quant + f_bght_quant	
-	gen					f_quant_ub = f_cltd_times*f_cltd_quant + f_bght_times*f_bght_quant	
+	gen					f_quant_lb = f_quant
+	gen					f_quant_ub = f_times*f_quant	
 	lab var				f_quant_lb "Quantity of firewood lower bound (kg)"
 	lab var				f_quant_ub "Quantity of firewood upper bound (kg)"
 	
@@ -206,7 +176,7 @@
 	lab var				f_val_ub "Value of firewood upper bound (USD)"
 	
 	gen					c_quant_lb = c_quant
-	gen					c_quant_ub = c_times* c_quant
+	gen					c_quant_ub = c_times*c_quant
 	lab var				c_quant_lb "Quantity of charcoal lower bound (kg)"
 	lab var				c_quant_ub "Quantity of charcoal upper bound (kg)"
 	

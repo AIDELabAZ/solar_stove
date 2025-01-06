@@ -2,7 +2,7 @@
 * created on: Sep 2024
 * created by: jdm
 * edited by: jdm
-* edited on: 16 Sep 2024
+* edited on: 6 Jan 2025
 * stata v.18.5
 
 * does
@@ -115,7 +115,7 @@
   
 * table 4, Panel A: Solar stove assignment on weekly fuel outcomes
 	esttab 			wFT wFTc wFQ wFQc wCQ wCQc wFV wFVc ///
-						using "$output/fuel_out.tex", b(2) se(2) replace ///
+						using "$output/fuel_out.tex", b(3) se(3) replace ///
 							prehead("\begin{tabular}{l*{8}{c}} \\[-1.8ex]\hline \hline \\[-1.8ex] " ///
 							"& \multicolumn{2}{c}{Firewood} & \multicolumn{2}{c}{Firewood} " ///
 							"& \multicolumn{2}{c}{Charcoal} & \multicolumn{2}{c}{Fuel} \\ " ///
@@ -195,7 +195,7 @@ collapse 				(sum) f_time f_quant_ub c_quant_ub val_fuel_ub ///
 
 * table 4, Panel B: Solar stove assignment on overall fuel
 	esttab 			tFT tFTc tFQ tFQc tCQ tCQc tFV tFVc ///
-						using "$output/fuel_out.tex", b(2) se(2) append ///
+						using "$output/fuel_out.tex", b(3) se(3) append ///
 							prehead("\midrule \multicolumn{9}{l}{\emph{Panel B: Overall Fuel Outcomes}} \\ ") ///
 							keep(treat_assign) noobs ///
 							booktabs nonum nomtitle collabels(none) nobaselevels nogaps ///
