@@ -99,7 +99,7 @@ if $pack == 1 {
 **********************************************************************
 * 3 - run analysis .do files
 **********************************************************************	
-	
+
 	do				"$code/analysis/desc_stats.do"
 	do				"$code/analysis/food_outcomes"
 	do				"$code/analysis/fuel_outcomes"

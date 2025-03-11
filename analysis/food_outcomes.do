@@ -2,7 +2,7 @@
 * created on: Sep 2024
 * created by: jdm
 * edited by: jdm
-* edited on: 24 Sep 2024
+* edited on: 11 Mar 25
 * stata v.18.5
 
 * does
@@ -15,10 +15,9 @@
 	* estout
 
 * to do:
-	* return to dish and meal data. look at dishes in a meal (hhid week day meal)
-	* dishes in a day (hhid week day) etc. in addition to by breakfast/lunch/dinner
-	* also do the same with meals skipped (how often is a meal skipped given a household could eat 126 meals)
-
+	* done
+	
+	
 ***********************************************************************
 **# 0 - setup
 ***********************************************************************
@@ -55,10 +54,14 @@
 
 * dish-level use with and without controls using LPM	
 	reg 				ss_use treat_assign i.aas i.village, vce(cluster hhid)
+	summarize 			ss_use if treat_assign == 0	
+	estadd scalar		dep_mean = r(mean)		
 	estadd local 		cov "No", replace	
 	eststo 				dLPM
 	
 	reg 				ss_use treat_assign $x_cov i.aas i.village, vce(cluster hhid)
+	summarize 			ss_use if treat_assign == 0	
+	estadd scalar		dep_mean = r(mean)		
 	estadd local 		cov "Yes", replace		
 	eststo 				dLPMc	
 				
@@ -67,10 +70,14 @@
 		duplicates drop		hhid week day meal, force	
 		
 		reg 			share_meal treat_assign i.aas i.village, vce(cluster hhid)	
+		summarize 		share_meal if treat_assign == 0	
+		estadd scalar	dep_mean = r(mean)		
 		estadd local 	cov "No", replace		
 		eststo 			mshare
 			
 		reg 			share_meal treat_assign $x_cov i.aas i.village, vce(cluster hhid)	
+		summarize 		share_meal if treat_assign == 0	
+		estadd scalar	dep_mean = r(mean)		
 		estadd local 	cov "Yes", replace		
 		eststo 			msharec	
 	restore					 
@@ -80,10 +87,14 @@
 		duplicates drop		hhid week day, force	
 		
 		reg 			share_day treat_assign i.aas i.village, vce(cluster hhid)  
+		summarize 		share_day if treat_assign == 0	
+		estadd scalar	dep_mean = r(mean)		
 		estadd local 	cov "No", replace	
 		eststo 			dshare	
 		
 		reg 			share_day treat_assign $x_cov i.aas i.village, vce(cluster hhid)
+		summarize 		share_day if treat_assign == 0	
+		estadd scalar	dep_mean = r(mean)		
 		estadd local 	cov "Yes", replace	
 		eststo 			dsharec	
 	restore
@@ -93,10 +104,14 @@
 		duplicates drop		hhid week, force	
 		
 		reg 			share_week treat_assign i.aas i.village, vce(cluster hhid) 
+		summarize 		share_week if treat_assign == 0	
+		estadd scalar	dep_mean = r(mean)		
 		estadd local 	cov "No", replace	
 		eststo 			wshare	
 					
 		reg 			share_week treat_assign $x_cov i.aas i.village, vce(cluster hhid)
+		summarize 		share_week if treat_assign == 0	
+		estadd scalar	dep_mean = r(mean)		
 		estadd local 	cov "Yes", replace		
 		eststo 			wsharec
 	restore
@@ -106,10 +121,14 @@
 		duplicates drop		hhid, force	
 		
 		reg 			share_tot treat_assign i.aas i.village, vce(cluster hhid) 
+		summarize 		share_tot if treat_assign == 0	
+		estadd scalar	dep_mean = r(mean)		
 		estadd local 	cov "No", replace	
 		eststo 			tshare	
 		
-		reg 			share_tot treat_assign $x_cov i.aas i.village, vce(cluster hhid)	
+		reg 			share_tot treat_assign $x_cov i.aas i.village, vce(cluster hhid) 
+		summarize 		share_tot if treat_assign == 0	
+		estadd scalar	dep_mean = r(mean)			
 		estadd local 	cov "Yes", replace		
 		eststo 			tsharec	
 	restore			
@@ -126,8 +145,8 @@
 							"& \multicolumn{1}{c}{(7)} & \multicolumn{1}{c}{(8)} & \multicolumn{1}{c}{(9)} " ///
 							"& \multicolumn{1}{c}{(10)} \\ \midrule")  keep(treat_assign) noobs ///
 							booktabs nonum nomtitle collabels(none) nobaselevels nogaps ///
-							fragment label stat(N cov r2, labels("Observations" ///
-							"Covariates" "Adjusted R$^2$") fmt(%9.0fc %4.3f)) ///
+							fragment label stat(dep_mean N cov r2, labels("Mean in Control" "Observations" ///
+							"Covariates" "Adjusted R$^2$") fmt(%4.3f %9.0fc %4.3f)) ///
 							postfoot("\hline \hline \\[-1.8ex] \multicolumn{11}{J{\linewidth}}{\small " ///
 							"\noindent \textit{Note}: Dependent variable is the number of dishes, or " ///
 							"the share of dishes in a given meal, day, week, etc., for which a " ///
@@ -139,8 +158,8 @@
 							"observation per household (columns 9-10), we calculate Eicker-Huber-White " ///
 							"(EHW) robust standard errors. Standard errors are presented in " ///
 							"parentheses (*** p$<$0.001, ** p$<$0.01, * p$<$0.05).}  \end{tabular}") 
-		
-	
+
+							
 ************************************************************************
 **# 3 - final outcomes: food diversity
 ************************************************************************
