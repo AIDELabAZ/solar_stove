@@ -44,28 +44,271 @@
 **## 1.1 - intermediate and dietary outcomes
 ************************************************************************
 
-* sum dish
-	estpost sum 		ss_use hdds_dish sr_dish p_dish
-	est store 			sum_dish
 
+* sum dish
+		eststo 			o_cntrl :	estpost ///
+						sum ss_use hdds_dish sr_dish p_dish ///
+						if treat_assign == 0
+		
+		eststo 			o_trtmnt : estpost ///
+						sum ss_use hdds_dish sr_dish p_dish ///
+						if treat_assign == 1
+
+		eststo 			o_tot : estpost ///
+						sum ss_use hdds_dish sr_dish p_dish
+						
+		eststo 			o_diff : estpost ///
+						ttest ss_use hdds_dish sr_dish p_dish, ///
+						by(treat_assign) unequal
+	
+		distinct		hhid if treat_assign == 0
+		local 			temp1a = r(N) 
+			local 			cntrlo : display %4.0f `temp1a'
+		
+		distinct		hhid if treat_assign == 1
+		local 			temp2a = r(N) 
+			local 			trtmnto : display %4.0f `temp2a'
+		
+		distinct		hhid
+		local 			temp3a = r(N) 
+			local 			toto : display %4.0f `temp3a'
+
+* output table of summary of dietary outcomes
+	esttab 			o_cntrl o_trtmnt o_diff o_tot ///
+						using "$output/descriptive/out_tab.tex", replace ///
+						prehead("\begin{tabular}{l*{4}{c}} \\ [-1.8ex]\hline \hline \\[-1.8ex] " ///
+						"& \multicolumn{1}{c}{Control} & \multicolumn{1}{c}{Treatment} &  " ///
+						"\multicolumn{1}{c}{\$p\$-value} & \multicolumn{1}{c}{Total}  \\ \midrule " ///
+						"\multicolumn{5}{l}{\emph{Panel A: Dish-Level Outcomes}} \\ " ) ///
+						booktabs main(mean) aux(sd) nostar unstack nonum ///
+						collabels(none) f noobs nomtitle nogaps ///
+						cells("mean(fmt(3) pattern(1 1 0 1)) p(fmt(3) pattern(0 0 1 0 ))"  ///
+						sd(fmt(3)par pattern(1 1 0 1) ) ) ///
+						rename(ss_use "Solar Stove Use" hdds_dish "HDDS" ///
+						sr_dish "Species Richness" p_dish "Legumes Cooked") ///
+						prefoot(" \midrule Observations & `cntrlo' & `trtmnto' & & `toto' \\ ")
+									
 * sum meal
 	preserve 
 		duplicates drop		hhid week day meal, force
-		estpost sum 		share_meal hdds_meal sr_meal p_meal
-		est store			sum_meal
-	restore	
+		
+		eststo 			m_cntrl :	estpost ///
+						sum share_meal hdds_meal sr_meal p_meal ///
+						if treat_assign == 0
+		
+		eststo 			m_trtmnt : estpost ///
+						sum share_meal hdds_meal sr_meal p_meal ///
+						if treat_assign == 1
 
+		eststo 			m_tot : estpost ///
+						sum share_meal hdds_meal sr_meal p_meal
+						
+		eststo 			m_diff : estpost ///
+						ttest share_meal hdds_meal sr_meal p_meal, ///
+						by(treat_assign) unequal
+	
+		distinct		hhid if treat_assign == 0
+		local 			temp1a = r(N) 
+			local 			cntrlm : display %4.0f `temp1a'
+		
+		distinct		hhid if treat_assign == 1
+		local 			temp2a = r(N) 
+			local 			trtmntm : display %4.0f `temp2a'
+		
+		distinct		hhid
+		local 			temp3a = r(N) 
+			local 			totm : display %4.0f `temp3a'
+	restore	
+			
+
+* output table of summary of dietary outcomes
+	esttab 			m_cntrl m_trtmnt m_diff m_tot ///
+						using "$output/descriptive/out_tab.tex", append ///
+						posthead("\midrule \multicolumn{5}{l}{\emph{Panel B: Meal-Level Outcomes}} \\ " ) ///
+						booktabs main(mean) aux(sd) nostar unstack nonum ///
+						collabels(none) f noobs nomtitle nogaps ///
+						cells("mean(fmt(3) pattern(1 1 0 1)) p(fmt(3) pattern(0 0 1 0 ))"  ///
+						sd(fmt(3)par pattern(1 1 0 1) ) ) ///
+						rename(share_meal "Solar Stove Use" hdds_meal "HDDS" ///
+						sr_meal "Species Richness"	p_meal "Legumes Cooked") ///
+						prefoot(" \midrule Observations & `cntrlm' & `trtmntm' & & `totm' \\ ")
+				
 * sum day
 	preserve 
 		duplicates drop		hhid week day, force
-		estpost sum 		share_day hdds_day sr_day p_day
-		est store			sum_day
+		
+		eststo 			d_cntrl :	estpost ///
+						sum share_day hdds_day sr_day p_day ///
+						if treat_assign == 0
+		
+		eststo 			d_trtmnt : estpost ///
+						sum share_day hdds_day sr_day p_day ///
+						if treat_assign == 1
+
+		eststo 			d_tot : estpost ///
+						sum share_day hdds_day sr_day p_day
+						
+		eststo 			d_diff : estpost ///
+						ttest share_day hdds_day sr_day p_day, ///
+						by(treat_assign) unequal
+	
+		distinct		hhid if treat_assign == 0
+		local 			temp1a = r(N) 
+			local 			cntrld : display %4.0f `temp1a'
+		
+		distinct		hhid if treat_assign == 1
+		local 			temp2a = r(N) 
+			local 			trtmntd : display %4.0f `temp2a'
+		
+		distinct		hhid
+		local 			temp3a = r(N) 
+			local 			totd : display %4.0f `temp3a'
 	restore	
+			
+
+* output table of summary of dietary outcomes
+	esttab 			d_cntrl d_trtmnt d_diff d_tot ///
+						using "$output/descriptive/out_tab.tex", append ///
+						posthead("\midrule \multicolumn{5}{l}{\emph{Panel C: Day-Level Outcomes}} \\ " ) ///
+						booktabs main(mean) aux(sd) nostar unstack nonum ///
+						collabels(none) f noobs nomtitle nogaps ///
+						cells("mean(fmt(3) pattern(1 1 0 1)) p(fmt(3) pattern(0 0 1 0 ))"  ///
+						sd(fmt(3)par pattern(1 1 0 1) ) ) ///
+						rename(share_day "Solar Stove Use" hdds_day "HDDS" ///
+						sr_day "Species Richness"	p_day "Legumes Cooked") ///
+						prefoot(" \midrule Observations & `cntrld' & `trtmntd' & & `totd' \\ ")
+			
+* sum week
+	preserve 
+		duplicates drop		hhid week, force
+		
+		eststo 			w_cntrl :	estpost ///
+						sum share_week hdds_week sr_week p_week ///
+						if treat_assign == 0
+		
+		eststo 			w_trtmnt : estpost ///
+						sum share_week hdds_week sr_week p_week ///
+						if treat_assign == 1
+
+		eststo 			w_tot : estpost ///
+						sum share_week hdds_week sr_week p_week
+						
+		eststo 			w_diff : estpost ///
+						ttest share_week hdds_week sr_week p_week, ///
+						by(treat_assign) unequal
+	
+		distinct		hhid if treat_assign == 0
+		local 			temp1a = r(N) 
+			local 			cntrlw : display %4.0f `temp1a'
+		
+		distinct		hhid if treat_assign == 1
+		local 			temp2a = r(N) 
+			local 			trtmntw : display %4.0f `temp2a'
+		
+		distinct		hhid
+		local 			temp3a = r(N) 
+			local 			totw : display %4.0f `temp3a'
+	restore	
+			
+
+* output table of summary of dietary outcomes
+	esttab 			w_cntrl w_trtmnt w_diff w_tot ///
+						using "$output/descriptive/out_tab.tex", append ///
+						posthead("\midrule \multicolumn{5}{l}{\emph{Panel C: Week-Level Outcomes}} \\ " ) ///
+						booktabs main(mean) aux(sd) nostar unstack nonum ///
+						collabels(none) f noobs nomtitle nogaps ///
+						cells("mean(fmt(3) pattern(1 1 0 1)) p(fmt(3) pattern(0 0 1 0 ))"  ///
+						sd(fmt(3)par pattern(1 1 0 1) ) ) ///
+						rename(share_week "Solar Stove Use" hdds_week "HDDS" ///
+						sr_week "Species Richness"	p_week "Legumes Cooked") ///
+						prefoot(" \midrule Observations & `cntrlw' & `trtmntw' & & `totw' \\ ")
+		
+* sum week
+	preserve 
+		duplicates drop		hhid, force
+		
+		eststo 			t_cntrl :	estpost ///
+						sum share_total hdds_total sr_total p_total ///
+						if treat_assign == 0
+		
+		eststo 			t_trtmnt : estpost ///
+						sum share_total hdds_total sr_total p_total ///
+						if treat_assign == 1
+
+		eststo 			t_tot : estpost ///
+						sum share_total hdds_total sr_total p_total
+						
+		eststo 			t_diff : estpost ///
+						ttest share_total hdds_total sr_total p_total, ///
+						by(treat_assign) unequal
+	
+		distinct		hhid if treat_assign == 0
+		local 			temp1a = r(N) 
+			local 			cntrlt : display %4.0f `temp1a'
+		
+		distinct		hhid if treat_assign == 1
+		local 			temp2a = r(N) 
+			local 			trtmntt : display %4.0f `temp2a'
+		
+		distinct		hhid
+		local 			temp3a = r(N) 
+			local 			tott : display %4.0f `temp3a'
+	restore	
+			
+
+* output table of summary of dietary outcomes
+	esttab 			t_cntrl t_trtmnt t_diff t_tot ///
+						using "$output/descriptive/out_tab.tex", append ///
+						posthead("\midrule \multicolumn{5}{l}{\emph{Panel C: Overall Outcomes}} \\ " ) ///
+						booktabs main(mean) aux(sd) nostar unstack nonum ///
+						collabels(none) f noobs nomtitle nogaps ///
+						cells("mean(fmt(3) pattern(1 1 0 1)) p(fmt(3) pattern(0 0 1 0 ))"  ///
+						sd(fmt(3)par pattern(1 1 0 1) ) ) ///
+						rename(share_total "Solar Stove Use" hdds_total "HDDS" ///
+						sr_total "Species Richness"	p_total "Legumes Cooked") ///
+						postfoot(" \midrule Observations & `cntrlt' & `trtmntt' & & `tott' \\ " ///
+						"\hline \hline \\[-1.8ex] \multicolumn{5}{J{\linewidth}}{\small " ///
+						"\noindent \textit{Note}: The table displays means, for solar stove use and outcome variables " ///
+						"by treatment assignment and for the total sample. Standard deviations are in " ///
+						"parentheses. We also report \$p\$-values " ///
+						"on a \$t\$-test for the equality of means between treatment and control.}  \end{tabular}")
+						
+					
+
+			
+			
+			
+			
+			
+* output table of summary of dietary outcomes
+	esttab 			o_cntrl o_trtmnt o_diff o_tot ///
+						using "$output/descriptive/out_tab.tex", replace booktabs ///
+						prehead("\begin{tabular}{l*{4}{c}} \\ [-1.8ex]\hline \hline \\[-1.8ex] " ///
+						"\multicolumn{5}{c}{\emph{Panel A: Daily Cooking Frequency} &  \multicolumn{4}{c}{Weekly Cooking Frequency} " ///
+						"& \multicolumn{4}{c}{Total Cooking Frequency} \\ " ///
+						"& \multicolumn{1}{c}{Control} & \multicolumn{1}{c}{Treatment} &  " ///
+						"\multicolumn{1}{c}{\$p\$-value} & \multicolumn{1}{c}{Total} " /// 
+						"& \multicolumn{1}{c}{Control} & \multicolumn{1}{c}{Treatment} &  " ///
+						"\multicolumn{1}{c}{\$p\$-value} & \multicolumn{1}{c}{Total} " /// 
+						"& \multicolumn{1}{c}{Control} & \multicolumn{1}{c}{Treatment} &  " ///
+						"\multicolumn{1}{c}{\$p\$-value} & \multicolumn{1}{c}{Total} \\ ") ///
+						main(mean) aux(sd) nostar unstack nonum ///
+						collabels(none) f noobs nomtitle nogaps ///
+						cells("mean(fmt(3) pattern(1 1 0 1 1 1 0 1 1 1 0 1)) p(fmt(3) pattern(0 0 1 0 0 0 1 0 0 0 1 0))"  ///
+						sd(fmt(3)par pattern(1 1 0 1 1 1 0 1 1 1 0 1) ) ) ///
+						rename(dish_eat "Dishes per Meal" dish_skp "Meals Skipped") ///
+						postfoot(" \midrule Observations & `cntrld' & `trtmntd' & & `totd' & " ///
+						" `cntrlw' & `trtmntw' & & `totw' & `cntrlt' & `trtmntt' & & `tott' \\ " ///
+						"\hline \hline \\[-1.8ex] \multicolumn{13}{J{\linewidth}}{\small " ///
+						"\noindent \textit{Note}: The table displays means, for solar stove use and outcome variables " ///
+						"by treatment assignment and for the total sample. Standard deviations are in " ///
+						"parentheses. We also report \$p\$-values " ///
+						"on a \$t\$-test for the equality of means between treatment and control.}  \end{tabular}") 
 
 * sum week
 	preserve 
 		duplicates drop		hhid week, force
-		estpost sum 		share_week hdds_week sr_week p_week
+		estpost sum 		
 		est store			sum_week
 	restore	
 
@@ -75,104 +318,243 @@
 		estpost sum 		share_total hdds_total sr_total p_total
 		est store			sum_total
 	restore	
-		
-* output table of descriptive statistics for categorical variables
-	esttab 			sum_dish sum_meal sum_day sum_week sum_total ///
-						using "$output/descriptive/out_tab.tex", replace booktabs ///
-						prehead("\begin{tabular}{l*{5}{c}} \\ [-1.8ex]\hline \hline \\[-1.8ex] ") ///
-						main(mean) aux(sd) label  mlabels("Dish" "Meal" "Day" "Week" "Total") collabels(,none) ///
-						nomtitle nonumber fragment nogap noobs  ///
-						rename(ss_use "Solar Stove Used" hdds_dish "HDDS" sr_dish "Species Richness" ///
-						p_dish "Legumes Cooked" share_meal "Solar Stove Used" hdds_meal "HDDS" ///
-						sr_meal "Species Richness" p_meal "Legumes Cooked" share_day "Solar Stove Used" ///
-						hdds_day "HDDS" sr_day "Species Richness" p_day "Legumes Cooked" ///
-						share_week "Solar Stove Used" hdds_week "HDDS" sr_week "Species Richness" ///
-						p_week "Legumes Cooked" share_total "Solar Stove Used" hdds_total "HDDS" ///
-						sr_total "Species Richness" p_total "Legumes Cooked") ///
-						postfoot("\midrule \multicolumn{1}{l}{Total} &  30,314 & 15,896 & " ///
-							" 6,013 & 912 & 156\\ " "\hline \hline \\[-1.8ex] " ///
-							"\multicolumn{6}{J{\linewidth}}{\small " ///
-							"\noindent \textit{Note}: The table displays means and standard deviations, " ///
-							"in parentheses, treatment assignment, use of solar stoves, " ///
-							"and continuous control variables.}  \end{tabular}") 	
-							
-			
+
 ************************************************************************
 **## 1.2 - cooking frequency outcomes
 ************************************************************************
 
-* sum breakfast
+* daily frequency
 	preserve
 		duplicates drop		hhid week day, force
-		estpost sum 		dish_day day_skip
-		est store 			sum_brk
-	restore
+		
+		rename			dish_day dish_eat
+		rename			day_skip dish_skp
+		
+		eststo 			d_cntrl :	estpost ///
+						sum dish_eat dish_skp ///
+						if treat_assign == 0
+		
+		eststo 			d_trtmnt : estpost ///
+						sum dish_eat dish_skp ///
+						if treat_assign == 1
 
-* sum lunch
+		eststo 			d_tot : estpost ///
+						sum dish_eat dish_skp
+						
+		eststo 			d_diff : estpost ///
+						ttest dish_eat dish_skp, ///
+						by(treat_assign) unequal
+	
+		distinct		hhid if treat_assign == 0
+		local 			temp1a = r(N) 
+			local 			cntrld : display %4.0f `temp1a'
+		
+		distinct		hhid if treat_assign == 1
+		local 			temp2a = r(N) 
+			local 			trtmntd : display %4.0f `temp2a'
+		
+		distinct		hhid
+		local 			temp3a = r(N) 
+			local 			totd : display %4.0f `temp3a'
+	restore
+				
+* weekly frequency
 	preserve
 		duplicates drop		hhid week, force
-		estpost sum 		dish_week week_skip
-		est store 			sum_lun
-	restore
+		
+		rename			dish_week dish_eat
+		rename			week_skip  dish_skp
+		
+		eststo 			w_cntrl :	estpost ///
+						sum dish_eat dish_skp ///
+						if treat_assign == 0
+		
+		eststo 			w_trtmnt : estpost ///
+						sum dish_eat dish_skp ///
+						if treat_assign == 1
+
+		eststo 			w_tot : estpost ///
+						sum dish_eat dish_skp
+						
+		eststo 			w_diff : estpost ///
+						ttest dish_eat dish_skp, ///
+						by(treat_assign) unequal
 	
-* sum dinner
+		distinct		hhid if treat_assign == 0
+		local 			temp1a = r(N) 
+			local 			cntrlw : display %4.0f `temp1a'
+		
+		distinct		hhid if treat_assign == 1
+		local 			temp2a = r(N) 
+			local 			trtmntw : display %4.0f `temp2a'
+		
+		distinct		hhid
+		local 			temp3a = r(N) 
+			local 			totw : display %4.0f `temp3a'
+	restore
+
+	
+* total frequency
 	preserve
 		duplicates drop		hhid, force
-		estpost sum 		dish_tot tot_skip
-		est store 			sum_din
+		
+		rename			dish_tot dish_eat
+		rename			tot_skip dish_skp
+				
+		eststo 			t_cntrl :	estpost ///
+						sum dish_eat dish_skp ///
+						if treat_assign == 0
+		
+		eststo 			t_trtmnt : estpost ///
+						sum dish_eat dish_skp ///
+						if treat_assign == 1
+
+		eststo 			t_tot : estpost ///
+						sum dish_eat dish_skp
+						
+		eststo 			t_diff : estpost ///
+						ttest dish_eat dish_skp, ///
+						by(treat_assign) unequal
+	
+		distinct		hhid if treat_assign == 0
+		local 			temp1a = r(N) 
+			local 			cntrlt : display %4.0f `temp1a'
+		
+		distinct		hhid if treat_assign == 1
+		local 			temp2a = r(N) 
+			local 			trtmntt : display %4.0f `temp2a'
+		
+		distinct		hhid
+		local 			temp3a = r(N) 
+			local 			tott : display %4.0f `temp3a'
 	restore
+
 		
-* output table of descriptive statistics for categorical variables
-	esttab 			sum_brk sum_lun sum_din ///
+* output table of summary of cooking frequency
+	esttab 			d_cntrl d_trtmnt d_diff d_tot w_cntrl w_trtmnt w_diff w_tot t_cntrl t_trtmnt t_diff t_tot ///
 						using "$output/descriptive/cook_tab.tex", replace booktabs ///
-						prehead("\begin{tabular}{l*{3}{c}} \\ [-1.8ex]\hline \hline \\[-1.8ex] ") ///
-						main(mean) aux(sd) label  mlabels("Day" "Week" "Total") collabels(,none) ///
-						nomtitle nonumber fragment nogap noobs  ///
-						rename(dish_day "Dishes per Meal" dish_week "Dishes per Meal" ///
-						dish_tot "Dishes per Meal" day_skip "Meals Skipped" ///
-						week_skip "Meals Skipped" tot_skip "Meals Skipped") ///
-						postfoot("\midrule \multicolumn{1}{l}{Total} &  6,013 & 912 & " ///
-							" 156 \\ " "\hline \hline \\[-1.8ex] " ///
-							"\multicolumn{4}{J{\linewidth}}{\small " ///
-							"\noindent \textit{Note}: The table displays means and standard deviations, " ///
-							"in parentheses, for dishes per meal and meals skipped.}  \end{tabular}") 	
+						prehead("\begin{tabular}{l*{12}{c}} \\ [-1.8ex]\hline \hline \\[-1.8ex] " ///
+						"& \multicolumn{4}{c}{Daily Cooking Frequency} &  \multicolumn{4}{c}{Weekly Cooking Frequency} " ///
+						"& \multicolumn{4}{c}{Total Cooking Frequency} \\ " ///
+						"& \multicolumn{1}{c}{Control} & \multicolumn{1}{c}{Treatment} &  " ///
+						"\multicolumn{1}{c}{\$p\$-value} & \multicolumn{1}{c}{Total} " /// 
+						"& \multicolumn{1}{c}{Control} & \multicolumn{1}{c}{Treatment} &  " ///
+						"\multicolumn{1}{c}{\$p\$-value} & \multicolumn{1}{c}{Total} " /// 
+						"& \multicolumn{1}{c}{Control} & \multicolumn{1}{c}{Treatment} &  " ///
+						"\multicolumn{1}{c}{\$p\$-value} & \multicolumn{1}{c}{Total} \\ ") ///
+						main(mean) aux(sd) nostar unstack nonum ///
+						collabels(none) f noobs nomtitle nogaps ///
+						cells("mean(fmt(3) pattern(1 1 0 1 1 1 0 1 1 1 0 1)) p(fmt(3) pattern(0 0 1 0 0 0 1 0 0 0 1 0))"  ///
+						sd(fmt(3)par pattern(1 1 0 1 1 1 0 1 1 1 0 1) ) ) ///
+						rename(dish_eat "Dishes per Meal" dish_skp "Meals Skipped") ///
+						postfoot(" \midrule Observations & `cntrld' & `trtmntd' & & `totd' & " ///
+						" `cntrlw' & `trtmntw' & & `totw' & `cntrlt' & `trtmntt' & & `tott' \\ " ///
+						"\hline \hline \\[-1.8ex] \multicolumn{13}{J{\linewidth}}{\small " ///
+						"\noindent \textit{Note}: The table displays means, for dishes per meal and meals skipped " ///
+						"by treatment assignment and for the total sample. Standard deviations are in " ///
+						"parentheses. We also report \$p\$-values " ///
+						"on a \$t\$-test for the equality of means between treatment and control.}  \end{tabular}") 
 		
+				
 ************************************************************************
 **## 1.3 - fuel outcomes
 ************************************************************************
 
 * load fuel data
 	use					"$ans/fuel_cleaned.dta", clear	
+	
+	rename				solar treat_assign
 						
 * fuel week
 	preserve
 		duplicates drop		hhid week, force
-		estpost sum 		f_time f_quant_ub c_quant_ub val_fuel_ub
-		est store 			fuel_week
+		
+		eststo 			w_cntrl :	estpost ///
+						sum f_time f_quant_ub c_quant_ub val_fuel_ub ///
+						if treat_assign == 0
+		
+		eststo 			w_trtmnt : estpost ///
+						sum f_time f_quant_ub c_quant_ub val_fuel_ub ///
+						if treat_assign == 1
+
+		eststo 			w_tot : estpost ///
+						sum f_time f_quant_ub c_quant_ub val_fuel_ub
+						
+		eststo 			w_diff : estpost ///
+						ttest f_time f_quant_ub c_quant_ub val_fuel_ub, ///
+						by(treat_assign) unequal
+	
+		distinct		hhid if treat_assign == 0
+		local 			temp1a = r(N) 
+			local 			cntrlob : display %4.0f `temp1a'
+		
+		distinct		hhid if treat_assign == 1
+		local 			temp2a = r(N) 
+			local 			trtmntob : display %4.0f `temp2a'
+		
+		distinct		hhid
+		local 			temp3a = r(N) 
+			local 			totob : display %4.0f `temp3a'
 	restore
 
 	
 * fuel total
 	preserve
 		duplicates drop		hhid, force
-		estpost sum 		f_time f_quant_ub c_quant_ub val_fuel_ub
-		est store 			fuel_tot
-	restore
+				
+		eststo 			t_cntrl :	estpost ///
+						sum f_time f_quant_ub c_quant_ub val_fuel_ub ///
+						if treat_assign == 0
 		
-* output table of descriptive statistics for categorical variables
-	esttab 			fuel_week fuel_tot ///
+		eststo 			t_trtmnt : estpost ///
+						sum f_time f_quant_ub c_quant_ub val_fuel_ub ///
+						if treat_assign == 1
+
+		eststo 			t_tot : estpost ///
+						sum f_time f_quant_ub c_quant_ub val_fuel_ub
+						
+		eststo 			t_diff : estpost ///
+						ttest f_time f_quant_ub c_quant_ub val_fuel_ub, ///
+						by(treat_assign) unequal
+	
+		distinct		hhid if treat_assign == 0
+		local 			temp1a = r(N) 
+			local 			cntrlhh : display %4.0f `temp1a'
+		
+		distinct		hhid if treat_assign == 1
+		local 			temp2a = r(N) 
+			local 			trtmnthh : display %4.0f `temp2a'
+		
+		distinct		hhid
+		local 			temp3a = r(N) 
+			local 			tothh : display %4.0f `temp3a'
+	restore
+
+		
+* output table of fuel collection
+	esttab 			w_cntrl w_trtmnt w_diff w_tot t_cntrl t_trtmnt t_diff t_tot ///
 						using "$output/descriptive/fuel_tab.tex", replace booktabs ///
-						prehead("\begin{tabular}{l*{2}{c}} \\ [-1.8ex]\hline \hline \\[-1.8ex] ") ///
-						main(mean) aux(sd) label  mlabels("Week" "Total") collabels(,none) ///
-						nomtitle nonumber fragment nogap noobs  ///
+						prehead("\begin{tabular}{l*{8}{c}} \\ [-1.8ex]\hline \hline \\[-1.8ex] " ///
+						"& \multicolumn{4}{c}{Weekly Fuel Collection} & \multicolumn{4}{c}{Total Fuel Collection} \\ " ///
+						"& \multicolumn{1}{c}{Control} & \multicolumn{1}{c}{Treatment} &  " ///
+						"\multicolumn{1}{c}{\$p\$-value} & \multicolumn{1}{c}{Total} " /// 
+						"& \multicolumn{1}{c}{Control} & \multicolumn{1}{c}{Treatment} &  " ///
+						"\multicolumn{1}{c}{\$p\$-value} & \multicolumn{1}{c}{Total} \\ ") ///
+						main(mean) aux(sd) nostar unstack nonum ///
+						collabels(none) f noobs nomtitle nogaps ///
+						cells("mean(fmt(1 2 2 3) pattern(1 1 0 1 1 1 0 1)) p(fmt(3) pattern(0 0 1 0 0 0 1 0))"  ///
+						sd(fmt(1 2 2 3)par pattern(1 1 0 1 1 1 0 1) ) ) ///
 						rename(f_time "Firewood Time (min)" f_quant_ub "Firewood Quantity (kg)" ///
 						c_quant_ub "Charcoal Quantity (kg)" val_fuel_ub "Fuel Value (USD)" ) ///
-						postfoot("\midrule \multicolumn{1}{l}{Total} &  870 & 157 \\ " "\hline \hline \\[-1.8ex] " ///
-							"\multicolumn{3}{J{\linewidth}}{\small " ///
-							"\noindent \textit{Note}: The table displays means and standard deviations, " ///
-							"in parentheses, for collected and purchased fuel.}  \end{tabular}") 	
-
-							
+						postfoot(" \midrule Observations & `cntrlob' & `trtmntob' & & `totob' & " ///
+						" `cntrlhh' & `trtmnthh' & & `tothh' \\ " ///
+						"\hline \hline \\[-1.8ex] \multicolumn{9}{J{\linewidth}}{\small " ///
+						"\noindent \textit{Note}: The table displays means, for collected and purchased fuel " ///
+						"by treatment assignment and for the total sample. Standard deviations are in " ///
+						"parentheses. We also report \$p\$-values " ///
+						"on a \$t\$-test for the equality of means between treatment and control.}  \end{tabular}") 
+		
+				
 ************************************************************************
 **# 2 - covariates
 ************************************************************************
@@ -180,89 +562,67 @@
 * re-load data
 	use					"$ans/dietary_cleaned.dta", clear		
 	
-************************************************************************
-**## 2.1 - non-categorical covariates
-************************************************************************
-
-	preserve // dropping dupes to give clearer idea of hh breakdown
-		duplicates drop		hhid, force
-		
-		* post frequency table
-		estpost sum			age hh_size tli ai cc
-		est store 			convar
-		
-	restore						
-						
-* output table of descriptive statistics for categorical variables
-	esttab 			convar using "$output/descriptive/convars_tab.tex", replace booktabs ///
-						prehead("\begin{tabular}{l*{4}{c}} \\ [-1.8ex]\hline \hline \\[-1.8ex] ") ///
-						cells("mean(label(Mean) fmt(a3)) sd(label(St. Dev.) fmt(a3)) min(label(Min) fmt(a3)) max(label(Max) fmt(a3))") ///
-						nomtitle nonumber fragment nogap noobs  label ///
-						postfoot("\midrule \multicolumn{4}{l}{Total Households} &      156 \\ " ///
-							"\hline \hline \\[-1.8ex] \multicolumn{5}{J{\linewidth}}{\small " ///
-							"\noindent \textit{Note}: The table displays summar statistics for " ///
-							"treatment assignment, use of solar stoves, and continuous control variables.}  \end{tabular}") 		
+preserve // dropping dupes to give clearer idea of hh breakdown
+	duplicates drop		hhid, force
 	
+* generate indicators for education and sex
+	qui tab 			edu, generate(edu_)
+	
+	replace				sex = 0 if sex == 1
+	replace				sex = 1 if sex == 2
+	
+	lab var				sex "Female Head of Household"
+	lab var				edu_1 "No Education"
+	lab var				edu_2 "Primary Education"
+	lab var				edu_3 "Secondary Education"
+	lab var				edu_4 "Higher Education"
+	
+* summary stats by treatment with t-test
+	eststo 			cntrl :	estpost ///
+						sum age sex  edu_* hh_size tli ai cc ///
+						if treat_assign == 0
+		
+	eststo 			trtmnt : estpost ///
+						sum age sex  edu_* hh_size tli ai cc ///
+						if treat_assign == 1
 
-************************************************************************
-**## 2.2 - categorical covariates
-************************************************************************	
+	eststo 			tot : estpost ///
+						sum age sex  edu_* hh_size tli ai cc
+						
+	eststo 			diff : estpost ///
+						ttest age sex  edu_* hh_size tli ai cc, ///
+						by(treat_assign) unequal
+	
+	distinct		hhid if treat_assign == 0
+	local 			temp1a = r(N) 
+		local 			cntrlhh : display %4.0f `temp1a'
+		
+	distinct		hhid if treat_assign == 1
+	local 			temp2a = r(N) 
+		local 			trtmnthh : display %4.0f `temp2a'
+		
+	distinct		hhid
+	local 			temp3a = r(N) 
+		local 			tothh : display %4.0f `temp3a'
+						
+	esttab 			cntrl trtmnt diff tot ///
+						using "$output/descriptive/convars_tab.tex", replace ///
+						prehead("\begin{tabular}{l*{4}{c}} \\ [-1.8ex]\hline \hline \\[-1.8ex] " ///
+						"& \multicolumn{1}{c}{Control} & \multicolumn{1}{c}{Treatment} &  " ///
+						"\multicolumn{1}{c}{\$p\$-value} & \multicolumn{1}{c}{Total}  \\ ") ///
+						main(mean) aux(sd) nostar unstack label booktabs nonum ///
+						collabels(none) f noobs nomtitle nogaps ///
+						cells("mean(fmt(2 3 3 3 3 3 3 3 3 2) pattern(1 1 0 1)) p(fmt(3) pattern(0 0 1 0))"  ///
+						sd(fmt(2 3 3 3 3 3 3 2 2 2)par pattern(1 1 0 1) )  ) ///
+						postfoot(" \midrule Households & `cntrlhh' & `trtmnthh' & & `tothh' \\ " ///
+						"\hline \hline \\[-1.8ex] \multicolumn{5}{J{\linewidth}}{\small " ///
+						"\noindent \textit{Note}: The table displays means for controls " ///
+						"by treatment assignment and for the total sample. Standard deviations are in " ///
+						"parentheses. We also report \$p\$-values " ///
+						"on a \$t\$-test for the equality of means between treatment and control.}  \end{tabular}") 
 
-	preserve // dropping dupes to give clearer idea of hh breakdown
-		duplicates drop		hhid, force	
-		
-		* post frequency table for treatment assignment
-		estpost tab			treat_assign, sort nototal 
-		est store 			treat_t	
-		
-		esttab 			 treat_t using "$output/descriptive/catvars_tab.tex", replace booktabs ///
-							prehead("\begin{tabular}{l*{2}{c}} \\ [-1.8ex]\hline \hline \\[-1.8ex] ") ///
-							posthead("\cline{2-3} \\[-1.8ex] \multicolumn{3}{l}{\emph{Treatment Assignment}} \\ ") ///
-							cells("b(label(Frequency) fmt(%9.0gc)) pct(label(Percent) fmt(2))") ///
-							nonumber nomtitle fragment nomtitles noobs 
-		
-		* post frequency table for aas group
-		estpost tab			aas, sort nototal 
-		est store 			group_t	
-		
-		esttab 			 group_t using "$output/descriptive/catvars_tab.tex", append booktabs ///
-							posthead("\multicolumn{3}{l}{\emph{NSL Group}} \\ ") ///
-							cells("b( fmt(%9.0gc)) pct( fmt(2))") ///
-							nonumber nomtitle fragment nomtitles noobs mlabels(,none) collabels(,none)
-							
-		* post frequency table for gender
-		estpost tab			sex, sort nototal 
-		est store 			gender_t
-		
-		esttab 			 gender_t using "$output/descriptive/catvars_tab.tex", append booktabs ///
-							posthead("\multicolumn{3}{l}{\emph{Gender of Head of Household}} \\ ") ///
-							cells("b( fmt(%9.0gc)) pct( fmt(2))") ///
-							nonumber nomtitle fragment nomtitles noobs mlabels(,none) collabels(,none)
-		
-		* post frequency table for educational attainment
-		estpost tab			edu, sort nototal 
-		est store 			educ_t
-		
-		esttab 			 educ_t using "$output/descriptive/catvars_tab.tex", append booktabs ///
-							posthead("\multicolumn{3}{l}{\emph{Education of Head of Household}} \\ ") ///
-							cells("b(label(Frequency) fmt(%9.0gc)) pct(label(Percent) fmt(2))") ///
-							nonumber nomtitle fragment nomtitles noobs  mlabels(,none) collabels(,none)
-		
-		* post frequency table for villages
-		estpost tab			village, sort nototal 
-		est store 			village_t
-		
-		esttab 			 village_t using "$output/descriptive/catvars_tab.tex", append booktabs ///
-							posthead("\multicolumn{3}{l}{\emph{Village}} \\ ") ///
-							cells("b(label(Frequency) fmt(%9.0gc)) pct(label(Percent) fmt(2))") ///
-							nonumber nomtitle fragment nomtitles noobs mlabels(,none) collabels(,none) ///
-							postfoot("\midrule \multicolumn{2}{l}{Total Households} &      156 \\ " ///
-							"\hline \hline \\[-1.8ex] \multicolumn{3}{J{\linewidth}}{\small " ///
-							"\noindent \textit{Note}: The table displays the number and " ///
-							"frequency of each categorical control variable.}  \end{tabular}") 				
-		
-		
-	restore
+restore
+
 		
 ************************************************************************
 **# 3 - END
