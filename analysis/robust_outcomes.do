@@ -2,7 +2,7 @@
 * created on: Sep 2024
 * created by: jdm
 * edited by: jdm
-* edited on: 19 Sep 2024
+* edited on: 13 Mar 25
 * stata v.18.5
 
 * does
@@ -45,6 +45,10 @@
 	lab var				treat_assign "Solar Stove"
 	lab var				ss_use "Solar Stove Use"
 	
+************************************************************************
+**# 2 - fatigue
+************************************************************************
+	
 * generate day counter
 	gen					day_count = day if week == 1
 	replace				day_count = day + 7 if week == 2
@@ -54,21 +58,119 @@
 	replace				day_count = day + 35 if week == 6
 	order				day_count, after(day)
 	lab var				day_count "Day in the Experiment"
-	
-************************************************************************
-**# 2 - fatigue
-************************************************************************
 
-* histogram of responses per day by treatment		
+************************************************************************
+**## 2.1 - histogram of responses per day by treatment	
+************************************************************************
+/*
 	twoway			(histogram day_count if treat_assign == 1, color(teal%50) discrete ) ///
 						(histogram day_count if treat_assign == 0, color(sienna%50) discrete ), ///
-						xlabel(1 7 14 21 28 35 42) ///
-						graphregion(fcolor(white)) xtitle("Day in Study") ///
+						xlabel(1 7 14 21 28 35 42) xtitle("Day in Study") ///
+						graphregion(fcolor(white)) ytitle("Density") ///
+						title("A: Distribution of the Number of Responses per Day") ///
 						legend(pos(6) cols(2) label(1 "Treatment") label(2 "Control"))
 
 * graph save
 	graph export 	"$figure/response.pdf", replace as(pdf)			
+	
+*/	
+************************************************************************
+**## 2.2 - total number of entries by treatment
+************************************************************************
 
+* generate total entries by household
+	tostring		hhid, replace
+	encode			hhid, gen(hh)
+
+	duplicates tag 	hh, generate(hh_ent)
+	replace			hh_ent = hh_ent + 1
+	gen				tot_ent = 351
+	
+* generate number of entries per day by household
+	duplicates tag 	hh day_count, generate(day_ent)
+	replace			day_ent = day_ent + 1
+
+* collapse to household and day
+	duplicates drop	hh day_count, force
+	
+* create entries by treatment
+	sort			treat_assign day_count
+	egen			trt_ent = total(day_ent) if treat_assign == 1, by(day_count)
+	egen			trt_tot= total(day_ent) if treat_assign == 1
+		
+	egen			cnt_ent = total(day_ent) if treat_assign == 0, by(day_count)
+	egen			cnt_tot= total(day_ent) if treat_assign == 0
+	
+* create cumulative distribution by household
+	sort 			hh day_count
+	bys hhid:		gen count = _n	
+
+	gen				cuml = day_ent / hh_ent if count == 1
+	by hhid:		replace	cuml = day_ent / hh_ent + cuml[_n-1] if cuml == .
+	replace			cuml = 1 if cuml > .9999 & cuml != .
+	
+	gen				cuml_trt = trt_ent / trt_tot if count == 1	
+	by hhid:		replace	cuml_trt = trt_ent / trt_tot + cuml_trt[_n-1] if cuml_trt == .
+	replace			cuml_trt = 1 if cuml_trt > .9999 & cuml_trt != .
+	
+	gen				cuml_cnt = cnt_ent / cnt_tot if count == 1
+	by hhid:		replace	cuml_cnt = cnt_ent / cnt_tot + cuml_cnt[_n-1] if cuml_cnt == .
+	replace			cuml_cnt = 1 if cuml_cnt > .9999 & cuml_cnt != .
+	
+* keep only needed variables
+	keep			hh treat_assign day_count cuml cuml_trt cuml_cnt
+	rename			treat_assign ss 
+	
+	reshape wide	cuml ss cuml_trt cuml_cnt, i(day_count) j(hh)
+
+	gen				cuml_cnt = cuml_cnt5 
+	gen				cuml_trt = cuml_trt18 
+	order			cuml_trt cuml_cnt, after(day_count)
+	
+	forvalues 		i = 1/156 {
+		drop 		cuml_cnt`i' cuml_trt`i'
+}
+
+* fill in  missing values
+	forvalues 		i = 1/156 {
+		replace 		ss`i' = ss`i'[1]
+}
+		
+	local 			grt ""
+	forvalues 		i = 1/156 {
+		local 			grt `grt' line cuml`i' day_count ///
+							if ss`i' == 1, lpattern(solid) lcolor(teal%20) lwidth(thin) ||
+}
+		
+	local 			grc ""
+	forvalues 		i = 1/156 {
+		local 			grc `grc' line cuml`i' day_count ///
+							if ss`i' == 0, lpattern(dash) lcolor(sienna%20) lwidth(thin) ||
+}
+		
+* final graph
+	sort 			day_count
+	twoway 			`grc' `grt' ///
+	line 			cuml_cnt day_count, lc(sienna*1.5) lpattern(dash) || ///
+	line			cuml_trt day_count, lc(teal*1.5) lpattern(solid)  ///
+						xlabel(1 7 14 21 28 35 42) xtitle("Day in Study") ///
+						graphregion(fcolor(white)) ytitle("Cumulative Distribution") ///
+						title("B: Accumulation of Diary Entries Over Time") ///
+						legend(pos(6) cols(2) order(313 314) ///
+						label(313 "Treatment") label(314 "Control"))
+						
+* graph save
+	graph export 	"$figure/cuml_entries.pdf", replace as(pdf)		
+	
+	
+	
+	
+	
+************************************************************************
+**## 2.3 - number of ingredients in a dish in a day
+************************************************************************
+
+* event study
 	reghdfe 		ingred_dish ib(42).day_count if treat_assign == 1, ///
 						absorb(hhid) cl(hhid) 
 	estimates 		store event_dish_t
@@ -79,15 +181,43 @@
 	
 	coefplot 		(event_dish_t, lc(teal) lpattern(solid) ciopts(recast(rarea) color(teal%20)) ) ///
 					(event_dish_c, lc(sienna) lpattern(dash) ciopts(recast(rarea) color(sienna%20)) ), ///
-					graphregion(fcolor(white)) xtitle("Day in Study") ///
+					graphregion(fcolor(white)) xtitle("Day in Study") ytitle("Ingredients in a Dish") ///
 						vertical omitted yline(0, lc(black) lw(vthin)) recast(connected) msize(vtiny) ///
-						xlabel(1 7 14 21 28 35 42, angle(0) nogrid) drop(_cons) ytitle("Coefficient Size") ///
+						xlabel(1 7 14 21 28 35 42, angle(0) nogrid) drop(_cons)  ///			
+						ylabel(-.4 "2.7" -.2 "2.9" 0 "3.1" .2 "3.3" .4 "3.5") ///
+						title("C: Average Number of Ingredients Used in a Dish") ///
 						legend(pos(6) cols(2) ) p1(label("Treatment")) p2(label("Control"))
 
 * graph save
-	graph export 	"$figure/event.pdf", replace as(pdf)		
+	graph export 	"$figure/event_ingredient.pdf", replace as(pdf)		
 	
 	
+************************************************************************
+**## 2.4 - diversity of ingredients in in a day
+************************************************************************
+
+* event study
+	reghdfe 		hdds_day ib(42).day_count if treat_assign == 1, ///
+						absorb(hhid) cl(hhid) 
+	estimates 		store event_day_t
+
+	reghdfe 		hdds_day ib(42).day_count if treat_assign == 0, ///
+						absorb(hhid) cl(hhid) 
+	estimates 		store event_day_c
+	
+	coefplot 		(event_day_t, lc(teal) lpattern(solid) ciopts(recast(rarea) color(teal%20)) ) ///
+					(event_day_c, lc(sienna) lpattern(dash) ciopts(recast(rarea) color(sienna%20)) ), ///
+					graphregion(fcolor(white)) xtitle("Day in Study") ytitle("Distinct Ingredients in a Day") ///
+						vertical omitted yline(0, lc(black) lw(vthin)) recast(connected) msize(vtiny) ///
+						xlabel(1 7 14 21 28 35 42, angle(0) nogrid) drop(_cons)  ///				
+						ylabel(-1 "5.2" -.5 "5.7" 0 "6.2" .5 "6.7" 1 "7.2") ///
+						title("D: Number of Distinct Ingredients Recorded in a Day") ///
+						legend(pos(6) cols(2) ) p1(label("Treatment")) p2(label("Control"))
+
+* graph save
+	graph export 	"$figure/event_diversity.pdf", replace as(pdf)		
+	
+		
 	reg 			ingred_dish day_count, vce(cluster hhid)
 
 	reg 			ingred_dish day_count $$x_cov, vce(cluster hhid)
