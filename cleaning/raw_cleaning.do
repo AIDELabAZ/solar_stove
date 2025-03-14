@@ -2,7 +2,7 @@
 * created on: July 2020
 * created by: lem
 * edited by: jdm
-* edited on: 12 Sep 2024
+* edited on: 14 Mar 25
 * stata v.18.5
 
 * does
@@ -302,7 +302,7 @@
 
 * drop unneeded variables
 	drop 			Liquid Quantity Units AH
-	drop 			Other Notes Note Basedonmemory  ///
+	drop 			Other Notes Note  ///
 						Notesorspecifyifotherunits AB
 
 ************************************************************************
@@ -594,6 +594,15 @@
 		}
 	drop 				process*
 
+* clean memory variable
+	gen 			recall = 0 if Basedonmemory == "no" | Basedonmemory == "no " | ///
+						Basedonmemory == "na"
+	replace			recall = 1 if Basedonmemory == "Nahupula" | Basedonmemory == "S" | ///
+						Basedonmemory == "S999/" | Basedonmemory == "c" | ///
+						Basedonmemory == "yes"
+	lab var			recall "Was Entry Based on Recall?"	
+	drop			Basedonmemory
+						
 * order variables
 	drop 			lozi*
 	order 			english1 fg1 proc1 ///

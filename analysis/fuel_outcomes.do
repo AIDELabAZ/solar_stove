@@ -112,6 +112,9 @@
 	estadd local 		cov "Yes", replace		
 	eststo 				wFVc	
 	
+	
+	mhtexp f_time f_quant_ub c_quant_ub val_fuel_ub, treatment(treat_assign)
+
   
 * table 4, Panel A: Solar stove assignment on weekly fuel outcomes
 	esttab 			wFT wFTc wFQ wFQc wCQ wCQc wFV wFVc ///

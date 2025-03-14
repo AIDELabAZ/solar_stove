@@ -2,7 +2,7 @@
 * created on: Sep 2024
 * created by: jdm
 * edited by: jdm
-* edited on: 24 Sep 2024
+* edited on: 14 Mar 25
 * stata v.18.5
 
 * does
@@ -99,7 +99,7 @@
 	lab var			ingred_num "Ingredient Number in Dish"
 	
 	order 			village hhid aas hh_size ai tli sex age edu treat_assign ///
-						week day meal dish ss_use cook ingred_num
+						week day meal dish ss_use cook ingred_num recall
 
 * clean a last few ingredients
 	replace			english = "maize" if english == "maize yellow"		
@@ -282,7 +282,7 @@
 						sr_meal hdds_avg_meal sr_avg_meal hdds_day sr_day ///
 						hdds_avg_day sr_avg_day hdds_week sr_week hdds_avg_week ///
 						sr_avg_week hdds_total sr_total ingred_dish ingred_meal ///
-						ingred_day ingred_week)
+						ingred_day ingred_week recall)
 	
 	lab var			legumes "Where Legumes Eaten?"
 	

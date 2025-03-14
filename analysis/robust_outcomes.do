@@ -62,7 +62,7 @@
 ************************************************************************
 **## 2.1 - histogram of responses per day by treatment	
 ************************************************************************
-/*
+
 	twoway			(histogram day_count if treat_assign == 1, color(teal%50) discrete ) ///
 						(histogram day_count if treat_assign == 0, color(sienna%50) discrete ), ///
 						xlabel(1 7 14 21 28 35 42) xtitle("Day in Study") ///
@@ -73,7 +73,7 @@
 * graph save
 	graph export 	"$figure/response.pdf", replace as(pdf)			
 	
-*/	
+
 ************************************************************************
 **## 2.2 - total number of entries by treatment
 ************************************************************************
@@ -163,35 +163,84 @@
 	graph export 	"$figure/cuml_entries.pdf", replace as(pdf)		
 	
 	
-	
-	
-	
 ************************************************************************
 **## 2.3 - number of ingredients in a dish in a day
 ************************************************************************
 
+preserve
 * event study
-	reghdfe 		ingred_dish ib(42).day_count if treat_assign == 1, ///
+	reghdfe 		recall ib(42).day_count if treat_assign == 1, ///
 						absorb(hhid) cl(hhid) 
 	estimates 		store event_dish_t
 
-	reghdfe 		ingred_dish ib(42).day_count if treat_assign == 0, ///
+	reghdfe 		recall ib(42).day_count if treat_assign == 0, ///
 						absorb(hhid) cl(hhid) 
 	estimates 		store event_dish_c
 	
 	coefplot 		(event_dish_t, lc(teal) lpattern(solid) ciopts(recast(rarea) color(teal%20)) ) ///
 					(event_dish_c, lc(sienna) lpattern(dash) ciopts(recast(rarea) color(sienna%20)) ), ///
-					graphregion(fcolor(white)) xtitle("Day in Study") ytitle("Ingredients in a Dish") ///
+					graphregion(fcolor(white)) xtitle("") ytitle("Share of Recall Entries") ///
 						vertical omitted yline(0, lc(black) lw(vthin)) recast(connected) msize(vtiny) ///
-						xlabel(1 7 14 21 28 35 42, angle(0) nogrid) drop(_cons)  ///			
-						ylabel(-.4 "2.7" -.2 "2.9" 0 "3.1" .2 "3.3" .4 "3.5") ///
-						title("C: Average Number of Ingredients Used in a Dish") ///
-						legend(pos(6) cols(2) ) p1(label("Treatment")) p2(label("Control"))
+						xlabel(1 7 14 21 28 35 42, angle(0) nogrid) drop(_cons)  ///	
+						ylabel(-.08 -0.04 0 .04 .08) title("C.1: Ignore Missing Recall Data") ///
+						legend(pos(6) cols(2) ) p1(label("Treatment")) p2(label("Control")) ///
+						saving("$figure/miss", replace)
+restore
+		
+preserve
+	
+replace recall = 0 if recall == .
 
+* event study
+	reghdfe 		recall ib(42).day_count if treat_assign == 1, ///
+						absorb(hhid) cl(hhid) 
+	estimates 		store event_dish_t
+
+	reghdfe 		recall ib(42).day_count if treat_assign == 0, ///
+						absorb(hhid) cl(hhid) 
+	estimates 		store event_dish_c
+	
+	coefplot 		(event_dish_t, lc(teal) lpattern(solid) ciopts(recast(rarea) color(teal%20)) ) ///
+					(event_dish_c, lc(sienna) lpattern(dash) ciopts(recast(rarea) color(sienna%20)) ), ///
+					graphregion(fcolor(white)) xtitle("") ytitle("Share of Recall Entries") ///
+						vertical omitted yline(0, lc(black) lw(vthin)) recast(connected) msize(vtiny) ///
+						xlabel(1 7 14 21 28 35 42, angle(0) nogrid) drop(_cons)  ///	
+						ylabel(-.08 -0.04 0 .04 .08) title("C.2: Treat Missing as Not Based on Recall") ///
+						legend(pos(6) cols(2) ) p1(label("Treatment")) p2(label("Control")) ///
+						saving("$figure/no", replace)
+restore		
+		
+preserve
+
+replace recall = 1 if recall == .
+
+* event study
+	reghdfe 		recall ib(42).day_count if treat_assign == 1, ///
+						absorb(hhid) cl(hhid) 
+	estimates 		store event_dish_t
+
+	reghdfe 		recall ib(42).day_count if treat_assign == 0, ///
+						absorb(hhid) cl(hhid) 
+	estimates 		store event_dish_c
+	
+	coefplot 		(event_dish_t, lc(teal) lpattern(solid) ciopts(recast(rarea) color(teal%20)) ) ///
+					(event_dish_c, lc(sienna) lpattern(dash) ciopts(recast(rarea) color(sienna%20)) ), ///
+					graphregion(fcolor(white)) xtitle("Day in Study") ytitle("Share of Recall Entries") ///
+						vertical omitted yline(0, lc(black) lw(vthin)) recast(connected) msize(vtiny) ///
+						xlabel(1 7 14 21 28 35 42, angle(0) nogrid) drop(_cons)  ///	
+						ylabel(-.08 -0.04 0 .04 .08) title("C.3: Treat Missing as Based on Recall") ///
+						legend(pos(6) cols(2) ) p1(label("Treatment")) p2(label("Control")) ///
+						saving("$figure/yes", replace)
+restore
+		
+	grc1leg2 				"$figure/miss" "$figure/no" "$figure/yes", col(1) iscale(.5) ///
+								 commonscheme title("C: Frequency of Entries Based on Recall")
+								
 * graph save
-	graph export 	"$figure/event_ingredient.pdf", replace as(pdf)		
+	graph export 	"$figure/recall.pdf", replace as(pdf)		
 	
-	
+			
+						
 ************************************************************************
 **## 2.4 - diversity of ingredients in in a day
 ************************************************************************
