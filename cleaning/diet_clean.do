@@ -56,7 +56,7 @@
 	drop if			week > 6
 
 * only recorded breakfast
-	drop if			hhid == 226000
+*	drop if			hhid == 226000
 		
 	order 			village hhid aas hh_size ai tli sex age edu ///
 						solar
@@ -162,7 +162,7 @@
 * encode english string var into a numeric variable
 	encode			english, gen(ingredients)
 	bys 			ingredients: gen size = _N
-	replace			ingredients = 0 if size < 566
+	replace			ingredients = 0 if size < 565
 	lab define 		ingredients 0 "other", add
 	
 	gen				science = sci
@@ -180,7 +180,7 @@
 							prehead("\begin{tabular}{l*{2}{c}} \\ [-1.8ex]\hline \hline \\[-1.8ex] ") ///
 							cells("b(label(Frequency) fmt(%9.0gc)) pct(label(Percent) fmt(2))") ///
 							nonumber nomtitle noobs fragment ///
-							postfoot("\midrule Total       &       93,606&      100 \\ " ///
+							postfoot("\midrule Total       &       93,724&      100 \\ " ///
 							"\hline \hline \\[-1.8ex] \multicolumn{3}{J{\linewidth}}{\small " ///
 							"\noindent \textit{Note}: The table displays the number of times " ///
 							"the top 25 ingredient was recorded in the food diaries and the relative " ///
@@ -195,7 +195,7 @@
 							prehead("\begin{tabular}{l*{2}{c}} \\ [-1.8ex]\hline \hline \\[-1.8ex] ") ///
 							cells("b(label(Frequency) fmt(%9.0gc)) pct(label(Percent) fmt(2))") ///
 							nonumber nomtitle noobs fragment varlabels(`e(labels)') ///
-							postfoot("\midrule Total       &       93,606&      100 \\ " ///
+							postfoot("\midrule Total       &       93,724&      100 \\ " ///
 							"\hline \hline \\[-1.8ex] \multicolumn{3}{J{\linewidth}}{\small " ///
 							"\noindent \textit{Note}: The table displays the number of times " ///
 							"a food group is represented in the food diaries. There are 12 " ///
@@ -209,7 +209,7 @@
 							prehead("\begin{tabular}{l*{2}{c}} \\ [-1.8ex]\hline \hline \\[-1.8ex] ") ///
 							cells("b(label(Frequency) fmt(%9.0gc)) pct(label(Percent) fmt(2))") ///
 							nonumber nomtitle noobs fragment ///
-							postfoot("\midrule Total       &       81330&      100 \\ " ///
+							postfoot("\midrule Total       &       66,3190&      100 \\ " ///
 							"\hline \hline \\[-1.8ex] \multicolumn{3}{J{\linewidth}}{\small " ///
 							"\noindent \textit{Note}: The table displays the number of times " ///
 							"a species is represented in the food diaries. There are 63 " ///

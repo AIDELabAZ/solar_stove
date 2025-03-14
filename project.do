@@ -84,7 +84,7 @@ if $pack == 1 {
 ***********************************************************************
 * 1 - run ingredients data cleaning .do file
 ***********************************************************************
-/*
+
 	do				"$code/cleaning/food_converter.do"
 	do				"$code/cleaning/raw_cleaning.do"
 

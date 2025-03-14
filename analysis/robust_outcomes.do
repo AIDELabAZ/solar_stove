@@ -78,6 +78,7 @@
 **## 2.2 - total number of entries by treatment
 ************************************************************************
 
+preserve
 * generate total entries by household
 	tostring		hhid, replace
 	encode			hhid, gen(hh)
@@ -156,12 +157,12 @@
 						xlabel(1 7 14 21 28 35 42) xtitle("Day in Study") ///
 						graphregion(fcolor(white)) ytitle("Cumulative Distribution") ///
 						title("B: Accumulation of Diary Entries Over Time") ///
-						legend(pos(6) cols(2) order(313 314) ///
-						label(313 "Treatment") label(314 "Control"))
+						legend(pos(6) cols(2) order(314 313) ///
+						label(313 "Control") label(314 "Treatment"))
 						
 * graph save
 	graph export 	"$figure/cuml_entries.pdf", replace as(pdf)		
-	
+restore	
 	
 ************************************************************************
 **## 2.3 - number of ingredients in a dish in a day
