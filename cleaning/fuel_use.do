@@ -2,8 +2,8 @@
 * created on: February 2021
 * created by: lem
 * edited by: jdm
-* edited on: 5 Jan 2025
-* stata v.18.5
+* edited on: 25 Apr 2025
+* stata v.19.5
 
 * does
 	* inputs raw fuel data
@@ -42,8 +42,8 @@
 ************************************************************************
 
 * drop unnecessary variables / anonymize
-	drop 				household_name cod_hh_collectedbought name_collected ///
-							cod_hh_bought name_whopayed type_lozi v27
+	drop 				household_name name_collected ///
+							name_whopayed type_lozi v27
 
 	rename				cod hhid	
 		
@@ -111,11 +111,32 @@
 							bght times_bght price_bght quant_bght, ///
 							after(fuel)
 	
+	replace				cod_hh_collectedbought = "" if cod_hh_collectedbought == "Missing name "
+	replace				cod_hh_bought = "" if cod_hh_bought == "Missing name "
+
+	destring			cod_hh_collectedbought, replace
+	destring			cod_hh_bought, replace
+	
+	
+* collapse to combine firewood and firewood/dung
+	collapse (sum)		times_cltd time_cltd price_cltd quant_cltd times_bght ///
+						price_bght quant_bght ///
+			 (max)		cltd bght, by(village hhid week cod_hh_collectedbought cod_hh_bought)
+
+
+	replace				price_cltd = . if price_cltd == 0
+	replace				price_bght = . if price_bght == 0
+	
+* save individual
+	compress
+	save 				"$export/fuel_cleaned_ind.dta", replace
+
+
 * collapse to combine firewood and firewood/dung
 	collapse (sum)		times_cltd time_cltd price_cltd quant_cltd times_bght ///
 						price_bght quant_bght ///
 			 (max)		cltd bght, by(village hhid week)
-	
+			 
 	replace				price_cltd = . if price_cltd == 0
 	replace				price_bght = . if price_bght == 0
 
