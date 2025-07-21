@@ -1,7 +1,7 @@
-* project: solar stoves (jde short paper)
+* project: solar stoves
 * created on: July 2020
 * created by: lem
-* Stata v.18.5
+* Stata v.19.5
 
 * does
 	* establishes an identical workspace between users
@@ -33,9 +33,9 @@
 ***********************************************************************
 
 * Define root folder globals
-    if `"`c(username)'"' == "jdmichler" {
-    global 		code  	"C:/Users/jdmichler/git/AIDELabAZ/solar_stove"
-	global 		data	"C:/Users/jdmichler/Dropbox/Solar_Stoves"
+    if `"`c(username)'"' == "jdmic" {
+    global 		code  	"C:/Users/jdmic/git/solar_stove"
+	global 		data	"C:/Users/jdmic/Dropbox/Solar_Stoves"
     }
 
     if `"`c(username)'"' == "lauramccann" {
@@ -51,7 +51,7 @@
 if $pack == 1 {
 	
 	* for packages/commands, make a local containing any required packages
-		loc userpack "blindschemes mdesc estout distinct winsor2 mipolate egenmore reghdfe ftools coefplot ivreg2 ssc install ranktest" 
+		loc userpack "blindschemes mdesc estout distinct winsor2 mipolate egenmore reghdfe ftools coefplot ivreg2 ranktest" 
 	
 	* install packages that are on ssc	
 		foreach package in `userpack' {

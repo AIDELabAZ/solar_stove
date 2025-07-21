@@ -2,8 +2,8 @@
 * created on: Sep 2024
 * created by: jdm
 * edited by: jdm
-* edited on: 1 May 25
-* stata v.18.5
+* edited on: 18 july 2025
+* stata v.19.5
 
 * does
 	* inputs cleaned fuel data
@@ -139,7 +139,7 @@
 	estadd scalar		dep_mean = r(mean)		
 	estadd local 		cov "Yes", replace		
 	eststo 				wCQc	
-	
+			
 * fuel value at week-level use with and without controls using LPM	
 	reg 				val_fuel_ub treat_assign i.aas i.village, vce(cluster hhid)
 	summarize 			val_fuel_ub if treat_assign == 0	
@@ -173,7 +173,7 @@
 				
 				
 ************************************************************************
-**# 2.2 - CO2e
+**## 2.2 - CO2e
 ************************************************************************
 	
 * calculate SSC via ITT
@@ -334,7 +334,7 @@ collapse 				(sum) f_time f_quant_m f_quant_ub c_quant_m c_quant_ub  ///
 						
 					
 ************************************************************************
-**# 2.4 - CO2e
+**## 2.4 - CO2e
 ************************************************************************
 	
 * calculate SSC via ITT
@@ -406,6 +406,133 @@ collapse 				(sum) f_time f_quant_m f_quant_ub c_quant_m c_quant_ub  ///
 * graph save
 	graph export 	"$figure/scc.pdf", replace as(pdf)			
 	
+************************************************************************
+**# 3- examining trends for reviewer
+************************************************************************
+	
+
+*******************************************************
+* 1.  Run the model and store the estimates
+*******************************************************
+
+reg f_quant_m i.treat_assign#ibn.week i.aas i.village if treat_assign == 1, nocon vce(cluster hhid)
+est store event_sum1
+
+reg f_quant_m i.treat_assign#ibn.week i.aas i.village if treat_assign == 0, nocon vce(cluster hhid)
+est store event_sum2
+
+*******************************************************
+* 2.  Build lists that keep / rename the interaction
+*     terms so that week-specific coefficients in the
+*     two series share the *same* name.
+*     (Adjust the week list to match your data.)
+*******************************************************
+local weeks 1 2 3 4 5 6       // example
+
+*  Build rename and keep lists on the fly
+local ren_T ""     // rename rules for Treatment
+local ren_C ""     // rename rules for Control
+local keep_T ""    // keep list  for Treatment
+local keep_C ""    // keep list  for Control
+
+foreach w of local weeks {
+    * coefficient names Stata created:
+    *   1.treat_assign#`w'.week   (Treatment)
+    *   0.treat_assign#`w'.week   (Control)
+    
+    local ren_T `ren_T'  1.treat_assign#`w'.week = week`w'
+    local ren_C `ren_C'  0.treat_assign#`w'.week = week`w'
+    
+    local keep_T `keep_T'  1.treat_assign#`w'.week
+    local keep_C `keep_C'  0.treat_assign#`w'.week
+}
+
+*******************************************************
+* 3.  Plot: two sub-plots that draw over the same
+*     x–positions (week1 … week10) because we renamed
+*     the coefficients to the identical base names.
+*******************************************************
+coefplot                                                     ///
+    (event_sum1,                                               ///
+        keep(`keep_T')                                        ///
+        rename(`ren_T')                                       ///
+        label("Treatment")  ylabel(0(10)50)                                   ///
+        recast(connected) lw(thick) lc(sea) mc(sea)  msymbol(O) )   ///
+    (event_sum2,                                               ///
+        keep(`keep_C')                                        ///
+        rename(`ren_C')                                       ///
+        label("Control")                                      ///
+        recast(connected) lw(thick) lc(reddish) mc(reddish)  msymbol(T) ),    ///
+    vertical  title("Firewood Quantity")                      ///
+    yline(0, lc(black) lw(vthin))                             ///
+    ciopts(recast(rline) lw(thin) lc(black) lp(dash))         ///
+    graphregion(fcolor(white))                                ///
+    legend(col(2) order(4 2))    			  ///
+	saving("$figure/fire", replace)                 
+		
+	
+*******************************************************
+* 1.  Run the model and store the estimates
+*******************************************************
+
+reg c_quant_m i.treat_assign#ibn.week i.aas i.village if treat_assign == 1, nocon vce(cluster hhid)
+est store event_sum1
+
+reg c_quant_m i.treat_assign#ibn.week i.aas i.village if treat_assign == 0, nocon vce(cluster hhid)
+est store event_sum2
+
+*******************************************************
+* 2.  Build lists that keep / rename the interaction
+*     terms so that week-specific coefficients in the
+*     two series share the *same* name.
+*     (Adjust the week list to match your data.)
+*******************************************************
+local weeks 1 2 3 4 5 6       // example
+
+*  Build rename and keep lists on the fly
+local ren_T ""     // rename rules for Treatment
+local ren_C ""     // rename rules for Control
+local keep_T ""    // keep list  for Treatment
+local keep_C ""    // keep list  for Control
+
+foreach w of local weeks {
+    * coefficient names Stata created:
+    *   1.treat_assign#`w'.week   (Treatment)
+    *   0.treat_assign#`w'.week   (Control)
+    
+    local ren_T `ren_T'  1.treat_assign#`w'.week = week`w'
+    local ren_C `ren_C'  0.treat_assign#`w'.week = week`w'
+    
+    local keep_T `keep_T'  1.treat_assign#`w'.week
+    local keep_C `keep_C'  0.treat_assign#`w'.week
+}
+
+*******************************************************
+* 3.  Plot: two sub-plots that draw over the same
+*     x–positions (week1 … week10) because we renamed
+*     the coefficients to the identical base names.
+*******************************************************
+coefplot                                                     ///
+    (event_sum1,                                               ///
+        keep(`keep_T')                                        ///
+        rename(`ren_T')                                       ///
+        label("Treatment")  ylabel(0(10)50)                                  ///
+        recast(connected) lw(thick) lc(sea) mc(sea)  msymbol(O) )   ///
+    (event_sum2,                                               ///
+        keep(`keep_C')                                        ///
+        rename(`ren_C')                                       ///
+        label("Control")                                      ///
+        recast(connected) lw(thick) lc(reddish) mc(reddish)  msymbol(T) ),    ///
+    vertical  title("Charcoal Quantity")                      ///
+    yline(0, lc(black) lw(vthin))                             ///
+    ciopts(recast(rline) lw(thin) lc(black) lp(dash))         ///
+    graphregion(fcolor(white))  saving("$figure/coal", replace)                 
+		
+*combine and save
+	grc1leg	"$figure/fire" "$figure/coal"
+		
+	graph export 	"$figure/trend.pdf", replace as(pdf)			
+
 * close the log
 	log				close
 	
