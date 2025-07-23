@@ -44,6 +44,23 @@
 	global 				x_cov hh_size ai tli sex age i.edu cc 	
 
 	lab var				treat_assign "Solar Stove"
+
+************************************************************************
+**## 1.1 - fuel use table
+************************************************************************
+	
+* post frequency table of food groups
+		estpost tab			cook, sort nototal
+	
+* output table of food group frequencies
+		esttab 			 using "$output/descriptive/cook.tex", replace booktabs ///
+							prehead("\begin{tabular}{l*{2}{c}} \\ [-1.8ex]\hline \hline \\[-1.8ex] ") ///
+							cells("b(label(Frequency) fmt(%9.0gc)) pct(label(Percent) fmt(2))") ///
+							nonumber nomtitle noobs fragment varlabels(`e(labels)') ///
+							postfoot("\midrule Total       &       30,345&      100 \\ " ///
+							"\hline \hline \\[-1.8ex] \multicolumn{3}{J{\linewidth}}{\small " ///
+							"\noindent \textit{Note}: The table displays the number of times " ///
+							"a heat source is used to cook a dish in the food diaries.}  \end{tabular}") 		
 	
 	
 ************************************************************************
