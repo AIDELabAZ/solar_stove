@@ -250,162 +250,164 @@
 **## 2.3 - final outcome: total fuel collection
 ************************************************************************
 
-collapse 				(sum) f_time f_quant_m f_quant_ub c_quant_m c_quant_ub  ///
-							  val_fuel_ub f_quant_lb c_quant_lb val_fuel_lb ///
-						(mean) cc scc co2e_f_m co2e_f_ub co2e_f_lb co2e_c_m ///
-								co2e_c_ub co2e_c_lb fNRB_m fNRB_ub fNRB_lb, ///
-							by(village hhid aas hh_size ai tli sex age edu treat_assign)
+preserve
+	collapse 				(sum) f_time f_quant_m f_quant_ub c_quant_m ///
+								c_quant_ub val_fuel_ub f_quant_lb c_quant_lb ///
+								val_fuel_lb (mean) cc scc co2e_f_m co2e_f_ub ///
+								co2e_f_lb co2e_c_m co2e_c_ub co2e_c_lb ///
+								fNRB_m fNRB_ub fNRB_lb, ///
+								by(village hhid aas hh_size ai tli sex age edu treat_assign)
 
-	
-* firewood time at overall use with and without controls using LPM	
-	reg 				f_time treat_assign i.aas i.village, vce(robust)
-	summarize 			f_time if treat_assign == 0	
-	estadd scalar		dep_mean = r(mean)		
-	estadd local 		cov "No", replace	
-	eststo 				tFT
-	
-	reg 				f_time treat_assign $x_cov i.aas i.village, vce(robust)
-	summarize 			f_time if treat_assign == 0	
-	estadd scalar		dep_mean = r(mean)		
-	estadd local 		cov "Yes", replace		
-	eststo 				tFTc	
-	
-* firewood quantity at overall use with and without controls using LPM	
-	reg 				f_quant_m treat_assign i.aas i.village, vce(robust)
-	summarize 			f_quant_m if treat_assign == 0	
-	estadd scalar		dep_mean = r(mean)		
-	estadd local 		cov "No", replace	
-	eststo 				tFQ
-	
-	reg 				f_quant_m treat_assign $x_cov i.aas i.village, vce(robust)
-	predict				f_hat_m, xb
-	gen					f_itt = _b[treat_assign]
-	summarize 			f_quant_m if treat_assign == 0	
-	estadd scalar		dep_mean = r(mean)		
-	estadd local 		cov "Yes", replace		
-	eststo 				tFQc	
-	
-* charcoal quantity at overall use with and without controls using LPM	
-	reg 				c_quant_m treat_assign i.aas i.village, vce(robust)
-	summarize 			c_quant_m if treat_assign == 0	
-	estadd scalar		dep_mean = r(mean)		
-	estadd local 		cov "No", replace	
-	eststo 				tCQ
-	
-	reg 				c_quant_m treat_assign $x_cov i.aas i.village, vce(robust)
-	predict				c_hat_m, xb
-	gen					c_itt = _b[treat_assign]
-	summarize 			c_quant_m if treat_assign == 0	
-	estadd scalar		dep_mean = r(mean)		
-	estadd local 		cov "Yes", replace		
-	eststo 				tCQc	
-	
-* fuel value at overall use with and without controls using LPM	
-	reg 				val_fuel_ub treat_assign i.aas i.village, vce(robust)
-	summarize 			val_fuel_ub if treat_assign == 0	
-	estadd scalar		dep_mean = r(mean)		
-	estadd local 		cov "No", replace	
-	eststo 				tFV
-	
-	reg 				val_fuel_ub treat_assign $x_cov i.aas i.village, vce(robust)
-	summarize 			val_fuel_ub if treat_assign == 0	
-	estadd scalar		dep_mean = r(mean)		
-	estadd local 		cov "Yes", replace		
-	eststo 				tFVc	
-	
+		
+	* firewood time at overall use with and without controls using LPM	
+		reg 				f_time treat_assign i.aas i.village, vce(robust)
+		summarize 			f_time if treat_assign == 0	
+		estadd scalar		dep_mean = r(mean)		
+		estadd local 		cov "No", replace	
+		eststo 				tFT
+		
+		reg 				f_time treat_assign $x_cov i.aas i.village, vce(robust)
+		summarize 			f_time if treat_assign == 0	
+		estadd scalar		dep_mean = r(mean)		
+		estadd local 		cov "Yes", replace		
+		eststo 				tFTc	
+		
+	* firewood quantity at overall use with and without controls using LPM	
+		reg 				f_quant_m treat_assign i.aas i.village, vce(robust)
+		summarize 			f_quant_m if treat_assign == 0	
+		estadd scalar		dep_mean = r(mean)		
+		estadd local 		cov "No", replace	
+		eststo 				tFQ
+		
+		reg 				f_quant_m treat_assign $x_cov i.aas i.village, vce(robust)
+		predict				f_hat_m, xb
+		gen					f_itt = _b[treat_assign]
+		summarize 			f_quant_m if treat_assign == 0	
+		estadd scalar		dep_mean = r(mean)		
+		estadd local 		cov "Yes", replace		
+		eststo 				tFQc	
+		
+	* charcoal quantity at overall use with and without controls using LPM	
+		reg 				c_quant_m treat_assign i.aas i.village, vce(robust)
+		summarize 			c_quant_m if treat_assign == 0	
+		estadd scalar		dep_mean = r(mean)		
+		estadd local 		cov "No", replace	
+		eststo 				tCQ
+		
+		reg 				c_quant_m treat_assign $x_cov i.aas i.village, vce(robust)
+		predict				c_hat_m, xb
+		gen					c_itt = _b[treat_assign]
+		summarize 			c_quant_m if treat_assign == 0	
+		estadd scalar		dep_mean = r(mean)		
+		estadd local 		cov "Yes", replace		
+		eststo 				tCQc	
+		
+	* fuel value at overall use with and without controls using LPM	
+		reg 				val_fuel_ub treat_assign i.aas i.village, vce(robust)
+		summarize 			val_fuel_ub if treat_assign == 0	
+		estadd scalar		dep_mean = r(mean)		
+		estadd local 		cov "No", replace	
+		eststo 				tFV
+		
+		reg 				val_fuel_ub treat_assign $x_cov i.aas i.village, vce(robust)
+		summarize 			val_fuel_ub if treat_assign == 0	
+		estadd scalar		dep_mean = r(mean)		
+		estadd local 		cov "Yes", replace		
+		eststo 				tFVc	
+		
 
-* table 4, Panel B: Solar stove assignment on overall fuel
-	esttab 			tFT tFTc tFQ tFQc tCQ tCQc tFV tFVc ///
-						using "$output/fuel_out.tex", b(3) se(3) append ///
-							prehead("\midrule \multicolumn{9}{l}{\emph{Panel B: Overall Fuel Outcomes}} \\ ") ///
-							keep(treat_assign) noobs ///
-							booktabs nonum nomtitle collabels(none) nobaselevels nogaps ///
-							fragment label stat(dep_mean N cov r2_a, labels( "Mean in Control" ///
-							"Observations" "Covariates" "Adjusted R$^2$") fmt(%4.3f %9.0fc %4.3f)) ///
-							postfoot("\hline \hline \\[-1.8ex] \multicolumn{9}{J{\linewidth}}{\small " ///
-							"\noindent \textit{Note}: Dependent variables are different measure of " ///
-							" fuel collection at different levels of aggregation. " ///
-							"In Panel A, we use values measured each week " ///
-							"In Panel B, we sum weekly values to the overall six week total. " ///
-							"All regressions include two levels of strata " ///
-							"fixed effects: village and nutrition sensitive landscapes (NSL) group. " ///
-							"Eicker-Huber-White (EHW) robust standard errors. Standard errors are presented in " ///
-							"parentheses (*** p$<$0.001, ** p$<$0.01, * p$<$0.05).}  \end{tabular}") 
+	* table 4, Panel B: Solar stove assignment on overall fuel
+		esttab 			tFT tFTc tFQ tFQc tCQ tCQc tFV tFVc ///
+							using "$output/fuel_out.tex", b(3) se(3) append ///
+								prehead("\midrule \multicolumn{9}{l}{\emph{Panel B: Overall Fuel Outcomes}} \\ ") ///
+								keep(treat_assign) noobs ///
+								booktabs nonum nomtitle collabels(none) nobaselevels nogaps ///
+								fragment label stat(dep_mean N cov r2_a, labels( "Mean in Control" ///
+								"Observations" "Covariates" "Adjusted R$^2$") fmt(%4.3f %9.0fc %4.3f)) ///
+								postfoot("\hline \hline \\[-1.8ex] \multicolumn{9}{J{\linewidth}}{\small " ///
+								"\noindent \textit{Note}: Dependent variables are different measure of " ///
+								" fuel collection at different levels of aggregation. " ///
+								"In Panel A, we use values measured each week " ///
+								"In Panel B, we sum weekly values to the overall six week total. " ///
+								"All regressions include two levels of strata " ///
+								"fixed effects: village and nutrition sensitive landscapes (NSL) group. " ///
+								"Eicker-Huber-White (EHW) robust standard errors. Standard errors are presented in " ///
+								"parentheses (*** p$<$0.001, ** p$<$0.01, * p$<$0.05).}  \end{tabular}") 
+							
 						
-					
-************************************************************************
-**## 2.4 - CO2e
-************************************************************************
-	
-* calculate SSC via ITT
-	gen				co2e_itt = (f_itt * co2e_f_m + c_itt * co2e_c_m) * fNRB_m
-	lab var			co2e_itt "CO2e (ITT)"
-	
-	gen				scc_itt = scc * co2e_itt
-	lab var			scc_itt "Social Cost of Carbon (ITT)"
-	
-* summarize weekly savings
-	sum				co2e_itt scc_itt
-	
-* run regressions	
-	reg 			f_quant_ub treat_assign $x_cov i.aas i.village, vce(robust)
-	predict			f_hat_ub, xb
-	
-	reg 			f_quant_lb treat_assign $x_cov i.aas i.village, vce(robust)
-	predict			f_hat_lb, xb
-	
-	reg 			c_quant_ub treat_assign $x_cov i.aas i.village, vce(robust)
-	predict			c_hat_ub, xb
-	
-	reg 			c_quant_lb treat_assign $x_cov i.aas i.village, vce(robust)
-	predict			c_hat_lb, xb
+	************************************************************************
+	**## 2.4 - CO2e
+	************************************************************************
+		
+	* calculate SSC via ITT
+		gen				co2e_itt = (f_itt * co2e_f_m + c_itt * co2e_c_m) * fNRB_m
+		lab var			co2e_itt "CO2e (ITT)"
+		
+		gen				scc_itt = scc * co2e_itt
+		lab var			scc_itt "Social Cost of Carbon (ITT)"
+		
+	* summarize weekly savings
+		sum				co2e_itt scc_itt
+		
+	* run regressions	
+		reg 			f_quant_ub treat_assign $x_cov i.aas i.village, vce(robust)
+		predict			f_hat_ub, xb
+		
+		reg 			f_quant_lb treat_assign $x_cov i.aas i.village, vce(robust)
+		predict			f_hat_lb, xb
+		
+		reg 			c_quant_ub treat_assign $x_cov i.aas i.village, vce(robust)
+		predict			c_hat_ub, xb
+		
+		reg 			c_quant_lb treat_assign $x_cov i.aas i.village, vce(robust)
+		predict			c_hat_lb, xb
 
-* generate parameters
-	gen				co2e_m = (f_hat_m * co2e_f_m + c_hat_m * co2e_c_m) * fNRB_m
-	lab var			co2e_m "CO2e (mean)"
-	
-	gen				co2e_ub = (f_hat_ub * co2e_f_ub + c_hat_ub * co2e_c_ub) * fNRB_ub
-	lab var			co2e_ub "CO2e (upper)"
-	
-	gen				co2e_lb = (f_hat_lb * co2e_f_lb + c_hat_lb * co2e_c_lb) * fNRB_lb
-	lab var			co2e_lb "CO2e (lower)"
-	
-	gen				scc_m = scc * co2e_m
-	lab var			scc_m "Social Cost of Carbon (mean)"
-	
-	gen				scc_ub = scc * co2e_ub
-	lab var			scc_ub "Social Cost of Carbon (upper))"
-	
-	gen				scc_lb = scc * co2e_lb
-	lab var			scc_lb "Social Cost of Carbon (lower))"
-	
-	
-	sort 			scc_m
-	gen 			obs = _n
-	
-	sum				scc_m if treat_assign == 0
-	global			scc_c = r(mean)
-	
-	sum				scc_m if treat_assign == 1
-	global			scc_t = r(mean)
-	
-	gen				scc_d = $scc_t - $scc_c
-	sum				scc_d
-	
-	twoway 			(scatter scc_m obs if treat_assign == 0, mcolor(sienna%75) msymbol(Th) msize(tiny) ) || ///
-						(scatter scc_m obs if treat_assign == 1, mcolor(teal%75) msymbol(Th) msize (tiny) ) || ///
-						(rbar scc_lb scc_ub obs if treat_assign == 0, msize(tiny) barwidth(.2) color(sienna%50) ) || ///
-						(rbar  scc_lb scc_ub obs if treat_assign == 1, msize(tiny) barwidth(.2) color(teal%50) ///
-						yline($scc_c, lcolor(sienna) lstyle(solid) ) yline($scc_t, lcolor(teal) lstyle(solid) ) ///
-						ytitle("Overall SCC (in USD)") xtitle("Household # - Sorted by Effect Size") ///
-						text(184 155 "$184", color(sienna) place(nw) size(small)) ylabel(0 150 300 450) ///
-						text(172 155 "$172", color(teal) place(sw) size(small)) ), ///
-						legend(order(4 3) cols(2)  label(4 "Treatment") label(3 "Control") ///
-						size(small) rowgap(.5) pos(6) ring(1)) 
-	
-* graph save
-	graph export 	"$figure/scc.pdf", replace as(pdf)			
-	
+	* generate parameters
+		gen				co2e_m = (f_hat_m * co2e_f_m + c_hat_m * co2e_c_m) * fNRB_m
+		lab var			co2e_m "CO2e (mean)"
+		
+		gen				co2e_ub = (f_hat_ub * co2e_f_ub + c_hat_ub * co2e_c_ub) * fNRB_ub
+		lab var			co2e_ub "CO2e (upper)"
+		
+		gen				co2e_lb = (f_hat_lb * co2e_f_lb + c_hat_lb * co2e_c_lb) * fNRB_lb
+		lab var			co2e_lb "CO2e (lower)"
+		
+		gen				scc_m = scc * co2e_m
+		lab var			scc_m "Social Cost of Carbon (mean)"
+		
+		gen				scc_ub = scc * co2e_ub
+		lab var			scc_ub "Social Cost of Carbon (upper))"
+		
+		gen				scc_lb = scc * co2e_lb
+		lab var			scc_lb "Social Cost of Carbon (lower))"
+		
+		
+		sort 			scc_m
+		gen 			obs = _n
+		
+		sum				scc_m if treat_assign == 0
+		global			scc_c = r(mean)
+		
+		sum				scc_m if treat_assign == 1
+		global			scc_t = r(mean)
+		
+		gen				scc_d = $scc_t - $scc_c
+		sum				scc_d
+		
+		twoway 			(scatter scc_m obs if treat_assign == 0, mcolor(sienna%75) msymbol(Th) msize(tiny) ) || ///
+							(scatter scc_m obs if treat_assign == 1, mcolor(teal%75) msymbol(Th) msize (tiny) ) || ///
+							(rbar scc_lb scc_ub obs if treat_assign == 0, msize(tiny) barwidth(.2) color(sienna%50) ) || ///
+							(rbar  scc_lb scc_ub obs if treat_assign == 1, msize(tiny) barwidth(.2) color(teal%50) ///
+							yline($scc_c, lcolor(sienna) lstyle(solid) ) yline($scc_t, lcolor(teal) lstyle(solid) ) ///
+							ytitle("Overall SCC (in USD)") xtitle("Household # - Sorted by Effect Size") ///
+							text(184 155 "$184", color(sienna) place(nw) size(small)) ylabel(0 150 300 450) ///
+							text(172 155 "$172", color(teal) place(sw) size(small)) ), ///
+							legend(order(4 3) cols(2)  label(4 "Treatment") label(3 "Control") ///
+							size(small) rowgap(.5) pos(6) ring(1)) 
+		
+	* graph save
+		graph export 	"$figure/scc.pdf", replace as(pdf)			
+	restore	
 ************************************************************************
 **# 3- examining trends for reviewer
 ************************************************************************
@@ -529,7 +531,7 @@ coefplot                                                     ///
     graphregion(fcolor(white))  saving("$figure/coal", replace)                 
 		
 *combine and save
-	grc1leg	"$figure/fire" "$figure/coal"
+	grc1leg2	"$figure/fire" "$figure/coal"
 		
 	graph export 	"$figure/trend.pdf", replace as(pdf)			
 
