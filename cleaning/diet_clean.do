@@ -37,7 +37,7 @@
 	log using			"$logout/dietary_comp", append
 	
 * load data
-	use 				"$export/HDDS/cleaned_ingredients.dta", clear
+	use 				"$export/cleaned_ingredients.dta", clear
 
 
 ***********************************************************************
@@ -176,7 +176,7 @@
 		estpost tab		ingredients, sort nototal
 	 
 * code for latex tables
-	esttab			using "$output/descriptive/ing_tab.tex", replace booktabs ///
+	esttab			using "$output/ing_tab.tex", replace booktabs ///
 							prehead("\begin{tabular}{l*{2}{c}} \\ [-1.8ex]\hline \hline \\[-1.8ex] ") ///
 							cells("b(label(Frequency) fmt(%9.0gc)) pct(label(Percent) fmt(2))") ///
 							nonumber nomtitle noobs fragment ///
@@ -191,7 +191,7 @@
 		estpost tab			fg, sort nototal
 	
 * output table of food group frequencies
-		esttab 			 using "$output/descriptive/fg_tab.tex", replace booktabs ///
+		esttab 			 using "$output/fg_tab.tex", replace booktabs ///
 							prehead("\begin{tabular}{l*{2}{c}} \\ [-1.8ex]\hline \hline \\[-1.8ex] ") ///
 							cells("b(label(Frequency) fmt(%9.0gc)) pct(label(Percent) fmt(2))") ///
 							nonumber nomtitle noobs fragment varlabels(`e(labels)') ///
@@ -205,7 +205,7 @@
 		estpost tab			science, sort nototal
 	
 * output table of processed food frequencies
-		esttab 			 using "$output/descriptive/sci_tab.tex", replace booktabs ///
+		esttab 			 using "$output/sci_tab.tex", replace booktabs ///
 							prehead("\begin{tabular}{l*{2}{c}} \\ [-1.8ex]\hline \hline \\[-1.8ex] ") ///
 							cells("b(label(Frequency) fmt(%9.0gc)) pct(label(Percent) fmt(2))") ///
 							nonumber nomtitle noobs fragment ///

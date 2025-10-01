@@ -35,7 +35,7 @@
 * Define root folder globals
     if `"`c(username)'"' == "jdmic" {
     global 		code  	"C:/Users/jdmic/git/solar_stove"
-	global 		data	"C:/Users/jdmic/Dropbox/Solar_Stoves"
+	global 		data	"C:/Users/jdmic/git/solar_stove/data"
     }
 
     if `"`c(username)'"' == "lauramccann" {

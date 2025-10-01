@@ -1,0 +1,143 @@
+----------------------------------------------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  C:/Users/jdmic/git/solar_stove/data/logs/desc_stats.log
+  log type:  text
+ opened on:   1 Oct 2025, 12:49:34
+
+. 
+. * load data
+.         use                                     "$ans/dietary_cleaned.dta", clear               
+
+.                                         
+.                                                 
+. ************************************************************************
+. **# 1 - outcome variables
+. ************************************************************************
+. 
+. ************************************************************************
+. **## 1.1 - intermediate and dietary outcomes
+. ************************************************************************
+. 
+. 
+. * sum dish
+.                 eststo                  o_cntrl :       estpost ///
+>                                                 sum ss_use hdds_dish sr_dish p_dish ///
+>                                                 if treat_assign == 0
+
+             |  e(count)   e(sum_w)    e(mean)     e(Var)      e(sd)     e(min)     e(max)     e(sum) 
+-------------+----------------------------------------------------------------------------------------
+      ss_use |     17939      17939   .0119293   .0117877    .108571          0          1        214 
+   hdds_dish |     17939      17939   2.333575   .9639808   .9818252          1          6      41862 
+     sr_dish |     17939      17939   2.329896   1.038002   1.018824          1          7      41796 
+      p_dish |     17939      17939   .0576955   .0543698   .2331733          0          1       1035 
+
+.                 
+.                 eststo                  o_trtmnt : estpost ///
+>                                                 sum ss_use hdds_dish sr_dish p_dish ///
+>                                                 if treat_assign == 1
+
+             |  e(count)   e(sum_w)    e(mean)     e(Var)      e(sd)     e(min)     e(max)     e(sum) 
+-------------+----------------------------------------------------------------------------------------
+      ss_use |     12406      12406   .4224569   .2440067   .4939704          0          1       5241 
+   hdds_dish |     12406      12406   2.294857    1.04437   1.021944          1          6      28470 
+     sr_dish |     12406      12406   2.308802   1.041353   1.020467          1          6      28643 
+      p_dish |     12406      12406   .0590037   .0555267   .2356411          0          1        732 
+
+. 
+.                 eststo                  o_tot : estpost ///
+>                                                 sum ss_use hdds_dish sr_dish p_dish
+
+             |  e(count)   e(sum_w)    e(mean)     e(Var)      e(sd)     e(min)     e(max)     e(sum) 
+-------------+----------------------------------------------------------------------------------------
+      ss_use |     30345      30345    .179766   .1474551   .3839988          0          1       5455 
+   hdds_dish |     30345      30345   2.317746   .9971755   .9985868          1          6      70332 
+     sr_dish |     30345      30345   2.321272   1.039445   1.019532          1          7      70439 
+      p_dish |     30345      30345   .0582304   .0548414   .2341824          0          1       1767 
+
+.                                                 
+.                 eststo                  o_diff : estpost ///
+>                                                 ttest ss_use hdds_dish sr_dish p_dish, ///
+>                                                 by(treat_assign) unequal
+
+             |      e(b)   e(count)      e(se)       e(t)    e(df_t)     e(p_l)       e(p)     e(p_u)     e(N_1) 
+-------------+---------------------------------------------------------------------------------------------------
+      ss_use | -.4105276      30345   .0045084  -91.05866    13237.5          0          0          1      17939 
+   hdds_dish |  .0387176      30345   .0117439   3.296823   25976.83   .9995104   .0009792   .0004896      17939 
+     sr_dish |  .0210936      30345   .0119081   1.771366   26645.96   .9617444   .0765112   .0382556      17939 
+      p_dish | -.0013082      30345   .0027398  -.4774709   26492.57   .3165154   .6330308   .6834846      17939 
+
+             |   e(mu_1)     e(N_2)    e(mu_2) 
+-------------+---------------------------------
+      ss_use |  .0119293      12406   .4224569 
+   hdds_dish |  2.333575      12406   2.294857 
+     sr_dish |  2.329896      12406   2.308802 
+      p_dish |  .0576955      12406   .0590037 
+
+.         
+.                 distinct                hhid if treat_assign == 0
+
+       |        Observations
+       |      total   distinct
+-------+----------------------
+  hhid |      17939         96
+
+.                 local                   temp1a = r(N) 
+
+.                         local                   cntrlo : display %4.0f `temp1a'
+
+.                 
+.                 distinct                hhid if treat_assign == 1
+
+       |        Observations
+       |      total   distinct
+-------+----------------------
+  hhid |      12406         61
+
+.                 local                   temp2a = r(N) 
+
+.                         local                   trtmnto : display %4.0f `temp2a'
+
+.                 
+.                 distinct                hhid
+
+       |        Observations
+       |      total   distinct
+-------+----------------------
+  hhid |      30345        157
+
+.                 local                   temp3a = r(N) 
+
+.                         local                   toto : display %4.0f `temp3a'
+
+. 
+. * output table of summary of dietary outcomes
+.         esttab                  o_cntrl o_trtmnt o_diff o_tot ///
+>                                                 using "$output/descriptive/out_tab.tex", replace ///
+>                                                 prehead("\begin{tabular}{l*{4}{c}} \\ [-1.8ex]\hline \hline \\[-1.8e
+> x] " ///
+>                                                 "& \multicolumn{1}{c}{Control} & \multicolumn{1}{c}{Treatment} &  " 
+> ///
+>                                                 "\multicolumn{1}{c}{\$p\$-value} & \multicolumn{1}{c}{Total}  \\ \mi
+> drule " ///
+>                                                 "\multicolumn{5}{l}{\emph{Panel A: Dish-Level Outcomes}} \\ " ) ///
+>                                                 booktabs main(mean) aux(sd) nostar unstack nonum ///
+>                                                 collabels(none) f noobs nomtitle nogaps ///
+>                                                 cells("mean(fmt(3) pattern(1 1 0 1)) p(fmt(3) pattern(0 0 1 0 ))"  /
+> //
+>                                                 sd(fmt(3)par pattern(1 1 0 1) ) ) ///
+>                                                 rename(ss_use "Solar Stove Use" hdds_dish "HDDS" ///
+>                                                 sr_dish "Species Richness" p_dish "Legumes Cooked") ///
+>                                                 prefoot(" \midrule Observations & `cntrlo' & `trtmnto' & & `toto' \\
+>  ")
+(file C:/Users/jdmic/git/solar_stove/data/analysis/tables/descriptive/out_tab.tex not found)
+file C:/Users/jdmic/git/solar_stove/data/analysis/tables/descriptive/out_tab.tex could not be opened
+r(603);
+
+end of do-file
+r(603);
+
+end of do-file
+
+r(603);
+
+. exit, clear
