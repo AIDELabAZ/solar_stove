@@ -50,7 +50,7 @@ rsconnect/
 
 
 # No version control for Stata project files or log files
-
+*.log
 *.dta
 *.sav
 *.csv
