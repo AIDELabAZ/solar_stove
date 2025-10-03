@@ -1,4 +1,4 @@
-# Food Without Fire: Nutritional and Environmental Impacts from a Solar Stove Field Experiment: Replication Package
+# Food Without Fire: Environmental and Nutritional Impacts from a Solar Stove Field Experiment: Replication Package
 This README describes the directory structure & Stata packages necessary to replicate all analysis for the paper "Food Without Fire: Nutritional and Environmental Impacts from a Solar Stove Field Experiment" in *American Journal of Agricultural Economics*. We provide raw data as part of this current repo. We make no guarantee that variables not used in the analysis are cleaned or accurate. The analysis is based on a [pre-analysis plan][1] filed with the American Economic Association's registry for randomized controlled trials (ID: AEARCTR-0004054).
 
 Last updated: October 2025. 
