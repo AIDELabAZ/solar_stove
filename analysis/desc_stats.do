@@ -75,7 +75,7 @@
 
 * output table of summary of dietary outcomes
 	esttab 			o_cntrl o_trtmnt o_diff o_tot ///
-						using "$output/descriptive/out_tab.tex", replace ///
+						using "$output/out_tab.tex", replace ///
 						prehead("\begin{tabular}{l*{4}{c}} \\ [-1.8ex]\hline \hline \\[-1.8ex] " ///
 						"& \multicolumn{1}{c}{Control} & \multicolumn{1}{c}{Treatment} &  " ///
 						"\multicolumn{1}{c}{\$p\$-value} & \multicolumn{1}{c}{Total}  \\ \midrule " ///
@@ -123,7 +123,7 @@
 
 * output table of summary of dietary outcomes
 	esttab 			m_cntrl m_trtmnt m_diff m_tot ///
-						using "$output/descriptive/out_tab.tex", append ///
+						using "$output/out_tab.tex", append ///
 						posthead("\midrule \multicolumn{5}{l}{\emph{Panel B: Meal-Level Outcomes}} \\ " ) ///
 						booktabs main(mean) aux(sd) nostar unstack nonum ///
 						collabels(none) f noobs nomtitle nogaps ///
@@ -168,7 +168,7 @@
 
 * output table of summary of dietary outcomes
 	esttab 			d_cntrl d_trtmnt d_diff d_tot ///
-						using "$output/descriptive/out_tab.tex", append ///
+						using "$output/out_tab.tex", append ///
 						posthead("\midrule \multicolumn{5}{l}{\emph{Panel C: Day-Level Outcomes}} \\ " ) ///
 						booktabs main(mean) aux(sd) nostar unstack nonum ///
 						collabels(none) f noobs nomtitle nogaps ///
@@ -213,7 +213,7 @@
 
 * output table of summary of dietary outcomes
 	esttab 			w_cntrl w_trtmnt w_diff w_tot ///
-						using "$output/descriptive/out_tab.tex", append ///
+						using "$output/out_tab.tex", append ///
 						posthead("\midrule \multicolumn{5}{l}{\emph{Panel C: Week-Level Outcomes}} \\ " ) ///
 						booktabs main(mean) aux(sd) nostar unstack nonum ///
 						collabels(none) f noobs nomtitle nogaps ///
@@ -258,7 +258,7 @@
 
 * output table of summary of dietary outcomes
 	esttab 			t_cntrl t_trtmnt t_diff t_tot ///
-						using "$output/descriptive/out_tab.tex", append ///
+						using "$output/out_tab.tex", append ///
 						posthead("\midrule \multicolumn{5}{l}{\emph{Panel C: Overall Outcomes}} \\ " ) ///
 						booktabs main(mean) aux(sd) nostar unstack nonum ///
 						collabels(none) f noobs nomtitle nogaps ///
@@ -282,7 +282,7 @@
 			
 * output table of summary of dietary outcomes
 	esttab 			o_cntrl o_trtmnt o_diff o_tot ///
-						using "$output/descriptive/out_tab.tex", replace booktabs ///
+						using "$output/out_tab.tex", replace booktabs ///
 						prehead("\begin{tabular}{l*{4}{c}} \\ [-1.8ex]\hline \hline \\[-1.8ex] " ///
 						"\multicolumn{5}{c}{\emph{Panel A: Daily Cooking Frequency} &  \multicolumn{4}{c}{Weekly Cooking Frequency} " ///
 						"& \multicolumn{4}{c}{Total Cooking Frequency} \\ " ///
@@ -432,7 +432,7 @@
 		
 * output table of summary of cooking frequency
 	esttab 			d_cntrl d_trtmnt d_diff d_tot w_cntrl w_trtmnt w_diff w_tot t_cntrl t_trtmnt t_diff t_tot ///
-						using "$output/descriptive/cook_tab.tex", replace booktabs ///
+						using "$output/cook_tab.tex", replace booktabs ///
 						prehead("\begin{tabular}{l*{12}{c}} \\ [-1.8ex]\hline \hline \\[-1.8ex] " ///
 						"& \multicolumn{4}{c}{Daily Cooking Frequency} &  \multicolumn{4}{c}{Weekly Cooking Frequency} " ///
 						"& \multicolumn{4}{c}{Total Cooking Frequency} \\ " ///
@@ -533,7 +533,7 @@
 		
 * output table of fuel collection
 	esttab 			w_cntrl w_trtmnt w_diff w_tot t_cntrl t_trtmnt t_diff t_tot ///
-						using "$output/descriptive/fuel_tab.tex", replace booktabs ///
+						using "$output/fuel_tab.tex", replace booktabs ///
 						prehead("\begin{tabular}{l*{8}{c}} \\ [-1.8ex]\hline \hline \\[-1.8ex] " ///
 						"& \multicolumn{4}{c}{Weekly Fuel Collection} & \multicolumn{4}{c}{Total Fuel Collection} \\ " ///
 						"& \multicolumn{1}{c}{Control} & \multicolumn{1}{c}{Treatment} &  " ///
@@ -606,7 +606,7 @@ preserve // dropping dupes to give clearer idea of hh breakdown
 		local 			tothh : display %4.0f `temp3a'
 						
 	esttab 			cntrl trtmnt diff tot ///
-						using "$output/descriptive/convars_tab.tex", replace ///
+						using "$output/convars_tab.tex", replace ///
 						prehead("\begin{tabular}{l*{4}{c}} \\ [-1.8ex]\hline \hline \\[-1.8ex] " ///
 						"& \multicolumn{1}{c}{Control} & \multicolumn{1}{c}{Treatment} &  " ///
 						"\multicolumn{1}{c}{\$p\$-value} & \multicolumn{1}{c}{Total}  \\ ") ///
