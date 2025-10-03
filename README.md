@@ -15,7 +15,7 @@ For issues or concerns with this repo, please contact Jeffrey Michler.
 * Laura E. McCann (Writing - original draft, Formal Analysis, Validation) 
 * Jeffrey D. Michler [jdmichler@arizona.edu] (Writing - review & editing, Writing - original draft, Supervision, Project administration, Formal analysis, Conceptualization, Data curation)
 * Maybin Mwangala (Investigation)
-* Osaretin Olurotimi (Writing - review & editing, Writing - original draft, Formal analysis)
+* Osaretin Olurotimi (Writing - review & editing, Writing - original draft)
 * Natalia Estrada Carmona [n.e.carmona@cgiar.org] (Resources, Funding acquisition, Conceptualization)
 
 ## Data cleaning
@@ -52,8 +52,15 @@ solar_stove
 ├────project.do
 ├────LICENSE
 ├────.gitignore
-├────analysis            /* overall analysis */
-└────raw_data	/* data to be moved into raw data folder */
+├────cleaning            /* script files for cleaning data */
+├────analysis            /* script files for conducting analysis */
+└────data				 /* data for analysis */
+     ├────logs			 /* log files */
+     ├────raw			 /* raw data */
+     ├────refined		 /* cleaned data */
+     └────analysis		 /* results */
+		   ├────figures /* figures in paper */
+		   └────tables	/* tables in paper */
 ```
 
 ### Step 2
@@ -64,30 +71,10 @@ Open the project.do file and update the global filepath with your username in Se
     if `"`c(username)'"' == "USERNAME" {
        	global 		code  	"C:/Users/USERNAME/git/solar_stove"
 		global 		data	"C:/Users/USERNAME/solar_stove/data"
-		global 		output  "C:/Users/USERNAME/solar_stove/output"
     }
    ```
 
 ### Step 3
-
-Set up the file structure on your local machine as outlined below: 
-
-```stata
-C:/Users/USERNAME/solar_stove 
- └───data
-         ├────logs
-         ├────raw
-         ├────refined
-         └────analysis
-                     ├────figures
-                     └────tables	 
-```
-
-### Step 4
-
-Move the data sets in the `raw_data` folder in this repo into the `raw` folder you created in step 3.
-
-### Step 5
 
 Run the `project.do` file. Output tables and figures will be saved to the relevant subfolders in the `analysis` folder. 
 
