@@ -66,3 +66,4 @@ rsconnect/
 *.DS_Store
 .Rproj.user
 necarmona/.Rhistory
+*.log

@@ -11854,3 +11854,2793 @@ end of do-file
 .         
 . * open log
 .         cap log                         close 
+----------------------------------------------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  C:/Users/jdmic/git/solar_stove/data/logs/raw_cleaning.log
+  log type:  text
+ opened on:   1 Oct 2025, 13:01:15
+
+. 
+. * import ingredient sheet and save as .dta
+.         import                  excel using "$root/Lealui_mapungu_nalitoya_data28_02_2020.xlsx", ///
+>                                                 sheet("Lealui_Mapungu_Nalitoya_ingridi") firstrow clear
+(33 vars, 43,127 obs)
+
+.         
+. ************************************************************************
+. **# 1 - prepare ingredients data
+. ************************************************************************
+. 
+.         sum Dish
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+        Dish |     34,420    1.612725     .713531          1          5
+
+.         ***     43,127 household observations
+.         *** 34,420 dish observations
+. 
+. * rename village, household, week, and day variables
+.         rename                  Sourcepdf village
+
+.         rename                  COD hhid
+
+.         lab var                 hhid "HH ID"
+
+.         rename                  Week week
+
+.         lab var                 week "Week"
+
+.         rename                  Day day
+
+.         lab var                 day "Day"
+
+.         lab var                 Meal "Meal"
+
+.         
+. * order variables       
+.         order                   hhid week day Meal Dish
+
+.         drop                    Group Solar Gender village
+
+. 
+. * create meal indicator
+.         gen                     meal = 0 if Meal == "Breakfast" | Meal == "breakfast"
+(35,132 missing values generated)
+
+.         replace                 meal = 1 if Meal == "Lunch" | Meal == "lunch"
+(14,135 real changes made)
+
+.         replace                 meal = 2 if Meal == "Dinner" | Meal == "dinner"
+(13,728 real changes made)
+
+.         replace                 meal = 3 if Meal == "Boiled Liquids" | ///
+>                                         Meal == "Boiled liquids" | Meal == "Boiled water" | ///
+>                                                 Meal == "boiled liquids"
+(6,987 real changes made)
+
+.         lab var                 meal "Meal"
+
+.         lab define              meal 0 "Breakfast" 1 "Lunch" 2 "Dinner" 3 "Boiled Liquid"
+
+.         lab val                 meal meal
+
+.         drop                    Meal
+
+.         order                   meal, after(day)
+
+. 
+. * create cooking method indicator
+.         drop                    Cookingmethod
+
+.         gen                     cook = 0 if Cookingmethod_modified == "No meal"
+(41,023 missing values generated)
+
+.         replace                 cook = 1 if Cookingmethod_modified == "C-Charcoal"
+(6,869 real changes made)
+
+.         replace                 cook = 2 if Cookingmethod_modified == "E-Electric Stove"
+(120 real changes made)
+
+.         replace                 cook = 3 if Cookingmethod_modified == "F- Firewood" | ///
+>                                                 Cookingmethod_modified == "F-Firewood"
+(18,276 real changes made)
+
+.         replace                 cook = 4 if Cookingmethod_modified == "M-Cow dung" | ///
+>                                                 Cookingmethod_modified == "M-Manure" | /// 
+>                                                 Cookingmethod_modified == "M-Manure " | ///
+>                                                 Cookingmethod_modified == "M-Manure  " 
+(59 real changes made)
+
+.         replace                 cook = 5 if Cookingmethod_modified == "S-Solar Stove" | ///
+>                                                 Cookingmethod_modified == "S-Solar stove"
+(5,635 real changes made)
+
+.         replace                 cook = 6 if Cookingmethod_modified == "Boiled liquids"
+(6,976 real changes made)
+
+.         replace                 cook = 7 if Cookingmethod_modified == "unspecified"
+(2,998 real changes made)
+
+.         lab var                 cook "Cooking Method"
+
+.         lab define              method 0 "No Meal" 1 "Charcoal" 2 "Electric" 3 ///
+>                                                 "Firewood" 4 "Manure" 5 "Solar Stove" ///
+>                                                 6 "Boiled Liquid" 7 "Unspecified"
+
+.         lab val                 cook method
+
+.         drop                    Cookingmethod_modified
+
+.         order                   cook, after(Dish)
+
+. 
+. * create dish indicators
+.         rename                  Dish dish_num
+
+.         lab var                 dish_num "Dish Number in Meal"
+
+.         
+. * input missing values for dish_num     
+. 
+.         tab                     dish_num, m
+
+Dish Number |
+    in Meal |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |     17,636       40.89       40.89
+          2 |     12,836       29.76       70.66
+          3 |      3,604        8.36       79.01
+          4 |        330        0.77       79.78
+          5 |         14        0.03       79.81
+          . |      8,707       20.19      100.00
+------------+-----------------------------------
+      Total |     43,127      100.00
+
+. 
+.         * village       group                   hhid    gender  solar week      day      meal  dish_num
+.         
+.         * Mapungu       Learning Plot   238000  Male    0          5    5       Dinner    .
+.                 *** change to "2"       
+.                 
+.         * Mapungu       None            219000  Male    0          6    1       Breakfast .
+.                 *** change to "1"       
+. 
+.         * Mapungu       None            219000  Male    0          6    3       Breakfast .     
+.                 *** change to "1"       
+. 
+.         * Mapungu       Both            234000  Female  1          1    5       Breakfast .
+.                 *** change to "1"       
+. 
+.         * Nalitoay      Both            371000  Male    0          2    2       Breakfast .
+.                 *** change to "1"       
+. 
+.         * Mapungu       Both            233000  Female  1          1    4       Breakfast .     
+.                 *** change to "1"       
+.                 
+.         * Mapungu       Learning Plot   238000  Male    0          6    6       Breakfast .
+.                 *** changed to "1"      
+. 
+.         * Mapungu       Learning Plot   238000  Male    0          3    6       Breakfast .     
+.                 *** change to "1"       
+.                 
+.         * Nalitoay      Nutrition Club  320000  Female  0          6    6       Breakfast .     
+.                 *** change to "1"
+. 
+.         sort                    hhid week day meal dish_num     
+
+.         
+. * replace the single missing obs that should be "2"
+.         replace                 dish_num = 2 if hhid == 238000 & week == 5 & ///
+>                                                 day == 5 & meal == 2 & dish_num == .
+(1 real change made)
+
+.                                                 
+. * replace the all other missing obs with "1"
+.         replace                 dish_num = 1 if dish_num == .
+(8,706 real changes made)
+
+.                 
+.         gen                     dish = 1 if dish_num != .
+
+.         lab var                 dish "Dish Counter"
+
+.         gen                     ss_count = 1 if cook == 5
+(37,492 missing values generated)
+
+.         replace                 ss_count = 0 if cook == . | dish != .
+(43,127 real changes made)
+
+.         lab var                 ss_count "Meal Cooked with Solar Stove"
+
+.         order                   dish ss_count, after(dish_num)
+
+. 
+. * replace cooking method with liquid cooking method
+.         replace                 Method = "" if cook != 6
+(94 real changes made)
+
+.         replace                 cook = 1  if cook == 7 & Method == "C- Charcol" | /// 
+>                                                 Method == "C-Charcoal" | Method == "C-charcoal" | ///
+>                                                 Method == "Charcoal" | Method == "c-charcoal" 
+(1,330 real changes made)
+
+.         replace                 cook = 2  if Method == "E-Electric Stove" | ///
+>                                                 Method == "E-Electric stove"
+(45 real changes made)
+
+.         replace                 cook = 3  if Method == "F- Firewood" | ///
+>                                                 Method == "F- Firewood " | Method == /// 
+>                                                 "F- firewood"  | Method == "F- firewoods" | ///
+>                                                 Method == "F-Firewood" | Method == "F-Frewood" | ///
+>                                                 Method == "F-firewood" | Method == "F-firewoods" | ///  
+>                                                 Method == "Firewood" | Method == "f-firewood"
+(3,344 real changes made)
+
+.         replace                 cook = 4  if Method == "M-Cow dung" | Method == /// 
+>                                                 "M-Manure" | Method == "M-Manure " | Method == ///
+>                                                 "M-Manure  " 
+(26 real changes made)
+
+.         replace                 cook = 5  if Method == "S- Solar stove" | Method == ///
+>                                                 "S-Solar Stove" | Method == "S-Solar stove" | ///
+>                                                 Method == "S-Stove Solar" | Method == "s-solar stove"
+(1,670 real changes made)
+
+.         replace                 cook = 7  if Method == "Missing" | Method == "Other" | ///
+>                                                 Method == "missing"
+(170 real changes made)
+
+.         replace                 cook = 7 if cook == 6
+(391 real changes made)
+
+.         drop                    Method
+
+.         
+.         
+. ************************************************************************
+. **# 2 - clean up liquid and legume data
+. ************************************************************************
+. 
+. * create liquid quantity
+.         replace                 Quantity = "2.5" if Quantity == "2,5"
+(3 real changes made)
+
+.         replace                 Quantity = "2.5" if Quantity == "2..5"
+(1 real change made)
+
+.         replace                 Quantity = "3.5" if Quantity == "3,5"
+(2 real changes made)
+
+.         replace                 Quantity = "5" if Quantity == "5lt"
+(1 real change made)
+
+.         replace                 Quantity = "8" if Quantity == "8cm "
+(2 real changes made)
+
+.         replace                 Quantity = "" if Quantity == "lt"
+(1 real change made)
+
+.         replace                 Quantity = "" if Quantity == "na"
+(12 real changes made)
+
+.         gen                     vol = Quantity
+(36,523 missing values generated)
+
+.         destring                vol, replace
+vol: all characters numeric; replaced as double
+(36523 missing values generated)
+
+.         lab var                 vol "Volume Liquid (L)"
+
+.         replace                 vol = vol*0.001 if Units == "mL"
+(0 real changes made)
+
+. 
+. * create milk/water indicator
+.         gen                     type = 0 if Type == "Mezi" | Type == "Water" | Type == ///
+>                                                 "kasana mazi" | Type == "masamba" | Type == "mazi" | ///
+>                                                 Type == "mezi" | Type == "mezi " | Type == ///
+>                                                 "mezi akutapa" | Type == "mezi hakunwa" | Type == ///
+>                                                 "mezi hakutapa " | Type == "hakunwa" | ///
+>                                                 Type == "hakutapa" | Type == "ni mezi" | ///
+>                                                 Type == "tea" | Type == "water"
+(37,763 missing values generated)
+
+.         replace                 type = 1 if Type == "Mabisi" | Type == "Milk" | ///
+>                                                 Type == "fresh milk" | Type == "mabilisi" | ///
+>                                                 Type == "mabis" | Type == "mabisa" | ///
+>                                                 Type == "mabisi" | Type == "mabsisi" | ///
+>                                                 Type == "milk" | Type == "milk "
+(1,200 real changes made)
+
+.         lab var type            "Type of Liquid"
+
+.         lab                             define watermilk 0 "Water" 1 "Milk"
+
+.         lab val type            watermilk
+
+.         drop                            Type
+
+.         order                           type, before(vol)
+
+.         replace                         vol = 7.5 if vol == 750
+(11 real changes made)
+
+.         replace                         vol = 5 if vol == 500
+(1 real change made)
+
+.         replace                         vol = .25 if vol == .0025
+(0 real changes made)
+
+.         replace                         type = 0 if type == . & vol != .
+(245 real changes made)
+
+.         replace                         type = . if vol == .
+(205 real changes made, 205 to missing)
+
+.         
+. * clean up legume variables     
+.         rename                  Noofcupsoflegumes legumes
+
+.         sort                    legumes
+
+.         
+. * replace values to be consistent
+.         replace                 legumes = "0" if legumes == ""
+(37,057 real changes made)
+
+.         replace                 legumes = "0" if legumes == "Faibi"
+(1 real change made)
+
+.         replace                 legumes = "0" if legumes == "Mbonyi"
+(1 real change made)
+
+.         replace                 legumes = "0" if legumes == "na "
+(1 real change made)
+
+.         replace                 legumes = "0" if legumes == "na  "      
+(1 real change made)
+
+.         replace                 legumes = "0" if legumes == "na"
+(4,453 real changes made)
+
+.         replace                 legumes = "0" if legumes == "number of cups not added"
+(168 real changes made)
+
+.         replace                 legumes = "0" if legumes == " number of cups not added"
+(1 real change made)
+
+.         replace                 legumes = "0" if legumes == "5Kg vegetable"     
+(1 real change made)
+
+.         replace                 legumes = "0" if legumes == "no"
+(1 real change made)
+
+.         replace                 legumes = "0" if legumes == "no meal"
+(2 real changes made)
+
+.         replace                 legumes = "0" if legumes == "number of cups not mentioned"
+(1 real change made)
+
+.         replace                 legumes = "0" if legumes == "numer of cups not added"           
+(1 real change made)
+
+.         
+.         
+.         replace                 legumes = "1" if legumes == "1cup"
+(11 real changes made)
+
+.         replace                 legumes = "1.5" if legumes == "1 1/2 Cups"
+(1 real change made)
+
+.         replace                 legumes = "1.5" if legumes == "1.5cups"
+(2 real changes made)
+
+.         replace                 legumes = "1.5" if legumes == "1,5"
+(2 real changes made)
+
+.         replace                 legumes = "2.5" if legumes == "2,5cups"
+(0 real changes made)
+
+.         replace                 legumes = "2.5" if legumes == "2,5"
+(1 real change made)
+
+.         replace                 legumes = "2.5" if legumes == "2.5cups"
+(2 real changes made)
+
+.         replace                 legumes = "2" if legumes == "2cups"
+(24 real changes made)
+
+.         replace                 legumes = "3" if legumes == "3cups"
+(7 real changes made)
+
+.         replace                 legumes = "3" if legumes == "3 Cups"
+(1 real change made)
+
+.         replace                 legumes = "3" if legumes == "3 Cups"
+(0 real changes made)
+
+.         replace                 legumes = "3" if legumes == "3 Cups"
+(0 real changes made)
+
+.         replace                 legumes = "4" if legumes == "4cups"
+(1 real change made)
+
+.         replace                 legumes = "5" if legumes == "5cups"
+(1 real change made)
+
+.         replace                 legumes = "0.5" if legumes == "o.5"
+(1 real change made)
+
+.         
+.         
+.         replace                 legumes = "1.5" if legumes == "1 1/2 cup of 10 cm"
+(1 real change made)
+
+.         replace                 legumes = "1" if legumes == "1 Cup of 10 Cm"
+(1 real change made)
+
+.         replace                 legumes = "1" if legumes == "1 cup of 10 cm"
+(7 real changes made)
+
+.         replace                 legumes = "1" if legumes == "1 x 10 cm cup"
+(2 real changes made)
+
+.         replace                 legumes = "1" if legumes == "1 x 8 Cm cowpeas"
+(1 real change made)
+
+.         replace                 legumes = "1" if legumes == "1 cup of 10cm"
+(1 real change made)
+
+.         replace                 legumes = "1" if legumes == "10 cm cup of beans"
+(1 real change made)
+
+.         replace                 legumes = "1" if legumes == "10 cm yamanawa"    
+(7 real changes made)
+
+.         replace                 legumes = "2" if legumes == "2 Cups 8 Cm Manawa"
+(1 real change made)
+
+.         replace                 legumes = "2" if legumes == "2 Cups 8CM Manawa"
+(1 real change made)
+
+.         replace                 legumes = "2" if legumes == "2 X 8CM cups"      
+(4 real changes made)
+
+.         replace                 legumes = "2" if legumes == "2 x 8CM Cup"
+(1 real change made)
+
+.         replace                 legumes = "2" if legumes == "2 x 8CM Cups"
+(5 real changes made)
+
+.         replace                 legumes = "2" if legumes == "2 x 9cm ya manawa, but not mentioned as an ingredient f
+> or the day" 
+(1 real change made)
+
+.         replace                 legumes = "2" if legumes == "2*8 cm"    
+(1 real change made)
+
+.         replace                 legumes = "2" if legumes == "2*8cm"
+(1 real change made)
+
+.         replace                 legumes = "3" if legumes == "3 Cups Cm Mbonyi"
+(1 real change made)
+
+.         replace                 legumes = "3" if legumes == "3 cm yamanawa"
+(2 real changes made)
+
+.         replace                 legumes = "3" if legumes == "3 x 8CM Cups"
+(1 real change made)
+
+.         replace                 legumes = "3" if legumes == "3*8cm"     
+(1 real change made)
+
+.         replace                 legumes = "4" if legumes == "4*8cm"     
+(1 real change made)
+
+.         replace                 legumes = "1" if legumes == "8 cm cup beans"    
+(1 real change made)
+
+.         replace                 legumes = "2" if legumes == "8 Cm 2 Cups Mbonyi"                
+(1 real change made)
+
+.         replace                 legumes = "1" if legumes == "8cm yamanawa"      
+(1 real change made)
+
+.         replace                 legumes = "1" if legumes == "9cm"       
+(1 real change made)
+
+.         replace                 legumes = "2" if legumes == "Lituu Barbara 2.8 Cm Cups" 
+(1 real change made)
+
+.         replace                 legumes = "1" if legumes == "Manawa 8CM Cup"    
+(1 real change made)
+
+.         replace                 legumes = "1" if legumes == "9cm"       
+(0 real changes made)
+
+.         replace                 legumes = "2" if legumes == "Manawa 2.10 Cm Cups"       
+(1 real change made)
+
+.         replace                 legumes = "3" if legumes == "Manawa 3 Cups 10 Cm"       
+(1 real change made)
+
+.         replace                 legumes = "2" if legumes == "Mbonyi 2 Cups 8Cm" 
+(1 real change made)
+
+.         replace                 legumes = "2" if legumes == "Manawa 2 Cups 8 CM"        
+(1 real change made)
+
+.         replace                 legumes = "2" if legumes == "Manawa 8Cm 2 Cups" 
+(1 real change made)
+
+.         replace                 legumes = "3" if legumes == "Mbonyi 8Cm 3 Cups" 
+(1 real change made)
+
+.         replace                 legumes = "2" if legumes == "Mbonyi Oange 2 Cups 10 CM" 
+(1 real change made)
+
+.         
+. * get rid of text
+.         replace                 legumes = "0" if legumes == "no cooking method"
+(5 real changes made)
+
+.         replace                 legumes = "0" if legumes == "no cups added"
+(4 real changes made)
+
+.         replace                 legumes = "0" if legumes == "numbe of cups not added"
+(1 real change made)
+
+.         replace                 legumes = "0" if legumes == "number  of cups not added"
+(1 real change made)
+
+.         replace                 legumes = "0" if legumes == "number of cups added"
+(1 real change made)
+
+.         replace                 legumes = "0" if legumes == "number of cups not aadded"
+(1 real change made)
+
+.         replace                 legumes = "0" if legumes == "number of cups ont added"
+(1 real change made)
+
+.         replace                 legumes = "0" if legumes == "an"
+(1 real change made)
+
+. 
+. * drop unneeded variables
+.         drop                    Liquid Quantity Units
+
+.         drop                    Other Notes Note  ///
+>                                                 Notesorspecifyifotherunits
+
+. 
+. ************************************************************************
+. **# 3 - clean up ingredient data
+. ************************************************************************
+. 
+. * replace "na" values with blanks for ingredient variables
+.         replace                 Ingredient1 = "" if Ingredient1 == "na" | ///
+>                                                 Ingredient1 == "n/a" | Ingredient1 == "na " | ///
+>                                                 Ingredient1 == "ma" | Ingredient1 == "no meal"
+(34 real changes made)
+
+.         replace                 Ingredient2 = "" if Ingredient2 == "na" | ///
+>                                                 Ingredient2 == "n/a" | Ingredient2 == "na " | ///
+>                                                 Ingredient2 == "ma" | Ingredient2 == "no meal"
+(764 real changes made)
+
+.         replace                 Ingredient3 = "" if Ingredient3 == "na" | ///
+>                                                 Ingredient3 == "n/a" | Ingredient3 == "na " | ///
+>                                                 Ingredient3 == "ma" | Ingredient3 == "no meal"
+(2,713 real changes made)
+
+.         replace                 Ingredient4 = "" if Ingredient4 == "na" | ///
+>                                                 Ingredient4 == "n/a" | Ingredient4 == "na " | ///
+>                                                 Ingredient4 == "ma" | Ingredient4 == "no meal"
+(12,083 real changes made)
+
+.         replace                 Ingredient5 = "" if Ingredient5 == "na" | ///
+>                                                 Ingredient5 == "n/a" | Ingredient5 == "na " | ///
+>                                                 Ingredient5 == "ma" | Ingredient5 == "no meal"
+(23,077 real changes made)
+
+.         replace                 Ingredient6 = "" if Ingredient6 == "na" | ///
+>                                                 Ingredient6 == "n/a" | Ingredient6 == "na " | ///
+>                                                 Ingredient6 == "ma" | Ingredient6 == "no meal"
+(29,244 real changes made)
+
+.         replace                 Ingredient7 = "" if Ingredient7 == "na" | ///
+>                                                 Ingredient7 == "n/a" | Ingredient7 == "na " | ///
+>                                                 Ingredient7 == "ma" | Ingredient7 == "no meal"
+(31,429 real changes made)
+
+. 
+. * replace "na" values with blanks for obs that record boiling liquids (vs cooking a meal)                           
+>                                                             
+.         replace                 Ingredient1 = "" if meal == 3
+(1 real change made)
+
+.         replace                 Ingredient2 = "" if meal == 3
+(1 real change made)
+
+.         replace                 Ingredient3 = "" if meal == 3
+(1 real change made)
+
+.         replace                 Ingredient4 = "" if meal == 3
+(1 real change made)
+
+.         replace                 Ingredient5 = "" if meal == 3
+(1 real change made)
+
+.         replace                 Ingredient6 = "" if meal == 3
+(0 real changes made)
+
+.         replace                 Ingredient7 = "" if meal == 3
+(0 real changes made)
+
+. 
+.         replace type    = . if meal != 3
+(60 real changes made, 60 to missing)
+
+.         replace                 vol = . if meal != 3
+(60 real changes made, 60 to missing)
+
+. 
+.         replace                 dish_num = . if meal == 3
+(6,987 real changes made, 6,987 to missing)
+
+.         replace                 dish = 1
+(0 real changes made)
+
+.         replace                 ss_count = 1 if cook == 5
+(7,305 real changes made)
+
+.         replace                 ss_count = 0 if cook != 5
+(0 real changes made)
+
+. 
+.         drop if                 meal == .
+(282 observations deleted)
+
+. 
+. * replace missing weeks
+.         replace                 week = 4 if week == . & hhid == 338000
+(1 real change made)
+
+.         replace                 week = 5 if week == . & hhid == 322000
+(1 real change made)
+
+.         replace                 week = 2 if week == . & hhid == 246000
+(1 real change made)
+
+. 
+. * replace missing days
+.         replace                 day = 7 if day == . & hhid == 133000
+(1 real change made)
+
+.         replace                 day = 7 if day == . & hhid == 141000
+(1 real change made)
+
+.         replace                 day = 7 if day == . & hhid == 153000
+(1 real change made)
+
+.         replace                 day = 2 if day == . & hhid == 213000
+(1 real change made)
+
+.         replace                 day = 3 if day == . & hhid == 245000
+(1 real change made)
+
+.         replace                 day = 6 if day == . & hhid == 359000
+(1 real change made)
+
+.         replace                 day = 5 if day == . & week == 1 & hhid == 366000
+(1 real change made)
+
+.         replace                 day = 5 if day == . & week == 3 & hhid == 366000
+(1 real change made)
+
+.         replace                 day = 6 if day == . & week == 6 & hhid == 366000
+(1 real change made)
+
+. 
+.         
+. ************************************************************************
+. **## 3.1 - cut out liquid data
+. ************************************************************************
+.         
+. * cut out liquid data
+.         preserve
+
+.                 keep if         meal == 3
+(35,858 observations deleted)
+
+.                 save            "$export/liquids/liquids.dta", replace
+file C:/Users/jdmic/git/solar_stove/data/refined/liquids/liquids.dta saved
+
+.         restore
+
+. 
+. 
+. ************************************************************************
+. **## 3.2 - clean meal data
+. ************************************************************************
+. 
+. * load just meal data
+.         keep if         meal != 3
+(6,987 observations deleted)
+
+.         *** 6,987 observations deleted
+.         
+. * drop data with missing values
+.         drop type               vol
+
+.         drop if                 cook == 0 | cook == 7
+(4,910 observations deleted)
+
+.         *** 4,908 obs dropped
+.         drop if                 Ingredient1  == "" & Ingredient2 == "" & /// 
+>                                                 Ingredient3 == "" & Ingredient4 == "" & /// 
+>                                                 Ingredient5 == "" & Ingredient6 == "" & ///
+>                                                 Ingredient7 == ""
+(7 observations deleted)
+
+.         *** 7 obs dropped
+. 
+.         replace                 Ingredient1 = strtrim(Ingredient1)
+(259 real changes made)
+
+.         replace                 Ingredient2 = strtrim(Ingredient2)
+(186 real changes made)
+
+.         replace                 Ingredient3 = strtrim(Ingredient3)
+(32 real changes made)
+
+.         replace                 Ingredient4 = strtrim(Ingredient4)
+(23 real changes made)
+
+.         replace                 Ingredient5 = strtrim(Ingredient5)
+(3 real changes made)
+
+.         replace                 Ingredient6 = strtrim(Ingredient6)
+(2 real changes made)
+
+.         replace                 Ingredient7 = strtrim(Ingredient7)
+(4 real changes made)
+
+.         
+.         replace                 Ingredient1 = stritrim(Ingredient1)     
+(1 real change made)
+
+.         replace                 Ingredient2 = stritrim(Ingredient2)     
+(0 real changes made)
+
+.         replace                 Ingredient3 = stritrim(Ingredient3)     
+(0 real changes made)
+
+.         replace                 Ingredient4 = stritrim(Ingredient4)     
+(0 real changes made)
+
+.         replace                 Ingredient5 = stritrim(Ingredient5)     
+(0 real changes made)
+
+.         replace                 Ingredient6 = stritrim(Ingredient6)     
+(0 real changes made)
+
+.         replace                 Ingredient7 = stritrim(Ingredient7)     
+(0 real changes made)
+
+.         
+.         
+. * check for duplicates of hhid week day meal dish_num   
+.         
+.         duplicates              li hhid week day meal dish_num
+
+Duplicates in terms of hhid week day meal dish_num
+
+  +---------------------------------------------------------+
+  | Group     Obs     hhid   week   day     meal   dish_num |
+  |---------------------------------------------------------|
+  |     1   28373   358000      3     1   Dinner          1 |
+  |     1   30706   358000      3     1   Dinner          1 |
+  |     2   27618   370000      1     1   Dinner          1 |
+  |     2   27710   370000      1     1   Dinner          1 |
+  +---------------------------------------------------------+
+
+.                 *** 2 duplicates
+.                 
+.           /*| group:   obs:     hhid   week   day     meal   dish_num |
+>             |---------------------------------------------------------|
+>             |      1      1   358000      3     1   Dinner          1 |
+>             |      1   9997   358000      3     1   Dinner          1 |
+>             |      2      2   370000      1     1   Dinner          1 |
+>             |      2   1107   370000      1     1   Dinner          1 |*/
+.                 
+.         sort                    hhid week day meal dish_num
+
+.         
+. * renumber the dishes for hhid 358000 
+.         replace                 dish_num = 2 if hhid == 358000 & week == 3 & ///
+>                                                 day == 1 & meal == 2 & Ingredient1 == "mundambi"        
+(1 real change made)
+
+. 
+. * renumber the dishes for hhid 370000 
+.         replace                 dish_num = 2 if hhid == 370000 & week == 1 & ///
+>                                                 day == 1 & meal == 2 & Ingredient1 == "Buhobe"
+(1 real change made)
+
+.         
+. * check for duplicates  
+.         duplicates li hhid week day meal dish_num
+
+Duplicates in terms of hhid week day meal dish_num
+
+(0 observations are duplicates)
+
+.                 *** 0 duplicates        
+.                 
+. * another check         
+.         isid                    hhid week day meal dish_num
+
+.                 *** 0 duplicates        
+.         
+. * merge in data of Ingredient1
+.         rename                  Ingredient1 lozi
+
+.         merge m:1               lozi using "$export/hdds/food_match.dta"
+(variable lozi was str21, now str24 to accommodate using data's values)
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                           694
+        from master                       207  (_merge==1)
+        from using                        487  (_merge==2)
+
+    Matched                            30,734  (_merge==3)
+    -----------------------------------------
+
+.         drop if                 _merge == 2
+(487 observations deleted)
+
+.         sort                    _merge lozi
+
+.         *** 30,736 observations matched, 207 observations didn't match
+. 
+.         replace                 lozi = "" if _merge == 1
+(207 real changes made)
+
+.         drop                    _merge
+
+.         rename                  lozi lozi1
+
+.         rename                  english english1
+
+.         rename                  foodgroup foodgroup1
+
+.         rename                  process process1
+
+. 
+. * merge in data of Ingredient2
+.         rename                  Ingredient2 lozi
+
+.         merge m:1               lozi using "$export/hdds/food_match.dta"
+(variable lozi was str19, now str24 to accommodate using data's values)
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                         1,841
+        from master                     1,119  (_merge==1)
+        from using                        722  (_merge==2)
+
+    Matched                            29,822  (_merge==3)
+    -----------------------------------------
+
+.         drop if                 _merge == 2
+(722 observations deleted)
+
+.         sort                    _merge lozi
+
+.         *** 29,824 observations matched, 1,119 observations didn't match
+. 
+.         replace                 lozi = "" if _merge == 1        
+(1,119 real changes made)
+
+.         drop                    _merge
+
+.         rename                  lozi lozi2
+
+.         rename                  english english2
+
+.         rename                  foodgroup foodgroup2
+
+.         rename                  process process2
+
+. 
+. * merge in data of Ingredient3
+.         rename                  Ingredient3 lozi
+
+.         merge m:1               lozi using "$export/hdds/food_match.dta"        
+(variable lozi was str17, now str24 to accommodate using data's values)
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                         1,695
+        from master                       927  (_merge==1)
+        from using                        768  (_merge==2)
+
+    Matched                            30,014  (_merge==3)
+    -----------------------------------------
+
+.         drop if                 _merge == 2
+(768 observations deleted)
+
+.         sort                    _merge lozi
+
+.         *** 30,016 observations matched, 927 observations didn't match
+.         
+.         replace                 lozi = "" if _merge == 1                
+(927 real changes made)
+
+.         drop                    _merge
+
+.         rename                  lozi lozi3
+
+.         rename                  english english3
+
+.         rename                  foodgroup foodgroup3
+
+.         rename                  process process3
+
+. 
+. * merge in data of Ingredient4
+.         rename                  Ingredient4 lozi
+
+.         merge m:1               lozi using "$export/hdds/food_match.dta"
+(variable lozi was str19, now str24 to accommodate using data's values)
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                         1,522
+        from master                       694  (_merge==1)
+        from using                        828  (_merge==2)
+
+    Matched                            30,247  (_merge==3)
+    -----------------------------------------
+
+.         drop if                 _merge == 2
+(828 observations deleted)
+
+.         sort                    _merge lozi
+
+.         *** 30,249 observations matched, 694 observations didn't match
+. 
+.         replace                 lozi = "" if _merge == 1                
+(694 real changes made)
+
+.         drop                    _merge
+
+.         rename                  lozi lozi4
+
+.         rename                  english english4
+
+.         rename                  foodgroup foodgroup4
+
+.         rename                  process process4
+
+. 
+. * merge in data of Ingredient5
+.         rename                  Ingredient5 lozi
+
+.         merge m:1               lozi using "$export/hdds/food_match.dta"
+(variable lozi was str14, now str24 to accommodate using data's values)
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                         1,260
+        from master                       362  (_merge==1)
+        from using                        898  (_merge==2)
+
+    Matched                            30,579  (_merge==3)
+    -----------------------------------------
+
+.         drop if                 _merge == 2
+(898 observations deleted)
+
+.         sort                    _merge lozi     
+
+.         *** 30,581 observations matched, 362 observations didn't match
+. 
+.         replace                 lozi = "" if _merge == 1                
+(362 real changes made)
+
+.         drop                    _merge
+
+.         rename                  lozi lozi5
+
+.         rename                  english english5
+
+.         rename                   foodgroup foodgroup5
+
+.         rename                  process process5
+
+. 
+. * merge in data of Ingredient6
+.         rename                  Ingredient6 lozi
+
+.         merge m:1               lozi using "$export/hdds/food_match.dta"
+(variable lozi was str14, now str24 to accommodate using data's values)
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                         1,073
+        from master                        86  (_merge==1)
+        from using                        987  (_merge==2)
+
+    Matched                            30,855  (_merge==3)
+    -----------------------------------------
+
+.         drop if                 _merge == 2
+(987 observations deleted)
+
+.         sort                    _merge lozi             
+
+.         *** 330,857 observations matched, 86 observations didn't match
+. 
+.         replace                 lozi = "" if _merge == 1                
+(86 real changes made)
+
+.         drop                    _merge
+
+.         rename                  lozi lozi6
+
+.         rename                  english english6
+
+.         rename                  foodgroup foodgroup6
+
+.         rename                  process process6
+
+. 
+. * merge in data of Ingredient7
+.         rename                  Ingredient7 lozi
+
+.         merge m:1               lozi using "$export/hdds/food_match.dta"
+(variable lozi was str22, now str24 to accommodate using data's values)
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                         1,039
+        from master                        10  (_merge==1)
+        from using                      1,029  (_merge==2)
+
+    Matched                            30,931  (_merge==3)
+    -----------------------------------------
+
+.         drop if                 _merge == 2     
+(1,029 observations deleted)
+
+.         sort                    _merge lozi     
+
+.         *** 330,933 observations matched, 10 observations didn't match
+. 
+.         replace                 lozi = "" if _merge == 1                
+(10 real changes made)
+
+.         drop                    _merge
+
+.         rename                  lozi lozi7
+
+.         rename                  english english7
+
+.         rename                  foodgroup foodgroup7
+
+.         rename                  process process7
+
+. 
+. * define Labels
+.         lab define              foodgroup 0 "None" 1 "Cereals" 2 "Tubers" ///
+>                                                 3 "Vitamin-A Vegetables" 4 "Leafy Greens" ///
+>                                                 5 "Vegetables" 6 "Vitamin-A Fruits" 7 "Fruits" ///
+>                                                 8 "Organ Meat" 9 "Flesh Meat" 10 "Eggs" ///
+>                                                 11 "Fish" 12 "Pulses" 13 "Milk" ///
+>                                                 14 "Oils & Fats" 15 "Sweets" ///
+>                                                 16 "Spices & Condiments" 17 "Fried Snacks" ///
+>                                                 18 "Beverages" 19 "Nuts & seeds", replace
+
+.                                                 
+. 
+.         lab define              process 0 "None" 1 "Unprocessed" 2 "Proccessed Food" ///
+>                                                 3 "Processed Ingredient" 4 "Ultra-Processed"
+
+.         
+. * create numerical versions of foodgroup and process
+.         forval                           x = 1/7 {
+  2.                 gen                     fg`x' = 16 if foodgroup`x' == "Condiments and seasonings"
+  3.                 replace                 fg`x' = 4 if foodgroup`x' == "Dark green leafy vegetables"
+  4.                 replace                 fg`x' = 10 if foodgroup`x' == "Eggs"
+  5.                 replace                 fg`x' = 11 if foodgroup`x' == "Fish and sea food"
+  6.                 replace                 fg`x' = 1 if foodgroup`x' == "Grains"
+  7.                 replace                 fg`x' = 9 if foodgroup`x' == "Meat and poultry"
+  8.                 replace                 fg`x' = 13 if foodgroup`x' == "Milk and milk products"
+  9.                 replace                 fg`x' = 19 if foodgroup`x' == "Nuts and seeds"
+ 10.                 replace                 fg`x' = 8 if foodgroup`x' == "Organ meat"
+ 11.                 replace                 fg`x' = 18 if foodgroup`x' == "Other beverages and foods"
+ 12.                 replace                 fg`x' = 7 if foodgroup`x' == "Other fruits"
+ 13.                 replace                 fg`x' = 14 if foodgroup`x' == "Other oils and fats"
+ 14.                 replace                 fg`x' = 5 if foodgroup`x' == "Other vegetables"
+ 15.                 replace                 fg`x' = 12 if foodgroup`x' == "Pulses (beans, peas and lentils)"
+ 16.                 replace                 fg`x' = 17 if foodgroup`x' == "Savoury and fried snacks"
+ 17.                 replace                 fg`x' = 15 if foodgroup`x' == "Sweets"
+ 18.                 replace                 fg`x' = 6 if foodgroup`x' == "Vitamin A-rich fruits"
+ 19.                 replace                 fg`x' = 3 if foodgroup`x' == "Vitamin A-rich vegetables, roots and tubers
+> "
+ 20.                 replace                 fg`x' = 2 if foodgroup`x' == "White roots and tubers and plantains"
+ 21.                 replace                 fg`x' = 0 if fg`x' == .
+ 22.                 lab var                 fg`x' "Food Group"
+ 23.                 lab val                 fg`x' foodgroup
+ 24.                 }
+(30,494 missing values generated)
+(5,193 real changes made)
+(269 real changes made)
+(3,659 real changes made)
+(13,155 real changes made)
+(1,021 real changes made)
+(290 real changes made)
+(182 real changes made)
+(29 real changes made)
+(476 real changes made)
+(44 real changes made)
+(77 real changes made)
+(1,224 real changes made)
+(1,512 real changes made)
+(158 real changes made)
+(3 real changes made)
+(11 real changes made)
+(917 real changes made)
+(1,684 real changes made)
+(590 real changes made)
+(29,142 missing values generated)
+(834 real changes made)
+(21 real changes made)
+(152 real changes made)
+(4,624 real changes made)
+(58 real changes made)
+(279 real changes made)
+(929 real changes made)
+(0 real changes made)
+(97 real changes made)
+(15 real changes made)
+(3,239 real changes made)
+(1,729 real changes made)
+(139 real changes made)
+(5 real changes made)
+(0 real changes made)
+(0 real changes made)
+(86 real changes made)
+(388 real changes made)
+(16,547 real changes made)
+(24,845 missing values generated)
+(318 real changes made)
+(15 real changes made)
+(39 real changes made)
+(7,350 real changes made)
+(18 real changes made)
+(449 real changes made)
+(836 real changes made)
+(0 real changes made)
+(206 real changes made)
+(23 real changes made)
+(3,698 real changes made)
+(3,647 real changes made)
+(47 real changes made)
+(7 real changes made)
+(3 real changes made)
+(6 real changes made)
+(41 real changes made)
+(1,426 real changes made)
+(6,716 real changes made)
+(26,035 missing values generated)
+(184 real changes made)
+(11 real changes made)
+(21 real changes made)
+(1,398 real changes made)
+(9 real changes made)
+(562 real changes made)
+(389 real changes made)
+(0 real changes made)
+(103 real changes made)
+(38 real changes made)
+(2,124 real changes made)
+(3,976 real changes made)
+(40 real changes made)
+(4 real changes made)
+(4 real changes made)
+(0 real changes made)
+(31 real changes made)
+(2,875 real changes made)
+(14,266 real changes made)
+(27,867 missing values generated)
+(105 real changes made)
+(7 real changes made)
+(11 real changes made)
+(170 real changes made)
+(5 real changes made)
+(200 real changes made)
+(100 real changes made)
+(0 real changes made)
+(48 real changes made)
+(1 real change made)
+(880 real changes made)
+(2,130 real changes made)
+(30 real changes made)
+(3 real changes made)
+(2 real changes made)
+(0 real changes made)
+(19 real changes made)
+(443 real changes made)
+(23,713 real changes made)
+(29,825 missing values generated)
+(68 real changes made)
+(9 real changes made)
+(0 real changes made)
+(17 real changes made)
+(0 real changes made)
+(37 real changes made)
+(26 real changes made)
+(0 real changes made)
+(1 real change made)
+(10 real changes made)
+(168 real changes made)
+(588 real changes made)
+(17 real changes made)
+(1 real change made)
+(0 real changes made)
+(0 real changes made)
+(27 real changes made)
+(18 real changes made)
+(28,838 real changes made)
+(30,859 missing values generated)
+(47 real changes made)
+(8 real changes made)
+(4 real changes made)
+(5 real changes made)
+(4 real changes made)
+(4 real changes made)
+(3 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(14 real changes made)
+(23 real changes made)
+(4 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(39 real changes made)
+(2 real changes made)
+(30,702 real changes made)
+
+.                 drop                    foodgroup*
+
+.         
+.         forval                          x = 1/7 {
+  2.                 gen                     proc`x' = 1 if process`x' == "Unprocessed"
+  3.                 replace                 proc`x' = 2 if process`x' == "Processed foods"
+  4.                 replace                 proc`x' = 3 if process`x' == "Processed culinary ingredients"
+  5.                 replace                 proc`x' = 4 if process`x' == "Ultra-processed products"
+  6.                 replace                 proc`x' = 0 if proc`x' == .
+  7.                 lab var                 proc`x' "Type of Processing"
+  8.                 lab val                 proc`x' process
+  9.                 }
+(12,787 missing values generated)
+(10,734 real changes made)
+(1,328 real changes made)
+(135 real changes made)
+(590 real changes made)
+(24,161 missing values generated)
+(152 real changes made)
+(7,257 real changes made)
+(205 real changes made)
+(16,547 real changes made)
+(19,154 missing values generated)
+(22 real changes made)
+(12,233 real changes made)
+(187 real changes made)
+(6,712 real changes made)
+(21,643 missing values generated)
+(13 real changes made)
+(7,284 real changes made)
+(81 real changes made)
+(14,265 real changes made)
+(27,774 missing values generated)
+(7 real changes made)
+(4,007 real changes made)
+(47 real changes made)
+(23,713 real changes made)
+(30,146 missing values generated)
+(5 real changes made)
+(1,285 real changes made)
+(18 real changes made)
+(28,838 real changes made)
+(30,804 missing values generated)
+(0 real changes made)
+(96 real changes made)
+(6 real changes made)
+(30,702 real changes made)
+
+.         drop                            process*
+
+. 
+. * clean memory variable
+.         gen                     recall = 0 if Basedonmemory == "no" | Basedonmemory == "no " | ///
+>                                                 Basedonmemory == "na"
+(2,760 missing values generated)
+
+.         replace                 recall = 1 if Basedonmemory == "Nahupula" | Basedonmemory == "S" | ///
+>                                                 Basedonmemory == "S999/" | Basedonmemory == "c" | ///
+>                                                 Basedonmemory == "yes"
+(479 real changes made)
+
+.         lab var                 recall "Was Entry Based on Recall?"     
+
+.         drop                    Basedonmemory
+
+.                                                 
+. * order variables
+.         drop                    lozi*
+
+.         order                   english1 fg1 proc1 ///
+>                                         english2 fg2 proc2 ///
+>                                         english3 fg3 proc3 ///
+>                                         english4 fg4 proc4 ///
+>                                         english5 fg5 proc5 ///
+>                                         english6 fg6 proc6 ///
+>                                         english7 fg7 proc7, after(cook)
+
+.         
+. ***********************************************************************
+. **# 4 - end matter, clean up to save
+. ***********************************************************************
+.         
+.         save                    "$export/cleaned_ingredients.dta", replace      
+file C:/Users/jdmic/git/solar_stove/data/refined/cleaned_ingredients.dta saved
+
+.         
+. /* END */
+. 
+end of do-file
+
+. 
+. ***********************************************************************
+. * 2 - run cleaning code creating outcome variables
+. ***********************************************************************
+.         
+.         do                              "$code/cleaning/controls.do"    
+
+. * project: solar stove - control variables
+. * created on: Sep 2024
+. * created by: jdm
+. * edited by: jdm
+. * edited on: 12 Sep 2024
+. * stata v.18.5
+. 
+. * does
+.         * inputs household characteristics
+.         * adds cloud cover
+.         * saves household level control vars
+. 
+. * assumes
+.         * access to raw data
+. 
+. * to do:
+.         * done
+. 
+. ************************************************************************
+. **# 0 - setup
+. ************************************************************************
+. 
+. * define paths
+.         global  root    =       "$data/raw/controls"
+
+.         global  export  =       "$data/refined"
+
+.         global  logout  =       "$data/logs"
+
+.         
+. * open log
+.         cap log                         close 
+----------------------------------------------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  C:/Users/jdmic/git/solar_stove/data/logs/raw_cleaning.log
+  log type:  text
+ opened on:   1 Oct 2025, 13:02:35
+
+. 
+. * import ingredient sheet and save as .dta
+.         import                  excel using "$root/Lealui_mapungu_nalitoya_data28_02_2020.xlsx", ///
+>                                                 sheet("Lealui_Mapungu_Nalitoya_ingridi") firstrow clear
+(33 vars, 43,127 obs)
+
+.         
+. ************************************************************************
+. **# 1 - prepare ingredients data
+. ************************************************************************
+. 
+.         sum Dish
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+        Dish |     34,420    1.612725     .713531          1          5
+
+.         ***     43,127 household observations
+.         *** 34,420 dish observations
+. 
+. * rename village, household, week, and day variables
+.         rename                  Sourcepdf village
+
+.         rename                  COD hhid
+
+.         lab var                 hhid "HH ID"
+
+.         rename                  Week week
+
+.         lab var                 week "Week"
+
+.         rename                  Day day
+
+.         lab var                 day "Day"
+
+.         lab var                 Meal "Meal"
+
+.         
+. * order variables       
+.         order                   hhid week day Meal Dish
+
+.         drop                    Group Solar Gender village
+
+. 
+. * create meal indicator
+.         gen                     meal = 0 if Meal == "Breakfast" | Meal == "breakfast"
+(35,132 missing values generated)
+
+.         replace                 meal = 1 if Meal == "Lunch" | Meal == "lunch"
+(14,135 real changes made)
+
+.         replace                 meal = 2 if Meal == "Dinner" | Meal == "dinner"
+(13,728 real changes made)
+
+.         replace                 meal = 3 if Meal == "Boiled Liquids" | ///
+>                                         Meal == "Boiled liquids" | Meal == "Boiled water" | ///
+>                                                 Meal == "boiled liquids"
+(6,987 real changes made)
+
+.         lab var                 meal "Meal"
+
+.         lab define              meal 0 "Breakfast" 1 "Lunch" 2 "Dinner" 3 "Boiled Liquid"
+
+.         lab val                 meal meal
+
+.         drop                    Meal
+
+.         order                   meal, after(day)
+
+. 
+. * create cooking method indicator
+.         drop                    Cookingmethod
+
+.         gen                     cook = 0 if Cookingmethod_modified == "No meal"
+(41,023 missing values generated)
+
+.         replace                 cook = 1 if Cookingmethod_modified == "C-Charcoal"
+(6,869 real changes made)
+
+.         replace                 cook = 2 if Cookingmethod_modified == "E-Electric Stove"
+(120 real changes made)
+
+.         replace                 cook = 3 if Cookingmethod_modified == "F- Firewood" | ///
+>                                                 Cookingmethod_modified == "F-Firewood"
+(18,276 real changes made)
+
+.         replace                 cook = 4 if Cookingmethod_modified == "M-Cow dung" | ///
+>                                                 Cookingmethod_modified == "M-Manure" | /// 
+>                                                 Cookingmethod_modified == "M-Manure " | ///
+>                                                 Cookingmethod_modified == "M-Manure  " 
+(59 real changes made)
+
+.         replace                 cook = 5 if Cookingmethod_modified == "S-Solar Stove" | ///
+>                                                 Cookingmethod_modified == "S-Solar stove"
+(5,635 real changes made)
+
+.         replace                 cook = 6 if Cookingmethod_modified == "Boiled liquids"
+(6,976 real changes made)
+
+.         replace                 cook = 7 if Cookingmethod_modified == "unspecified"
+(2,998 real changes made)
+
+.         lab var                 cook "Cooking Method"
+
+.         lab define              method 0 "No Meal" 1 "Charcoal" 2 "Electric" 3 ///
+>                                                 "Firewood" 4 "Manure" 5 "Solar Stove" ///
+>                                                 6 "Boiled Liquid" 7 "Unspecified"
+
+.         lab val                 cook method
+
+.         drop                    Cookingmethod_modified
+
+.         order                   cook, after(Dish)
+
+. 
+. * create dish indicators
+.         rename                  Dish dish_num
+
+.         lab var                 dish_num "Dish Number in Meal"
+
+.         
+. * input missing values for dish_num     
+. 
+.         tab                     dish_num, m
+
+Dish Number |
+    in Meal |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |     17,636       40.89       40.89
+          2 |     12,836       29.76       70.66
+          3 |      3,604        8.36       79.01
+          4 |        330        0.77       79.78
+          5 |         14        0.03       79.81
+          . |      8,707       20.19      100.00
+------------+-----------------------------------
+      Total |     43,127      100.00
+
+. 
+.         * village       group                   hhid    gender  solar week      day      meal  dish_num
+.         
+.         * Mapungu       Learning Plot   238000  Male    0          5    5       Dinner    .
+.                 *** change to "2"       
+.                 
+.         * Mapungu       None            219000  Male    0          6    1       Breakfast .
+.                 *** change to "1"       
+. 
+.         * Mapungu       None            219000  Male    0          6    3       Breakfast .     
+.                 *** change to "1"       
+. 
+.         * Mapungu       Both            234000  Female  1          1    5       Breakfast .
+.                 *** change to "1"       
+. 
+.         * Nalitoay      Both            371000  Male    0          2    2       Breakfast .
+.                 *** change to "1"       
+. 
+.         * Mapungu       Both            233000  Female  1          1    4       Breakfast .     
+.                 *** change to "1"       
+.                 
+.         * Mapungu       Learning Plot   238000  Male    0          6    6       Breakfast .
+.                 *** changed to "1"      
+. 
+.         * Mapungu       Learning Plot   238000  Male    0          3    6       Breakfast .     
+.                 *** change to "1"       
+.                 
+.         * Nalitoay      Nutrition Club  320000  Female  0          6    6       Breakfast .     
+.                 *** change to "1"
+. 
+.         sort                    hhid week day meal dish_num     
+
+.         
+. * replace the single missing obs that should be "2"
+.         replace                 dish_num = 2 if hhid == 238000 & week == 5 & ///
+>                                                 day == 5 & meal == 2 & dish_num == .
+(1 real change made)
+
+.                                                 
+. * replace the all other missing obs with "1"
+.         replace                 dish_num = 1 if dish_num == .
+(8,706 real changes made)
+
+.                 
+.         gen                     dish = 1 if dish_num != .
+
+.         lab var                 dish "Dish Counter"
+
+.         gen                     ss_count = 1 if cook == 5
+(37,492 missing values generated)
+
+.         replace                 ss_count = 0 if cook == . | dish != .
+(43,127 real changes made)
+
+.         lab var                 ss_count "Meal Cooked with Solar Stove"
+
+.         order                   dish ss_count, after(dish_num)
+
+. 
+. * replace cooking method with liquid cooking method
+.         replace                 Method = "" if cook != 6
+(94 real changes made)
+
+.         replace                 cook = 1  if cook == 7 & Method == "C- Charcol" | /// 
+>                                                 Method == "C-Charcoal" | Method == "C-charcoal" | ///
+>                                                 Method == "Charcoal" | Method == "c-charcoal" 
+(1,330 real changes made)
+
+.         replace                 cook = 2  if Method == "E-Electric Stove" | ///
+>                                                 Method == "E-Electric stove"
+(45 real changes made)
+
+.         replace                 cook = 3  if Method == "F- Firewood" | ///
+>                                                 Method == "F- Firewood " | Method == /// 
+>                                                 "F- firewood"  | Method == "F- firewoods" | ///
+>                                                 Method == "F-Firewood" | Method == "F-Frewood" | ///
+>                                                 Method == "F-firewood" | Method == "F-firewoods" | ///  
+>                                                 Method == "Firewood" | Method == "f-firewood"
+(3,344 real changes made)
+
+.         replace                 cook = 4  if Method == "M-Cow dung" | Method == /// 
+>                                                 "M-Manure" | Method == "M-Manure " | Method == ///
+>                                                 "M-Manure  " 
+(26 real changes made)
+
+.         replace                 cook = 5  if Method == "S- Solar stove" | Method == ///
+>                                                 "S-Solar Stove" | Method == "S-Solar stove" | ///
+>                                                 Method == "S-Stove Solar" | Method == "s-solar stove"
+(1,670 real changes made)
+
+.         replace                 cook = 7  if Method == "Missing" | Method == "Other" | ///
+>                                                 Method == "missing"
+(170 real changes made)
+
+.         replace                 cook = 7 if cook == 6
+(391 real changes made)
+
+.         drop                    Method
+
+.         
+.         
+. ************************************************************************
+. **# 2 - clean up liquid and legume data
+. ************************************************************************
+. 
+. * create liquid quantity
+.         replace                 Quantity = "2.5" if Quantity == "2,5"
+(3 real changes made)
+
+.         replace                 Quantity = "2.5" if Quantity == "2..5"
+(1 real change made)
+
+.         replace                 Quantity = "3.5" if Quantity == "3,5"
+(2 real changes made)
+
+.         replace                 Quantity = "5" if Quantity == "5lt"
+(1 real change made)
+
+.         replace                 Quantity = "8" if Quantity == "8cm "
+(2 real changes made)
+
+.         replace                 Quantity = "" if Quantity == "lt"
+(1 real change made)
+
+.         replace                 Quantity = "" if Quantity == "na"
+(12 real changes made)
+
+.         gen                     vol = Quantity
+(36,523 missing values generated)
+
+.         destring                vol, replace
+vol: all characters numeric; replaced as double
+(36523 missing values generated)
+
+.         lab var                 vol "Volume Liquid (L)"
+
+.         replace                 vol = vol*0.001 if Units == "mL"
+(0 real changes made)
+
+. 
+. * create milk/water indicator
+.         gen                     type = 0 if Type == "Mezi" | Type == "Water" | Type == ///
+>                                                 "kasana mazi" | Type == "masamba" | Type == "mazi" | ///
+>                                                 Type == "mezi" | Type == "mezi " | Type == ///
+>                                                 "mezi akutapa" | Type == "mezi hakunwa" | Type == ///
+>                                                 "mezi hakutapa " | Type == "hakunwa" | ///
+>                                                 Type == "hakutapa" | Type == "ni mezi" | ///
+>                                                 Type == "tea" | Type == "water"
+(37,763 missing values generated)
+
+.         replace                 type = 1 if Type == "Mabisi" | Type == "Milk" | ///
+>                                                 Type == "fresh milk" | Type == "mabilisi" | ///
+>                                                 Type == "mabis" | Type == "mabisa" | ///
+>                                                 Type == "mabisi" | Type == "mabsisi" | ///
+>                                                 Type == "milk" | Type == "milk "
+(1,200 real changes made)
+
+.         lab var type            "Type of Liquid"
+
+.         lab                             define watermilk 0 "Water" 1 "Milk"
+
+.         lab val type            watermilk
+
+.         drop                            Type
+
+.         order                           type, before(vol)
+
+.         replace                         vol = 7.5 if vol == 750
+(11 real changes made)
+
+.         replace                         vol = 5 if vol == 500
+(1 real change made)
+
+.         replace                         vol = .25 if vol == .0025
+(0 real changes made)
+
+.         replace                         type = 0 if type == . & vol != .
+(245 real changes made)
+
+.         replace                         type = . if vol == .
+(205 real changes made, 205 to missing)
+
+.         
+. * clean up legume variables     
+.         rename                  Noofcupsoflegumes legumes
+
+.         sort                    legumes
+
+.         
+. * replace values to be consistent
+.         replace                 legumes = "0" if legumes == ""
+(37,057 real changes made)
+
+.         replace                 legumes = "0" if legumes == "Faibi"
+(1 real change made)
+
+.         replace                 legumes = "0" if legumes == "Mbonyi"
+(1 real change made)
+
+.         replace                 legumes = "0" if legumes == "na "
+(1 real change made)
+
+.         replace                 legumes = "0" if legumes == "na  "      
+(1 real change made)
+
+.         replace                 legumes = "0" if legumes == "na"
+(4,453 real changes made)
+
+.         replace                 legumes = "0" if legumes == "number of cups not added"
+(168 real changes made)
+
+.         replace                 legumes = "0" if legumes == " number of cups not added"
+(1 real change made)
+
+.         replace                 legumes = "0" if legumes == "5Kg vegetable"     
+(1 real change made)
+
+.         replace                 legumes = "0" if legumes == "no"
+(1 real change made)
+
+.         replace                 legumes = "0" if legumes == "no meal"
+(2 real changes made)
+
+.         replace                 legumes = "0" if legumes == "number of cups not mentioned"
+(1 real change made)
+
+.         replace                 legumes = "0" if legumes == "numer of cups not added"           
+(1 real change made)
+
+.         
+.         
+.         replace                 legumes = "1" if legumes == "1cup"
+(11 real changes made)
+
+.         replace                 legumes = "1.5" if legumes == "1 1/2 Cups"
+(1 real change made)
+
+.         replace                 legumes = "1.5" if legumes == "1.5cups"
+(2 real changes made)
+
+.         replace                 legumes = "1.5" if legumes == "1,5"
+(2 real changes made)
+
+.         replace                 legumes = "2.5" if legumes == "2,5cups"
+(0 real changes made)
+
+.         replace                 legumes = "2.5" if legumes == "2,5"
+(1 real change made)
+
+.         replace                 legumes = "2.5" if legumes == "2.5cups"
+(2 real changes made)
+
+.         replace                 legumes = "2" if legumes == "2cups"
+(24 real changes made)
+
+.         replace                 legumes = "3" if legumes == "3cups"
+(7 real changes made)
+
+.         replace                 legumes = "3" if legumes == "3 Cups"
+(1 real change made)
+
+.         replace                 legumes = "3" if legumes == "3 Cups"
+(0 real changes made)
+
+.         replace                 legumes = "3" if legumes == "3 Cups"
+(0 real changes made)
+
+.         replace                 legumes = "4" if legumes == "4cups"
+(1 real change made)
+
+.         replace                 legumes = "5" if legumes == "5cups"
+(1 real change made)
+
+.         replace                 legumes = "0.5" if legumes == "o.5"
+(1 real change made)
+
+.         
+.         
+.         replace                 legumes = "1.5" if legumes == "1 1/2 cup of 10 cm"
+(1 real change made)
+
+.         replace                 legumes = "1" if legumes == "1 Cup of 10 Cm"
+(1 real change made)
+
+.         replace                 legumes = "1" if legumes == "1 cup of 10 cm"
+(7 real changes made)
+
+.         replace                 legumes = "1" if legumes == "1 x 10 cm cup"
+(2 real changes made)
+
+.         replace                 legumes = "1" if legumes == "1 x 8 Cm cowpeas"
+(1 real change made)
+
+.         replace                 legumes = "1" if legumes == "1 cup of 10cm"
+(1 real change made)
+
+.         replace                 legumes = "1" if legumes == "10 cm cup of beans"
+(1 real change made)
+
+.         replace                 legumes = "1" if legumes == "10 cm yamanawa"    
+(7 real changes made)
+
+.         replace                 legumes = "2" if legumes == "2 Cups 8 Cm Manawa"
+(1 real change made)
+
+.         replace                 legumes = "2" if legumes == "2 Cups 8CM Manawa"
+(1 real change made)
+
+.         replace                 legumes = "2" if legumes == "2 X 8CM cups"      
+(4 real changes made)
+
+.         replace                 legumes = "2" if legumes == "2 x 8CM Cup"
+(1 real change made)
+
+.         replace                 legumes = "2" if legumes == "2 x 8CM Cups"
+(5 real changes made)
+
+.         replace                 legumes = "2" if legumes == "2 x 9cm ya manawa, but not mentioned as an ingredient f
+> or the day" 
+(1 real change made)
+
+.         replace                 legumes = "2" if legumes == "2*8 cm"    
+(1 real change made)
+
+.         replace                 legumes = "2" if legumes == "2*8cm"
+(1 real change made)
+
+.         replace                 legumes = "3" if legumes == "3 Cups Cm Mbonyi"
+(1 real change made)
+
+.         replace                 legumes = "3" if legumes == "3 cm yamanawa"
+(2 real changes made)
+
+.         replace                 legumes = "3" if legumes == "3 x 8CM Cups"
+(1 real change made)
+
+.         replace                 legumes = "3" if legumes == "3*8cm"     
+(1 real change made)
+
+.         replace                 legumes = "4" if legumes == "4*8cm"     
+(1 real change made)
+
+.         replace                 legumes = "1" if legumes == "8 cm cup beans"    
+(1 real change made)
+
+.         replace                 legumes = "2" if legumes == "8 Cm 2 Cups Mbonyi"                
+(1 real change made)
+
+.         replace                 legumes = "1" if legumes == "8cm yamanawa"      
+(1 real change made)
+
+.         replace                 legumes = "1" if legumes == "9cm"       
+(1 real change made)
+
+.         replace                 legumes = "2" if legumes == "Lituu Barbara 2.8 Cm Cups" 
+(1 real change made)
+
+.         replace                 legumes = "1" if legumes == "Manawa 8CM Cup"    
+(1 real change made)
+
+.         replace                 legumes = "1" if legumes == "9cm"       
+(0 real changes made)
+
+.         replace                 legumes = "2" if legumes == "Manawa 2.10 Cm Cups"       
+(1 real change made)
+
+.         replace                 legumes = "3" if legumes == "Manawa 3 Cups 10 Cm"       
+(1 real change made)
+
+.         replace                 legumes = "2" if legumes == "Mbonyi 2 Cups 8Cm" 
+(1 real change made)
+
+.         replace                 legumes = "2" if legumes == "Manawa 2 Cups 8 CM"        
+(1 real change made)
+
+.         replace                 legumes = "2" if legumes == "Manawa 8Cm 2 Cups" 
+(1 real change made)
+
+.         replace                 legumes = "3" if legumes == "Mbonyi 8Cm 3 Cups" 
+(1 real change made)
+
+.         replace                 legumes = "2" if legumes == "Mbonyi Oange 2 Cups 10 CM" 
+(1 real change made)
+
+.         
+. * get rid of text
+.         replace                 legumes = "0" if legumes == "no cooking method"
+(5 real changes made)
+
+.         replace                 legumes = "0" if legumes == "no cups added"
+(4 real changes made)
+
+.         replace                 legumes = "0" if legumes == "numbe of cups not added"
+(1 real change made)
+
+.         replace                 legumes = "0" if legumes == "number  of cups not added"
+(1 real change made)
+
+.         replace                 legumes = "0" if legumes == "number of cups added"
+(1 real change made)
+
+.         replace                 legumes = "0" if legumes == "number of cups not aadded"
+(1 real change made)
+
+.         replace                 legumes = "0" if legumes == "number of cups ont added"
+(1 real change made)
+
+.         replace                 legumes = "0" if legumes == "an"
+(1 real change made)
+
+. 
+. * drop unneeded variables
+.         drop                    Liquid Quantity Units
+
+.         drop                    Other Notes Note  ///
+>                                                 Notesorspecifyifotherunits
+
+. 
+. ************************************************************************
+. **# 3 - clean up ingredient data
+. ************************************************************************
+. 
+. * replace "na" values with blanks for ingredient variables
+.         replace                 Ingredient1 = "" if Ingredient1 == "na" | ///
+>                                                 Ingredient1 == "n/a" | Ingredient1 == "na " | ///
+>                                                 Ingredient1 == "ma" | Ingredient1 == "no meal"
+(34 real changes made)
+
+.         replace                 Ingredient2 = "" if Ingredient2 == "na" | ///
+>                                                 Ingredient2 == "n/a" | Ingredient2 == "na " | ///
+>                                                 Ingredient2 == "ma" | Ingredient2 == "no meal"
+(764 real changes made)
+
+.         replace                 Ingredient3 = "" if Ingredient3 == "na" | ///
+>                                                 Ingredient3 == "n/a" | Ingredient3 == "na " | ///
+>                                                 Ingredient3 == "ma" | Ingredient3 == "no meal"
+(2,713 real changes made)
+
+.         replace                 Ingredient4 = "" if Ingredient4 == "na" | ///
+>                                                 Ingredient4 == "n/a" | Ingredient4 == "na " | ///
+>                                                 Ingredient4 == "ma" | Ingredient4 == "no meal"
+(12,083 real changes made)
+
+.         replace                 Ingredient5 = "" if Ingredient5 == "na" | ///
+>                                                 Ingredient5 == "n/a" | Ingredient5 == "na " | ///
+>                                                 Ingredient5 == "ma" | Ingredient5 == "no meal"
+(23,077 real changes made)
+
+.         replace                 Ingredient6 = "" if Ingredient6 == "na" | ///
+>                                                 Ingredient6 == "n/a" | Ingredient6 == "na " | ///
+>                                                 Ingredient6 == "ma" | Ingredient6 == "no meal"
+(29,244 real changes made)
+
+.         replace                 Ingredient7 = "" if Ingredient7 == "na" | ///
+>                                                 Ingredient7 == "n/a" | Ingredient7 == "na " | ///
+>                                                 Ingredient7 == "ma" | Ingredient7 == "no meal"
+(31,429 real changes made)
+
+. 
+. * replace "na" values with blanks for obs that record boiling liquids (vs cooking a meal)                           
+>                                                             
+.         replace                 Ingredient1 = "" if meal == 3
+(1 real change made)
+
+.         replace                 Ingredient2 = "" if meal == 3
+(1 real change made)
+
+.         replace                 Ingredient3 = "" if meal == 3
+(1 real change made)
+
+.         replace                 Ingredient4 = "" if meal == 3
+(1 real change made)
+
+.         replace                 Ingredient5 = "" if meal == 3
+(1 real change made)
+
+.         replace                 Ingredient6 = "" if meal == 3
+(0 real changes made)
+
+.         replace                 Ingredient7 = "" if meal == 3
+(0 real changes made)
+
+. 
+.         replace type    = . if meal != 3
+(60 real changes made, 60 to missing)
+
+.         replace                 vol = . if meal != 3
+(60 real changes made, 60 to missing)
+
+. 
+.         replace                 dish_num = . if meal == 3
+(6,987 real changes made, 6,987 to missing)
+
+.         replace                 dish = 1
+(0 real changes made)
+
+.         replace                 ss_count = 1 if cook == 5
+(7,305 real changes made)
+
+.         replace                 ss_count = 0 if cook != 5
+(0 real changes made)
+
+. 
+.         drop if                 meal == .
+(282 observations deleted)
+
+. 
+. * replace missing weeks
+.         replace                 week = 4 if week == . & hhid == 338000
+(1 real change made)
+
+.         replace                 week = 5 if week == . & hhid == 322000
+(1 real change made)
+
+.         replace                 week = 2 if week == . & hhid == 246000
+(1 real change made)
+
+. 
+. * replace missing days
+.         replace                 day = 7 if day == . & hhid == 133000
+(1 real change made)
+
+.         replace                 day = 7 if day == . & hhid == 141000
+(1 real change made)
+
+.         replace                 day = 7 if day == . & hhid == 153000
+(1 real change made)
+
+.         replace                 day = 2 if day == . & hhid == 213000
+(1 real change made)
+
+.         replace                 day = 3 if day == . & hhid == 245000
+(1 real change made)
+
+.         replace                 day = 6 if day == . & hhid == 359000
+(1 real change made)
+
+.         replace                 day = 5 if day == . & week == 1 & hhid == 366000
+(1 real change made)
+
+.         replace                 day = 5 if day == . & week == 3 & hhid == 366000
+(1 real change made)
+
+.         replace                 day = 6 if day == . & week == 6 & hhid == 366000
+(1 real change made)
+
+. 
+.         
+. ************************************************************************
+. **## 3.1 - cut out liquid data
+. ************************************************************************
+.         
+. * cut out liquid data
+.         preserve
+
+.                 keep if         meal == 3
+(35,858 observations deleted)
+
+.                 save            "$export/liquids/liquids.dta", replace
+file C:/Users/jdmic/git/solar_stove/data/refined/liquids/liquids.dta saved
+
+.         restore
+
+. 
+. 
+. ************************************************************************
+. **## 3.2 - clean meal data
+. ************************************************************************
+. 
+. * load just meal data
+.         keep if         meal != 3
+(6,987 observations deleted)
+
+.         *** 6,987 observations deleted
+.         
+. * drop data with missing values
+.         drop type               vol
+
+.         drop if                 cook == 0 | cook == 7
+(4,910 observations deleted)
+
+.         *** 4,908 obs dropped
+.         drop if                 Ingredient1  == "" & Ingredient2 == "" & /// 
+>                                                 Ingredient3 == "" & Ingredient4 == "" & /// 
+>                                                 Ingredient5 == "" & Ingredient6 == "" & ///
+>                                                 Ingredient7 == ""
+(7 observations deleted)
+
+.         *** 7 obs dropped
+. 
+.         replace                 Ingredient1 = strtrim(Ingredient1)
+(259 real changes made)
+
+.         replace                 Ingredient2 = strtrim(Ingredient2)
+(186 real changes made)
+
+.         replace                 Ingredient3 = strtrim(Ingredient3)
+(32 real changes made)
+
+.         replace                 Ingredient4 = strtrim(Ingredient4)
+(23 real changes made)
+
+.         replace                 Ingredient5 = strtrim(Ingredient5)
+(3 real changes made)
+
+.         replace                 Ingredient6 = strtrim(Ingredient6)
+(2 real changes made)
+
+.         replace                 Ingredient7 = strtrim(Ingredient7)
+(4 real changes made)
+
+.         
+.         replace                 Ingredient1 = stritrim(Ingredient1)     
+(1 real change made)
+
+.         replace                 Ingredient2 = stritrim(Ingredient2)     
+(0 real changes made)
+
+.         replace                 Ingredient3 = stritrim(Ingredient3)     
+(0 real changes made)
+
+.         replace                 Ingredient4 = stritrim(Ingredient4)     
+(0 real changes made)
+
+.         replace                 Ingredient5 = stritrim(Ingredient5)     
+(0 real changes made)
+
+.         replace                 Ingredient6 = stritrim(Ingredient6)     
+(0 real changes made)
+
+.         replace                 Ingredient7 = stritrim(Ingredient7)     
+(0 real changes made)
+
+.         
+.         
+. * check for duplicates of hhid week day meal dish_num   
+.         
+.         duplicates              li hhid week day meal dish_num
+
+Duplicates in terms of hhid week day meal dish_num
+
+  +---------------------------------------------------------+
+  | Group     Obs     hhid   week   day     meal   dish_num |
+  |---------------------------------------------------------|
+  |     1   27911   358000      3     1   Dinner          1 |
+  |     1   28513   358000      3     1   Dinner          1 |
+  |     2   28136   370000      1     1   Dinner          1 |
+  |     2   30574   370000      1     1   Dinner          1 |
+  +---------------------------------------------------------+
+
+.                 *** 2 duplicates
+.                 
+.           /*| group:   obs:     hhid   week   day     meal   dish_num |
+>             |---------------------------------------------------------|
+>             |      1      1   358000      3     1   Dinner          1 |
+>             |      1   9997   358000      3     1   Dinner          1 |
+>             |      2      2   370000      1     1   Dinner          1 |
+>             |      2   1107   370000      1     1   Dinner          1 |*/
+.                 
+.         sort                    hhid week day meal dish_num
+
+.         
+. * renumber the dishes for hhid 358000 
+.         replace                 dish_num = 2 if hhid == 358000 & week == 3 & ///
+>                                                 day == 1 & meal == 2 & Ingredient1 == "mundambi"        
+(1 real change made)
+
+. 
+. * renumber the dishes for hhid 370000 
+.         replace                 dish_num = 2 if hhid == 370000 & week == 1 & ///
+>                                                 day == 1 & meal == 2 & Ingredient1 == "Buhobe"
+(1 real change made)
+
+.         
+. * check for duplicates  
+.         duplicates li hhid week day meal dish_num
+
+Duplicates in terms of hhid week day meal dish_num
+
+(0 observations are duplicates)
+
+.                 *** 0 duplicates        
+.                 
+. * another check         
+.         isid                    hhid week day meal dish_num
+
+.                 *** 0 duplicates        
+.         
+. * merge in data of Ingredient1
+.         rename                  Ingredient1 lozi
+
+.         merge m:1               lozi using "$export/hdds/food_match.dta"
+(variable lozi was str21, now str24 to accommodate using data's values)
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                           694
+        from master                       207  (_merge==1)
+        from using                        487  (_merge==2)
+
+    Matched                            30,734  (_merge==3)
+    -----------------------------------------
+
+.         drop if                 _merge == 2
+(487 observations deleted)
+
+.         sort                    _merge lozi
+
+.         *** 30,736 observations matched, 207 observations didn't match
+. 
+.         replace                 lozi = "" if _merge == 1
+(207 real changes made)
+
+.         drop                    _merge
+
+.         rename                  lozi lozi1
+
+.         rename                  english english1
+
+.         rename                  foodgroup foodgroup1
+
+.         rename                  process process1
+
+. 
+. * merge in data of Ingredient2
+.         rename                  Ingredient2 lozi
+
+.         merge m:1               lozi using "$export/hdds/food_match.dta"
+(variable lozi was str19, now str24 to accommodate using data's values)
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                         1,841
+        from master                     1,119  (_merge==1)
+        from using                        722  (_merge==2)
+
+    Matched                            29,822  (_merge==3)
+    -----------------------------------------
+
+.         drop if                 _merge == 2
+(722 observations deleted)
+
+.         sort                    _merge lozi
+
+.         *** 29,824 observations matched, 1,119 observations didn't match
+. 
+.         replace                 lozi = "" if _merge == 1        
+(1,119 real changes made)
+
+.         drop                    _merge
+
+.         rename                  lozi lozi2
+
+.         rename                  english english2
+
+.         rename                  foodgroup foodgroup2
+
+.         rename                  process process2
+
+. 
+. * merge in data of Ingredient3
+.         rename                  Ingredient3 lozi
+
+.         merge m:1               lozi using "$export/hdds/food_match.dta"        
+(variable lozi was str17, now str24 to accommodate using data's values)
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                         1,695
+        from master                       927  (_merge==1)
+        from using                        768  (_merge==2)
+
+    Matched                            30,014  (_merge==3)
+    -----------------------------------------
+
+.         drop if                 _merge == 2
+(768 observations deleted)
+
+.         sort                    _merge lozi
+
+.         *** 30,016 observations matched, 927 observations didn't match
+.         
+.         replace                 lozi = "" if _merge == 1                
+(927 real changes made)
+
+.         drop                    _merge
+
+.         rename                  lozi lozi3
+
+.         rename                  english english3
+
+.         rename                  foodgroup foodgroup3
+
+.         rename                  process process3
+
+. 
+. * merge in data of Ingredient4
+.         rename                  Ingredient4 lozi
+
+.         merge m:1               lozi using "$export/hdds/food_match.dta"
+(variable lozi was str19, now str24 to accommodate using data's values)
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                         1,522
+        from master                       694  (_merge==1)
+        from using                        828  (_merge==2)
+
+    Matched                            30,247  (_merge==3)
+    -----------------------------------------
+
+.         drop if                 _merge == 2
+(828 observations deleted)
+
+.         sort                    _merge lozi
+
+.         *** 30,249 observations matched, 694 observations didn't match
+. 
+.         replace                 lozi = "" if _merge == 1                
+(694 real changes made)
+
+.         drop                    _merge
+
+.         rename                  lozi lozi4
+
+.         rename                  english english4
+
+.         rename                  foodgroup foodgroup4
+
+.         rename                  process process4
+
+. 
+. * merge in data of Ingredient5
+.         rename                  Ingredient5 lozi
+
+.         merge m:1               lozi using "$export/hdds/food_match.dta"
+(variable lozi was str14, now str24 to accommodate using data's values)
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                         1,260
+        from master                       362  (_merge==1)
+        from using                        898  (_merge==2)
+
+    Matched                            30,579  (_merge==3)
+    -----------------------------------------
+
+.         drop if                 _merge == 2
+(898 observations deleted)
+
+.         sort                    _merge lozi     
+
+.         *** 30,581 observations matched, 362 observations didn't match
+. 
+.         replace                 lozi = "" if _merge == 1                
+(362 real changes made)
+
+.         drop                    _merge
+
+.         rename                  lozi lozi5
+
+.         rename                  english english5
+
+.         rename                   foodgroup foodgroup5
+
+.         rename                  process process5
+
+. 
+. * merge in data of Ingredient6
+.         rename                  Ingredient6 lozi
+
+.         merge m:1               lozi using "$export/hdds/food_match.dta"
+(variable lozi was str14, now str24 to accommodate using data's values)
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                         1,073
+        from master                        86  (_merge==1)
+        from using                        987  (_merge==2)
+
+    Matched                            30,855  (_merge==3)
+    -----------------------------------------
+
+.         drop if                 _merge == 2
+(987 observations deleted)
+
+.         sort                    _merge lozi             
+
+.         *** 330,857 observations matched, 86 observations didn't match
+. 
+.         replace                 lozi = "" if _merge == 1                
+(86 real changes made)
+
+.         drop                    _merge
+
+.         rename                  lozi lozi6
+
+.         rename                  english english6
+
+.         rename                  foodgroup foodgroup6
+
+.         rename                  process process6
+
+. 
+. * merge in data of Ingredient7
+.         rename                  Ingredient7 lozi
+
+.         merge m:1               lozi using "$export/hdds/food_match.dta"
+(variable lozi was str22, now str24 to accommodate using data's values)
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                         1,039
+        from master                        10  (_merge==1)
+        from using                      1,029  (_merge==2)
+
+    Matched                            30,931  (_merge==3)
+    -----------------------------------------
+
+.         drop if                 _merge == 2     
+(1,029 observations deleted)
+
+.         sort                    _merge lozi     
+
+.         *** 330,933 observations matched, 10 observations didn't match
+. 
+.         replace                 lozi = "" if _merge == 1                
+(10 real changes made)
+
+.         drop                    _merge
+
+.         rename                  lozi lozi7
+
+.         rename                  english english7
+
+.         rename                  foodgroup foodgroup7
+
+.         rename                  process process7
+
+. 
+. * define Labels
+.         lab define              foodgroup 0 "None" 1 "Cereals" 2 "Tubers" ///
+>                                                 3 "Vitamin-A Vegetables" 4 "Leafy Greens" ///
+>                                                 5 "Vegetables" 6 "Vitamin-A Fruits" 7 "Fruits" ///
+>                                                 8 "Organ Meat" 9 "Flesh Meat" 10 "Eggs" ///
+>                                                 11 "Fish" 12 "Pulses" 13 "Milk" ///
+>                                                 14 "Oils & Fats" 15 "Sweets" ///
+>                                                 16 "Spices & Condiments" 17 "Fried Snacks" ///
+>                                                 18 "Beverages" 19 "Nuts & seeds", replace
+
+.                                                 
+. 
+.         lab define              process 0 "None" 1 "Unprocessed" 2 "Proccessed Food" ///
+>                                                 3 "Processed Ingredient" 4 "Ultra-Processed"
+
+.         
+. * create numerical versions of foodgroup and process
+.         forval                           x = 1/7 {
+  2.                 gen                     fg`x' = 16 if foodgroup`x' == "Condiments and seasonings"
+  3.                 replace                 fg`x' = 4 if foodgroup`x' == "Dark green leafy vegetables"
+  4.                 replace                 fg`x' = 10 if foodgroup`x' == "Eggs"
+  5.                 replace                 fg`x' = 11 if foodgroup`x' == "Fish and sea food"
+  6.                 replace                 fg`x' = 1 if foodgroup`x' == "Grains"
+  7.                 replace                 fg`x' = 9 if foodgroup`x' == "Meat and poultry"
+  8.                 replace                 fg`x' = 13 if foodgroup`x' == "Milk and milk products"
+  9.                 replace                 fg`x' = 19 if foodgroup`x' == "Nuts and seeds"
+ 10.                 replace                 fg`x' = 8 if foodgroup`x' == "Organ meat"
+ 11.                 replace                 fg`x' = 18 if foodgroup`x' == "Other beverages and foods"
+ 12.                 replace                 fg`x' = 7 if foodgroup`x' == "Other fruits"
+ 13.                 replace                 fg`x' = 14 if foodgroup`x' == "Other oils and fats"
+ 14.                 replace                 fg`x' = 5 if foodgroup`x' == "Other vegetables"
+ 15.                 replace                 fg`x' = 12 if foodgroup`x' == "Pulses (beans, peas and lentils)"
+ 16.                 replace                 fg`x' = 17 if foodgroup`x' == "Savoury and fried snacks"
+ 17.                 replace                 fg`x' = 15 if foodgroup`x' == "Sweets"
+ 18.                 replace                 fg`x' = 6 if foodgroup`x' == "Vitamin A-rich fruits"
+ 19.                 replace                 fg`x' = 3 if foodgroup`x' == "Vitamin A-rich vegetables, roots and tubers
+> "
+ 20.                 replace                 fg`x' = 2 if foodgroup`x' == "White roots and tubers and plantains"
+ 21.                 replace                 fg`x' = 0 if fg`x' == .
+ 22.                 lab var                 fg`x' "Food Group"
+ 23.                 lab val                 fg`x' foodgroup
+ 24.                 }
+(30,494 missing values generated)
+(5,193 real changes made)
+(269 real changes made)
+(3,659 real changes made)
+(13,155 real changes made)
+(1,021 real changes made)
+(290 real changes made)
+(182 real changes made)
+(29 real changes made)
+(476 real changes made)
+(44 real changes made)
+(77 real changes made)
+(1,224 real changes made)
+(1,512 real changes made)
+(158 real changes made)
+(3 real changes made)
+(11 real changes made)
+(917 real changes made)
+(1,684 real changes made)
+(590 real changes made)
+(29,142 missing values generated)
+(834 real changes made)
+(21 real changes made)
+(152 real changes made)
+(4,624 real changes made)
+(58 real changes made)
+(279 real changes made)
+(929 real changes made)
+(0 real changes made)
+(97 real changes made)
+(15 real changes made)
+(3,239 real changes made)
+(1,729 real changes made)
+(139 real changes made)
+(5 real changes made)
+(0 real changes made)
+(0 real changes made)
+(86 real changes made)
+(388 real changes made)
+(16,547 real changes made)
+(24,845 missing values generated)
+(318 real changes made)
+(15 real changes made)
+(39 real changes made)
+(7,350 real changes made)
+(18 real changes made)
+(449 real changes made)
+(836 real changes made)
+(0 real changes made)
+(202 real changes made)
+(23 real changes made)
+(3,698 real changes made)
+(3,647 real changes made)
+(55 real changes made)
+(7 real changes made)
+(3 real changes made)
+(6 real changes made)
+(41 real changes made)
+(1,426 real changes made)
+(6,712 real changes made)
+(26,035 missing values generated)
+(184 real changes made)
+(11 real changes made)
+(21 real changes made)
+(1,398 real changes made)
+(9 real changes made)
+(562 real changes made)
+(389 real changes made)
+(0 real changes made)
+(102 real changes made)
+(38 real changes made)
+(2,124 real changes made)
+(3,976 real changes made)
+(42 real changes made)
+(4 real changes made)
+(4 real changes made)
+(0 real changes made)
+(31 real changes made)
+(2,875 real changes made)
+(14,265 real changes made)
+(27,867 missing values generated)
+(105 real changes made)
+(7 real changes made)
+(11 real changes made)
+(170 real changes made)
+(5 real changes made)
+(200 real changes made)
+(100 real changes made)
+(0 real changes made)
+(48 real changes made)
+(1 real change made)
+(880 real changes made)
+(2,130 real changes made)
+(30 real changes made)
+(3 real changes made)
+(2 real changes made)
+(0 real changes made)
+(19 real changes made)
+(443 real changes made)
+(23,713 real changes made)
+(29,825 missing values generated)
+(68 real changes made)
+(9 real changes made)
+(0 real changes made)
+(17 real changes made)
+(0 real changes made)
+(37 real changes made)
+(26 real changes made)
+(0 real changes made)
+(1 real change made)
+(10 real changes made)
+(168 real changes made)
+(588 real changes made)
+(17 real changes made)
+(1 real change made)
+(0 real changes made)
+(0 real changes made)
+(27 real changes made)
+(18 real changes made)
+(28,838 real changes made)
+(30,859 missing values generated)
+(47 real changes made)
+(8 real changes made)
+(4 real changes made)
+(5 real changes made)
+(4 real changes made)
+(4 real changes made)
+(3 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(14 real changes made)
+(23 real changes made)
+(4 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(39 real changes made)
+(2 real changes made)
+(30,702 real changes made)
+
+.                 drop                    foodgroup*
+
+.         
+.         forval                          x = 1/7 {
+  2.                 gen                     proc`x' = 1 if process`x' == "Unprocessed"
+  3.                 replace                 proc`x' = 2 if process`x' == "Processed foods"
+  4.                 replace                 proc`x' = 3 if process`x' == "Processed culinary ingredients"
+  5.                 replace                 proc`x' = 4 if process`x' == "Ultra-processed products"
+  6.                 replace                 proc`x' = 0 if proc`x' == .
+  7.                 lab var                 proc`x' "Type of Processing"
+  8.                 lab val                 proc`x' process
+  9.                 }
+(12,787 missing values generated)
+(10,734 real changes made)
+(1,328 real changes made)
+(135 real changes made)
+(590 real changes made)
+(24,161 missing values generated)
+(152 real changes made)
+(7,257 real changes made)
+(205 real changes made)
+(16,547 real changes made)
+(19,154 missing values generated)
+(22 real changes made)
+(12,233 real changes made)
+(187 real changes made)
+(6,712 real changes made)
+(21,643 missing values generated)
+(13 real changes made)
+(7,284 real changes made)
+(81 real changes made)
+(14,265 real changes made)
+(27,774 missing values generated)
+(7 real changes made)
+(4,007 real changes made)
+(47 real changes made)
+(23,713 real changes made)
+(30,146 missing values generated)
+(5 real changes made)
+(1,285 real changes made)
+(18 real changes made)
+(28,838 real changes made)
+(30,804 missing values generated)
+(0 real changes made)
+(96 real changes made)
+(6 real changes made)
+(30,702 real changes made)
+
+.         drop                            process*
+
+. 
+. * clean memory variable
+.         gen                     recall = 0 if Basedonmemory == "no" | Basedonmemory == "no " | ///
+>                                                 Basedonmemory == "na"
+(2,760 missing values generated)
+
+.         replace                 recall = 1 if Basedonmemory == "Nahupula" | Basedonmemory == "S" | ///
+>                                                 Basedonmemory == "S999/" | Basedonmemory == "c" | ///
+>                                                 Basedonmemory == "yes"
+(479 real changes made)
+
+.         lab var                 recall "Was Entry Based on Recall?"     
+
+.         drop                    Basedonmemory
+
+.                                                 
+. * order variables
+.         drop                    lozi*
+
+.         order                   english1 fg1 proc1 ///
+>                                         english2 fg2 proc2 ///
+>                                         english3 fg3 proc3 ///
+>                                         english4 fg4 proc4 ///
+>                                         english5 fg5 proc5 ///
+>                                         english6 fg6 proc6 ///
+>                                         english7 fg7 proc7, after(cook)
+
+.         
+. ***********************************************************************
+. **# 4 - end matter, clean up to save
+. ***********************************************************************
+.         
+.         save                    "$export/cleaned_ingredients.dta", replace      
+file C:/Users/jdmic/git/solar_stove/data/refined/cleaned_ingredients.dta saved
+
+.         
+. /* END */
+. 
+end of do-file
+
+. 
+. ***********************************************************************
+. * 2 - run cleaning code creating outcome variables
+. ***********************************************************************
+.         
+.         do                              "$code/cleaning/controls.do"    
+
+. * project: solar stove - control variables
+. * created on: Sep 2024
+. * created by: jdm
+. * edited by: jdm
+. * edited on: 12 Sep 2024
+. * stata v.18.5
+. 
+. * does
+.         * inputs household characteristics
+.         * adds cloud cover
+.         * saves household level control vars
+. 
+. * assumes
+.         * access to raw data
+. 
+. * to do:
+.         * done
+. 
+. ************************************************************************
+. **# 0 - setup
+. ************************************************************************
+. 
+. * define paths
+.         global  root    =       "$data/raw/controls"
+
+.         global  export  =       "$data/refined"
+
+.         global  logout  =       "$data/logs"
+
+.         
+. * open log
+.         cap log                         close 

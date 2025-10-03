@@ -141,3 +141,3391 @@ end of do-file
 r(603);
 
 . exit, clear
+----------------------------------------------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  C:/Users/jdmic/git/solar_stove/data/logs/desc_stats.log
+  log type:  text
+ opened on:   1 Oct 2025, 13:01:26
+
+. 
+. * load data
+.         use                                     "$ans/dietary_cleaned.dta", clear               
+
+.                                         
+.                                                 
+. ************************************************************************
+. **# 1 - outcome variables
+. ************************************************************************
+. 
+. ************************************************************************
+. **## 1.1 - intermediate and dietary outcomes
+. ************************************************************************
+. 
+. 
+. * sum dish
+.                 eststo                  o_cntrl :       estpost ///
+>                                                 sum ss_use hdds_dish sr_dish p_dish ///
+>                                                 if treat_assign == 0
+
+             |  e(count)   e(sum_w)    e(mean)     e(Var)      e(sd)     e(min)     e(max)     e(sum) 
+-------------+----------------------------------------------------------------------------------------
+      ss_use |     17939      17939   .0119293   .0117877    .108571          0          1        214 
+   hdds_dish |     17939      17939   2.333575   .9639808   .9818252          1          6      41862 
+     sr_dish |     17939      17939   2.329896   1.038002   1.018824          1          7      41796 
+      p_dish |     17939      17939   .0576955   .0543698   .2331733          0          1       1035 
+
+.                 
+.                 eststo                  o_trtmnt : estpost ///
+>                                                 sum ss_use hdds_dish sr_dish p_dish ///
+>                                                 if treat_assign == 1
+
+             |  e(count)   e(sum_w)    e(mean)     e(Var)      e(sd)     e(min)     e(max)     e(sum) 
+-------------+----------------------------------------------------------------------------------------
+      ss_use |     12406      12406   .4224569   .2440067   .4939704          0          1       5241 
+   hdds_dish |     12406      12406   2.294454   1.044527   1.022021          1          6      28465 
+     sr_dish |     12406      12406   2.308802   1.041353   1.020467          1          6      28643 
+      p_dish |     12406      12406   .0581976   .0548151   .2341262          0          1        722 
+
+. 
+.                 eststo                  o_tot : estpost ///
+>                                                 sum ss_use hdds_dish sr_dish p_dish
+
+             |  e(count)   e(sum_w)    e(mean)     e(Var)      e(sd)     e(min)     e(max)     e(sum) 
+-------------+----------------------------------------------------------------------------------------
+      ss_use |     30345      30345    .179766   .1474551   .3839988          0          1       5455 
+   hdds_dish |     30345      30345   2.317581   .9972472   .9986227          1          6      70327 
+     sr_dish |     30345      30345   2.321272   1.039445   1.019532          1          7      70439 
+      p_dish |     30345      30345   .0579008   .0545501   .2335596          0          1       1757 
+
+.                                                 
+.                 eststo                  o_diff : estpost ///
+>                                                 ttest ss_use hdds_dish sr_dish p_dish, ///
+>                                                 by(treat_assign) unequal
+
+             |      e(b)   e(count)      e(se)       e(t)    e(df_t)     e(p_l)       e(p)     e(p_u)     e(N_1) 
+-------------+---------------------------------------------------------------------------------------------------
+      ss_use | -.4105276      30345   .0045084  -91.05866    13237.5          0          0          1      17939 
+   hdds_dish |  .0391206      30345   .0117444   3.330988    25975.5   .9995667   .0008666   .0004333      17939 
+     sr_dish |  .0210936      30345   .0119081   1.771366   26645.96   .9617444   .0765112   .0382556      17939 
+      p_dish | -.0005021      30345   .0027293  -.1839728   26603.64   .4270181   .8540362   .5729819      17939 
+
+             |   e(mu_1)     e(N_2)    e(mu_2) 
+-------------+---------------------------------
+      ss_use |  .0119293      12406   .4224569 
+   hdds_dish |  2.333575      12406   2.294454 
+     sr_dish |  2.329896      12406   2.308802 
+      p_dish |  .0576955      12406   .0581976 
+
+.         
+.                 distinct                hhid if treat_assign == 0
+
+       |        Observations
+       |      total   distinct
+-------+----------------------
+  hhid |      17939         96
+
+.                 local                   temp1a = r(N) 
+
+.                         local                   cntrlo : display %4.0f `temp1a'
+
+.                 
+.                 distinct                hhid if treat_assign == 1
+
+       |        Observations
+       |      total   distinct
+-------+----------------------
+  hhid |      12406         61
+
+.                 local                   temp2a = r(N) 
+
+.                         local                   trtmnto : display %4.0f `temp2a'
+
+.                 
+.                 distinct                hhid
+
+       |        Observations
+       |      total   distinct
+-------+----------------------
+  hhid |      30345        157
+
+.                 local                   temp3a = r(N) 
+
+.                         local                   toto : display %4.0f `temp3a'
+
+. 
+. * output table of summary of dietary outcomes
+.         esttab                  o_cntrl o_trtmnt o_diff o_tot ///
+>                                                 using "$output/descriptive/out_tab.tex", replace ///
+>                                                 prehead("\begin{tabular}{l*{4}{c}} \\ [-1.8ex]\hline \hline \\[-1.8e
+> x] " ///
+>                                                 "& \multicolumn{1}{c}{Control} & \multicolumn{1}{c}{Treatment} &  " 
+> ///
+>                                                 "\multicolumn{1}{c}{\$p\$-value} & \multicolumn{1}{c}{Total}  \\ \mi
+> drule " ///
+>                                                 "\multicolumn{5}{l}{\emph{Panel A: Dish-Level Outcomes}} \\ " ) ///
+>                                                 booktabs main(mean) aux(sd) nostar unstack nonum ///
+>                                                 collabels(none) f noobs nomtitle nogaps ///
+>                                                 cells("mean(fmt(3) pattern(1 1 0 1)) p(fmt(3) pattern(0 0 1 0 ))"  /
+> //
+>                                                 sd(fmt(3)par pattern(1 1 0 1) ) ) ///
+>                                                 rename(ss_use "Solar Stove Use" hdds_dish "HDDS" ///
+>                                                 sr_dish "Species Richness" p_dish "Legumes Cooked") ///
+>                                                 prefoot(" \midrule Observations & `cntrlo' & `trtmnto' & & `toto' \\
+>  ")
+(file C:/Users/jdmic/git/solar_stove/data/analysis/tables/descriptive/out_tab.tex not found)
+file C:/Users/jdmic/git/solar_stove/data/analysis/tables/descriptive/out_tab.tex could not be opened
+r(603);
+
+end of do-file
+r(603);
+
+end of do-file
+
+r(603);
+
+. do "C:\Users\jdmic\git\solar_stove\analysis\desc_stats.do"
+
+. * project: solar stove - food outcomes
+. * created on: Aug 2021
+. * created by: lem
+. * edited by: jdm
+. * edited on: 11 Mar 25
+. * stata v.18.5
+. 
+. * does
+.         * inputs cleaned dietary data
+.         * outputs results and table code for food outcomes
+.         * outcomes limited to JDE short paper (not full PAP)
+. 
+. * assumes
+.         * access to cleaned dietary data
+.         * estout
+. 
+. * to do:
+.         * revise table in section 1.2 with new variables on frequency
+. 
+.         
+. ***********************************************************************
+. **# 0 - setup
+. ***********************************************************************
+. 
+. * define
+.         global                          ans             =       "$data/refined"
+
+.         global                          output  =       "$data/analysis/tables"
+
+.         global                          figure  =       "$data/analysis/figures"
+
+.         global                          logout  =       "$data/logs"
+
+. 
+. * open log
+.         cap log                         close 
+----------------------------------------------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  C:/Users/jdmic/git/solar_stove/data/logs/desc_stats.log
+  log type:  text
+ opened on:   1 Oct 2025, 13:02:29
+
+. 
+. * load data
+.         use                                     "$ans/dietary_cleaned.dta", clear               
+
+.                                         
+.                                                 
+. ************************************************************************
+. **# 1 - outcome variables
+. ************************************************************************
+. 
+. ************************************************************************
+. **## 1.1 - intermediate and dietary outcomes
+. ************************************************************************
+. 
+. 
+. * sum dish
+.                 eststo                  o_cntrl :       estpost ///
+>                                                 sum ss_use hdds_dish sr_dish p_dish ///
+>                                                 if treat_assign == 0
+
+             |  e(count)   e(sum_w)    e(mean)     e(Var)      e(sd)     e(min)     e(max)     e(sum) 
+-------------+----------------------------------------------------------------------------------------
+      ss_use |     17939      17939   .0119293   .0117877    .108571          0          1        214 
+   hdds_dish |     17939      17939   2.333575   .9639808   .9818252          1          6      41862 
+     sr_dish |     17939      17939   2.329896   1.038002   1.018824          1          7      41796 
+      p_dish |     17939      17939   .0576955   .0543698   .2331733          0          1       1035 
+
+.                 
+.                 eststo                  o_trtmnt : estpost ///
+>                                                 sum ss_use hdds_dish sr_dish p_dish ///
+>                                                 if treat_assign == 1
+
+             |  e(count)   e(sum_w)    e(mean)     e(Var)      e(sd)     e(min)     e(max)     e(sum) 
+-------------+----------------------------------------------------------------------------------------
+      ss_use |     12406      12406   .4224569   .2440067   .4939704          0          1       5241 
+   hdds_dish |     12406      12406   2.294454   1.044527   1.022021          1          6      28465 
+     sr_dish |     12406      12406   2.308802   1.041353   1.020467          1          6      28643 
+      p_dish |     12406      12406   .0581976   .0548151   .2341262          0          1        722 
+
+. 
+.                 eststo                  o_tot : estpost ///
+>                                                 sum ss_use hdds_dish sr_dish p_dish
+
+             |  e(count)   e(sum_w)    e(mean)     e(Var)      e(sd)     e(min)     e(max)     e(sum) 
+-------------+----------------------------------------------------------------------------------------
+      ss_use |     30345      30345    .179766   .1474551   .3839988          0          1       5455 
+   hdds_dish |     30345      30345   2.317581   .9972472   .9986227          1          6      70327 
+     sr_dish |     30345      30345   2.321272   1.039445   1.019532          1          7      70439 
+      p_dish |     30345      30345   .0579008   .0545501   .2335596          0          1       1757 
+
+.                                                 
+.                 eststo                  o_diff : estpost ///
+>                                                 ttest ss_use hdds_dish sr_dish p_dish, ///
+>                                                 by(treat_assign) unequal
+
+             |      e(b)   e(count)      e(se)       e(t)    e(df_t)     e(p_l)       e(p)     e(p_u)     e(N_1) 
+-------------+---------------------------------------------------------------------------------------------------
+      ss_use | -.4105276      30345   .0045084  -91.05866    13237.5          0          0          1      17939 
+   hdds_dish |  .0391206      30345   .0117444   3.330988    25975.5   .9995667   .0008666   .0004333      17939 
+     sr_dish |  .0210936      30345   .0119081   1.771366   26645.96   .9617444   .0765112   .0382556      17939 
+      p_dish | -.0005021      30345   .0027293  -.1839728   26603.64   .4270181   .8540362   .5729819      17939 
+
+             |   e(mu_1)     e(N_2)    e(mu_2) 
+-------------+---------------------------------
+      ss_use |  .0119293      12406   .4224569 
+   hdds_dish |  2.333575      12406   2.294454 
+     sr_dish |  2.329896      12406   2.308802 
+      p_dish |  .0576955      12406   .0581976 
+
+.         
+.                 distinct                hhid if treat_assign == 0
+
+       |        Observations
+       |      total   distinct
+-------+----------------------
+  hhid |      17939         96
+
+.                 local                   temp1a = r(N) 
+
+.                         local                   cntrlo : display %4.0f `temp1a'
+
+.                 
+.                 distinct                hhid if treat_assign == 1
+
+       |        Observations
+       |      total   distinct
+-------+----------------------
+  hhid |      12406         61
+
+.                 local                   temp2a = r(N) 
+
+.                         local                   trtmnto : display %4.0f `temp2a'
+
+.                 
+.                 distinct                hhid
+
+       |        Observations
+       |      total   distinct
+-------+----------------------
+  hhid |      30345        157
+
+.                 local                   temp3a = r(N) 
+
+.                         local                   toto : display %4.0f `temp3a'
+
+. 
+. * output table of summary of dietary outcomes
+.         esttab                  o_cntrl o_trtmnt o_diff o_tot ///
+>                                                 using "$output/out_tab.tex", replace ///
+>                                                 prehead("\begin{tabular}{l*{4}{c}} \\ [-1.8ex]\hline \hline \\[-1.8e
+> x] " ///
+>                                                 "& \multicolumn{1}{c}{Control} & \multicolumn{1}{c}{Treatment} &  " 
+> ///
+>                                                 "\multicolumn{1}{c}{\$p\$-value} & \multicolumn{1}{c}{Total}  \\ \mi
+> drule " ///
+>                                                 "\multicolumn{5}{l}{\emph{Panel A: Dish-Level Outcomes}} \\ " ) ///
+>                                                 booktabs main(mean) aux(sd) nostar unstack nonum ///
+>                                                 collabels(none) f noobs nomtitle nogaps ///
+>                                                 cells("mean(fmt(3) pattern(1 1 0 1)) p(fmt(3) pattern(0 0 1 0 ))"  /
+> //
+>                                                 sd(fmt(3)par pattern(1 1 0 1) ) ) ///
+>                                                 rename(ss_use "Solar Stove Use" hdds_dish "HDDS" ///
+>                                                 sr_dish "Species Richness" p_dish "Legumes Cooked") ///
+>                                                 prefoot(" \midrule Observations & `cntrlo' & `trtmnto' & & `toto' \\
+>  ")
+(file C:/Users/jdmic/git/solar_stove/data/analysis/tables/out_tab.tex not found)
+(output written to C:/Users/jdmic/git/solar_stove/data/analysis/tables/out_tab.tex)
+
+.                                                                         
+. * sum meal
+.         preserve 
+
+.                 duplicates drop         hhid week day meal, force
+
+Duplicates in terms of hhid week day meal
+
+(14,417 observations deleted)
+
+.                 
+.                 eststo                  m_cntrl :       estpost ///
+>                                                 sum share_meal hdds_meal sr_meal p_meal ///
+>                                                 if treat_assign == 0
+
+             |  e(count)   e(sum_w)    e(mean)     e(Var)      e(sd)     e(min)     e(max)     e(sum) 
+-------------+----------------------------------------------------------------------------------------
+  share_meal |      9509       9509   .0110159   .0085607   .0925238          0          1     104.75 
+   hdds_meal |      9509       9509   3.904301   2.310361   1.519987          1          9      37126 
+     sr_meal |      9509       9509   3.980334   3.062823   1.750092          1         15      37849 
+      p_meal |      9509       9509   .1088443   .0982695   .3134796          0          2       1035 
+
+.                 
+.                 eststo                  m_trtmnt : estpost ///
+>                                                 sum share_meal hdds_meal sr_meal p_meal ///
+>                                                 if treat_assign == 1
+
+             |  e(count)   e(sum_w)    e(mean)     e(Var)      e(sd)     e(min)     e(max)     e(sum) 
+-------------+----------------------------------------------------------------------------------------
+  share_meal |      6419       6419   .4169263   .2017935   .4492143          0          1    2676.25 
+   hdds_meal |      6419       6419   3.845615   2.448115   1.564645          1          8      24685 
+     sr_meal |      6419       6419   4.004518   3.088948    1.75754          1         11      25705 
+      p_meal |      6419       6419   .1124786   .1017124   .3189239          0          2        722 
+
+. 
+.                 eststo                  m_tot : estpost ///
+>                                                 sum share_meal hdds_meal sr_meal p_meal
+
+             |  e(count)   e(sum_w)    e(mean)     e(Var)      e(sd)     e(min)     e(max)     e(sum) 
+-------------+----------------------------------------------------------------------------------------
+  share_meal |     15928      15928   .1745982    .126069   .3550619          0          1       2781 
+   hdds_meal |     15928      15928    3.88065   2.366555   1.538361          1          9      61811 
+     sr_meal |     15928      15928    3.99008   3.073299   1.753083          1         15      63554 
+      p_meal |     15928      15928   .1103089   .0996539     .31568          0          2       1757 
+
+.                                                 
+.                 eststo                  m_diff : estpost ///
+>                                                 ttest share_meal hdds_meal sr_meal p_meal, ///
+>                                                 by(treat_assign) unequal
+
+             |      e(b)   e(count)      e(se)       e(t)    e(df_t)     e(p_l)       e(p)     e(p_u)     e(N_1) 
+-------------+---------------------------------------------------------------------------------------------------
+  share_meal | -.4059104      15928   .0056866  -71.38043   6787.095          0          0          1       9509 
+   hdds_meal |  .0586866      15928    .024987   2.348683   13501.33   .9905729   .0188543   .0094271       9509 
+     sr_meal | -.0241834      15928   .0283428   -.853246   13732.16   .1967689   .3935378   .8032311       9509 
+      p_meal | -.0036343      15928   .0051166   -.710297    13611.4   .2387661   .4775321   .7612339       9509 
+
+             |   e(mu_1)     e(N_2)    e(mu_2) 
+-------------+---------------------------------
+  share_meal |  .0110159       6419   .4169263 
+   hdds_meal |  3.904301       6419   3.845615 
+     sr_meal |  3.980334       6419   4.004518 
+      p_meal |  .1088443       6419   .1124786 
+
+.         
+.                 distinct                hhid if treat_assign == 0
+
+       |        Observations
+       |      total   distinct
+-------+----------------------
+  hhid |       9509         96
+
+.                 local                   temp1a = r(N) 
+
+.                         local                   cntrlm : display %4.0f `temp1a'
+
+.                 
+.                 distinct                hhid if treat_assign == 1
+
+       |        Observations
+       |      total   distinct
+-------+----------------------
+  hhid |       6419         61
+
+.                 local                   temp2a = r(N) 
+
+.                         local                   trtmntm : display %4.0f `temp2a'
+
+.                 
+.                 distinct                hhid
+
+       |        Observations
+       |      total   distinct
+-------+----------------------
+  hhid |      15928        157
+
+.                 local                   temp3a = r(N) 
+
+.                         local                   totm : display %4.0f `temp3a'
+
+.         restore 
+
+.                         
+. 
+. * output table of summary of dietary outcomes
+.         esttab                  m_cntrl m_trtmnt m_diff m_tot ///
+>                                                 using "$output/out_tab.tex", append ///
+>                                                 posthead("\midrule \multicolumn{5}{l}{\emph{Panel B: Meal-Level Outc
+> omes}} \\ " ) ///
+>                                                 booktabs main(mean) aux(sd) nostar unstack nonum ///
+>                                                 collabels(none) f noobs nomtitle nogaps ///
+>                                                 cells("mean(fmt(3) pattern(1 1 0 1)) p(fmt(3) pattern(0 0 1 0 ))"  /
+> //
+>                                                 sd(fmt(3)par pattern(1 1 0 1) ) ) ///
+>                                                 rename(share_meal "Solar Stove Use" hdds_meal "HDDS" ///
+>                                                 sr_meal "Species Richness"      p_meal "Legumes Cooked") ///
+>                                                 prefoot(" \midrule Observations & `cntrlm' & `trtmntm' & & `totm' \\
+>  ")
+(output written to C:/Users/jdmic/git/solar_stove/data/analysis/tables/out_tab.tex)
+
+.                                 
+. * sum day
+.         preserve 
+
+.                 duplicates drop         hhid week day, force
+
+Duplicates in terms of hhid week day
+
+(24,300 observations deleted)
+
+.                 
+.                 eststo                  d_cntrl :       estpost ///
+>                                                 sum share_day hdds_day sr_day p_day ///
+>                                                 if treat_assign == 0
+
+             |  e(count)   e(sum_w)    e(mean)     e(Var)      e(sd)     e(min)     e(max)     e(sum) 
+-------------+----------------------------------------------------------------------------------------
+   share_day |      3672       3672    .009278   .0048241   .0694554          0        .75   34.06865 
+    hdds_day |      3672       3672   5.644063   2.163931   1.471031          1         11      20725 
+      sr_day |      3672       3672    6.51988   5.468959   2.338581          1         19      23941 
+       p_day |      3672       3672   .2818627   .3027164   .5501967          0          3       1035 
+
+.                 
+.                 eststo                  d_trtmnt : estpost ///
+>                                                 sum share_day hdds_day sr_day p_day ///
+>                                                 if treat_assign == 1
+
+             |  e(count)   e(sum_w)    e(mean)     e(Var)      e(sd)     e(min)     e(max)     e(sum) 
+-------------+----------------------------------------------------------------------------------------
+   share_day |      2373       2373    .429528   .1091177   .3303298          0          1    1019.27 
+    hdds_day |      2373       2373   5.732828   2.275132   1.508354          1         10      13604 
+      sr_day |      2373       2373   6.865571   4.998363   2.235702          1         14      16292 
+       p_day |      2373       2373   .3042562   .3163267   .5624293          0          3        722 
+
+. 
+.                 eststo                  d_tot : estpost ///
+>                                                 sum share_day hdds_day sr_day p_day
+
+             |  e(count)   e(sum_w)    e(mean)     e(Var)      e(sd)     e(min)     e(max)     e(sum) 
+-------------+----------------------------------------------------------------------------------------
+   share_day |      6045       6045   .1742496   .0878745   .2964364          0          1   1053.339 
+    hdds_day |      6045       6045   5.678908   2.209093   1.486302          1         11      34329 
+      sr_day |      6045       6045   6.655583   5.311867   2.304749          1         19      40233 
+       p_day |      6045       6045   .2906534   .3081274   .5550922          0          3       1757 
+
+.                                                 
+.                 eststo                  d_diff : estpost ///
+>                                                 ttest share_day hdds_day sr_day p_day, ///
+>                                                 by(treat_assign) unequal
+
+             |      e(b)   e(count)      e(se)       e(t)    e(df_t)     e(p_l)       e(p)     e(p_u)     e(N_1) 
+-------------+---------------------------------------------------------------------------------------------------
+   share_day | -.4202501       6045   .0068773  -61.10715    2508.15          0          0          1       3672 
+    hdds_day | -.0887645       6045   .0393454  -2.256029    4970.66    .012056   .0241121    .987944       3672 
+      sr_day | -.3456908       6045   .0599643  -5.764945   5224.538   4.32e-09   8.64e-09          1       3672 
+       p_day | -.0223935       6045   .0146881  -1.524595   4981.903   .0637118   .1274236   .9362882       3672 
+
+             |   e(mu_1)     e(N_2)    e(mu_2) 
+-------------+---------------------------------
+   share_day |   .009278       2373    .429528 
+    hdds_day |  5.644063       2373   5.732828 
+      sr_day |   6.51988       2373   6.865571 
+       p_day |  .2818627       2373   .3042562 
+
+.         
+.                 distinct                hhid if treat_assign == 0
+
+       |        Observations
+       |      total   distinct
+-------+----------------------
+  hhid |       3672         96
+
+.                 local                   temp1a = r(N) 
+
+.                         local                   cntrld : display %4.0f `temp1a'
+
+.                 
+.                 distinct                hhid if treat_assign == 1
+
+       |        Observations
+       |      total   distinct
+-------+----------------------
+  hhid |       2373         61
+
+.                 local                   temp2a = r(N) 
+
+.                         local                   trtmntd : display %4.0f `temp2a'
+
+.                 
+.                 distinct                hhid
+
+       |        Observations
+       |      total   distinct
+-------+----------------------
+  hhid |       6045        157
+
+.                 local                   temp3a = r(N) 
+
+.                         local                   totd : display %4.0f `temp3a'
+
+.         restore 
+
+.                         
+. 
+. * output table of summary of dietary outcomes
+.         esttab                  d_cntrl d_trtmnt d_diff d_tot ///
+>                                                 using "$output/out_tab.tex", append ///
+>                                                 posthead("\midrule \multicolumn{5}{l}{\emph{Panel C: Day-Level Outco
+> mes}} \\ " ) ///
+>                                                 booktabs main(mean) aux(sd) nostar unstack nonum ///
+>                                                 collabels(none) f noobs nomtitle nogaps ///
+>                                                 cells("mean(fmt(3) pattern(1 1 0 1)) p(fmt(3) pattern(0 0 1 0 ))"  /
+> //
+>                                                 sd(fmt(3)par pattern(1 1 0 1) ) ) ///
+>                                                 rename(share_day "Solar Stove Use" hdds_day "HDDS" ///
+>                                                 sr_day "Species Richness"       p_day "Legumes Cooked") ///
+>                                                 prefoot(" \midrule Observations & `cntrld' & `trtmntd' & & `totd' \\
+>  ")
+(output written to C:/Users/jdmic/git/solar_stove/data/analysis/tables/out_tab.tex)
+
+.                         
+. * sum week
+.         preserve 
+
+.                 duplicates drop         hhid week, force
+
+Duplicates in terms of hhid week
+
+(29,427 observations deleted)
+
+.                 
+.                 eststo                  w_cntrl :       estpost ///
+>                                                 sum share_week hdds_week sr_week p_week ///
+>                                                 if treat_assign == 0
+
+             |  e(count)   e(sum_w)    e(mean)     e(Var)      e(sd)     e(min)     e(max)     e(sum) 
+-------------+----------------------------------------------------------------------------------------
+  share_week |       561        561   .0085369   .0037272    .061051          0   .6326531   4.789229 
+   hdds_week |       561        561   8.112299   2.607009   1.614624          1         12       4551 
+     sr_week |       561        561   13.16221   15.54328   3.942497          1         28       7384 
+      p_week |       561        561    1.84492   3.516979   1.875361          0         10       1035 
+
+.                 
+.                 eststo                  w_trtmnt : estpost ///
+>                                                 sum share_week hdds_week sr_week p_week ///
+>                                                 if treat_assign == 1
+
+             |  e(count)   e(sum_w)    e(mean)     e(Var)      e(sd)     e(min)     e(max)     e(sum) 
+-------------+----------------------------------------------------------------------------------------
+  share_week |       357        357   .4367036   .0706543   .2658088          0          1   155.9032 
+   hdds_week |       357        357   8.252101   2.104806   1.450795          1         11       2946 
+     sr_week |       357        357   13.62465    14.2913   3.780384          1         25       4864 
+      p_week |       357        357   2.022409   3.679272   1.918143          0         11        722 
+
+. 
+.                 eststo                  w_tot : estpost ///
+>                                                 sum share_week hdds_week sr_week p_week
+
+             |  e(count)   e(sum_w)    e(mean)     e(Var)      e(sd)     e(min)     e(max)     e(sum) 
+-------------+----------------------------------------------------------------------------------------
+  share_week |       918        918   .1750462   .0733216   .2707797          0          1   160.6924 
+   hdds_week |       918        918   8.166667    2.41385   1.553657          1         12       7497 
+     sr_week |       918        918   13.34205   15.09116   3.884735          1         28      12248 
+      p_week |       918        918   1.913943   3.583644   1.893051          0         11       1757 
+
+.                                                 
+.                 eststo                  w_diff : estpost ///
+>                                                 ttest share_week hdds_week sr_week p_week, ///
+>                                                 by(treat_assign) unequal
+
+             |      e(b)   e(count)      e(se)       e(t)    e(df_t)     e(p_l)       e(p)     e(p_u)     e(N_1) 
+-------------+---------------------------------------------------------------------------------------------------
+  share_week | -.4281667        918   .0143023  -29.93696   380.0308   2.6e-102   5.2e-102          1        561 
+   hdds_week | -.1398014        918   .1026786  -1.361544   816.0662   .0868588   .1737177   .9131412        561 
+     sr_week | -.4624395        918   .2602653    -1.7768   781.3718    .037995   .0759901    .962005        561 
+      p_week | -.1774892        918   .1287447  -1.378613   745.4759   .0842138   .1684276   .9157862        561 
+
+             |   e(mu_1)     e(N_2)    e(mu_2) 
+-------------+---------------------------------
+  share_week |  .0085369        357   .4367036 
+   hdds_week |  8.112299        357   8.252101 
+     sr_week |  13.16221        357   13.62465 
+      p_week |   1.84492        357   2.022409 
+
+.         
+.                 distinct                hhid if treat_assign == 0
+
+       |        Observations
+       |      total   distinct
+-------+----------------------
+  hhid |        561         96
+
+.                 local                   temp1a = r(N) 
+
+.                         local                   cntrlw : display %4.0f `temp1a'
+
+.                 
+.                 distinct                hhid if treat_assign == 1
+
+       |        Observations
+       |      total   distinct
+-------+----------------------
+  hhid |        357         61
+
+.                 local                   temp2a = r(N) 
+
+.                         local                   trtmntw : display %4.0f `temp2a'
+
+.                 
+.                 distinct                hhid
+
+       |        Observations
+       |      total   distinct
+-------+----------------------
+  hhid |        918        157
+
+.                 local                   temp3a = r(N) 
+
+.                         local                   totw : display %4.0f `temp3a'
+
+.         restore 
+
+.                         
+. 
+. * output table of summary of dietary outcomes
+.         esttab                  w_cntrl w_trtmnt w_diff w_tot ///
+>                                                 using "$output/out_tab.tex", append ///
+>                                                 posthead("\midrule \multicolumn{5}{l}{\emph{Panel C: Week-Level Outc
+> omes}} \\ " ) ///
+>                                                 booktabs main(mean) aux(sd) nostar unstack nonum ///
+>                                                 collabels(none) f noobs nomtitle nogaps ///
+>                                                 cells("mean(fmt(3) pattern(1 1 0 1)) p(fmt(3) pattern(0 0 1 0 ))"  /
+> //
+>                                                 sd(fmt(3)par pattern(1 1 0 1) ) ) ///
+>                                                 rename(share_week "Solar Stove Use" hdds_week "HDDS" ///
+>                                                 sr_week "Species Richness"      p_week "Legumes Cooked") ///
+>                                                 prefoot(" \midrule Observations & `cntrlw' & `trtmntw' & & `totw' \\
+>  ")
+(output written to C:/Users/jdmic/git/solar_stove/data/analysis/tables/out_tab.tex)
+
+.                 
+. * sum week
+.         preserve 
+
+.                 duplicates drop         hhid, force
+
+Duplicates in terms of hhid
+
+(30,188 observations deleted)
+
+.                 
+.                 eststo                  t_cntrl :       estpost ///
+>                                                 sum share_total hdds_total sr_total p_total ///
+>                                                 if treat_assign == 0
+
+             |  e(count)   e(sum_w)    e(mean)     e(Var)      e(sd)     e(min)     e(max)     e(sum) 
+-------------+----------------------------------------------------------------------------------------
+ share_total |        96         96   .0084522   .0035323    .059433          0   .5413534   .8114082 
+  hdds_total |        96         96   9.739583   1.710417   1.307829          6         12        935 
+    sr_total |        96         96         20   24.25263   4.924696          8         31       1920 
+     p_total |        96         96   10.78125   61.79375     7.8609          0         41       1035 
+
+.                 
+.                 eststo                  t_trtmnt : estpost ///
+>                                                 sum share_total hdds_total sr_total p_total ///
+>                                                 if treat_assign == 1
+
+             |  e(count)   e(sum_w)    e(mean)     e(Var)      e(sd)     e(min)     e(max)     e(sum) 
+-------------+----------------------------------------------------------------------------------------
+ share_total |        61         61   .4329363   .0478058   .2186454          0   .9333333   26.40912 
+  hdds_total |        61         61   9.934426   1.195628   1.093448          8         12        606 
+    sr_total |        61         61   20.16393   21.73934   4.662547         10         31       1230 
+     p_total |        61         61   11.83607   61.33934   7.831944          0         40        722 
+
+. 
+.                 eststo                  t_tot : estpost ///
+>                                                 sum share_total hdds_total sr_total p_total
+
+             |  e(count)   e(sum_w)    e(mean)     e(Var)      e(sd)     e(min)     e(max)     e(sum) 
+-------------+----------------------------------------------------------------------------------------
+ share_total |       157        157   .1733791   .0636203   .2522307          0   .9333333   27.22052 
+  hdds_total |       157        157   9.815287   1.510534   1.229038          6         12       1541 
+    sr_total |       157        157   20.06369   23.13694   4.810088          8         31       3150 
+     p_total |       157        157   11.19108   61.48889   7.841485          0         41       1757 
+
+.                                                 
+.                 eststo                  t_diff : estpost ///
+>                                                 ttest share_total hdds_total sr_total p_total, ///
+>                                                 by(treat_assign) unequal
+
+             |      e(b)   e(count)      e(se)       e(t)    e(df_t)     e(p_l)       e(p)     e(p_u)     e(N_1) 
+-------------+---------------------------------------------------------------------------------------------------
+ share_total | -.4244842        157   .0286443  -14.81915    65.6748   6.30e-23   1.26e-22          1         96 
+  hdds_total | -.1948429        157   .1934355  -1.007276   143.6773   .1577479   .3154957   .8422521         96 
+    sr_total | -.1639344        157   .7803937  -.2100663   133.0039   .4169687   .8339374   .5830313         96 
+     p_total | -1.054816        157    1.28423    -.82136   128.2182   .2064829   .4129658   .7935171         96 
+
+             |   e(mu_1)     e(N_2)    e(mu_2) 
+-------------+---------------------------------
+ share_total |  .0084522         61   .4329363 
+  hdds_total |  9.739583         61   9.934426 
+    sr_total |        20         61   20.16393 
+     p_total |  10.78125         61   11.83607 
+
+.         
+.                 distinct                hhid if treat_assign == 0
+
+       |        Observations
+       |      total   distinct
+-------+----------------------
+  hhid |         96         96
+
+.                 local                   temp1a = r(N) 
+
+.                         local                   cntrlt : display %4.0f `temp1a'
+
+.                 
+.                 distinct                hhid if treat_assign == 1
+
+       |        Observations
+       |      total   distinct
+-------+----------------------
+  hhid |         61         61
+
+.                 local                   temp2a = r(N) 
+
+.                         local                   trtmntt : display %4.0f `temp2a'
+
+.                 
+.                 distinct                hhid
+
+       |        Observations
+       |      total   distinct
+-------+----------------------
+  hhid |        157        157
+
+.                 local                   temp3a = r(N) 
+
+.                         local                   tott : display %4.0f `temp3a'
+
+.         restore 
+
+.                         
+. 
+. * output table of summary of dietary outcomes
+.         esttab                  t_cntrl t_trtmnt t_diff t_tot ///
+>                                                 using "$output/out_tab.tex", append ///
+>                                                 posthead("\midrule \multicolumn{5}{l}{\emph{Panel C: Overall Outcome
+> s}} \\ " ) ///
+>                                                 booktabs main(mean) aux(sd) nostar unstack nonum ///
+>                                                 collabels(none) f noobs nomtitle nogaps ///
+>                                                 cells("mean(fmt(3) pattern(1 1 0 1)) p(fmt(3) pattern(0 0 1 0 ))"  /
+> //
+>                                                 sd(fmt(3)par pattern(1 1 0 1) ) ) ///
+>                                                 rename(share_total "Solar Stove Use" hdds_total "HDDS" ///
+>                                                 sr_total "Species Richness"     p_total "Legumes Cooked") ///
+>                                                 postfoot(" \midrule Observations & `cntrlt' & `trtmntt' & & `tott' \
+> \ " ///
+>                                                 "\hline \hline \\[-1.8ex] \multicolumn{5}{J{\linewidth}}{\small " //
+> /
+>                                                 "\noindent \textit{Note}: The table displays means, for solar stove 
+> use and outcome variables " ///
+>                                                 "by treatment assignment and for the total sample. Standard deviatio
+> ns are in " ///
+>                                                 "parentheses. We also report \$p\$-values " ///
+>                                                 "on a \$t\$-test for the equality of means between treatment and con
+> trol.}  \end{tabular}")
+(output written to C:/Users/jdmic/git/solar_stove/data/analysis/tables/out_tab.tex)
+
+.                                                 
+.                                         
+. 
+.                         
+.                         
+.                         
+.                         
+.                         
+. * output table of summary of dietary outcomes
+.         esttab                  o_cntrl o_trtmnt o_diff o_tot ///
+>                                                 using "$output/out_tab.tex", replace booktabs ///
+>                                                 prehead("\begin{tabular}{l*{4}{c}} \\ [-1.8ex]\hline \hline \\[-1.8e
+> x] " ///
+>                                                 "\multicolumn{5}{c}{\emph{Panel A: Daily Cooking Frequency} &  \mult
+> icolumn{4}{c}{Weekly Cooking Frequency} " ///
+>                                                 "& \multicolumn{4}{c}{Total Cooking Frequency} \\ " ///
+>                                                 "& \multicolumn{1}{c}{Control} & \multicolumn{1}{c}{Treatment} &  " 
+> ///
+>                                                 "\multicolumn{1}{c}{\$p\$-value} & \multicolumn{1}{c}{Total} " /// 
+>                                                 "& \multicolumn{1}{c}{Control} & \multicolumn{1}{c}{Treatment} &  " 
+> ///
+>                                                 "\multicolumn{1}{c}{\$p\$-value} & \multicolumn{1}{c}{Total} " /// 
+>                                                 "& \multicolumn{1}{c}{Control} & \multicolumn{1}{c}{Treatment} &  " 
+> ///
+>                                                 "\multicolumn{1}{c}{\$p\$-value} & \multicolumn{1}{c}{Total} \\ ") /
+> //
+>                                                 main(mean) aux(sd) nostar unstack nonum ///
+>                                                 collabels(none) f noobs nomtitle nogaps ///
+>                                                 cells("mean(fmt(3) pattern(1 1 0 1 1 1 0 1 1 1 0 1)) p(fmt(3) patter
+> n(0 0 1 0 0 0 1 0 0 0 1 0))"  ///
+>                                                 sd(fmt(3)par pattern(1 1 0 1 1 1 0 1 1 1 0 1) ) ) ///
+>                                                 rename(dish_eat "Dishes per Meal" dish_skp "Meals Skipped") ///
+>                                                 postfoot(" \midrule Observations & `cntrld' & `trtmntd' & & `totd' &
+>  " ///
+>                                                 " `cntrlw' & `trtmntw' & & `totw' & `cntrlt' & `trtmntt' & & `tott' 
+> \\ " ///
+>                                                 "\hline \hline \\[-1.8ex] \multicolumn{13}{J{\linewidth}}{\small " /
+> //
+>                                                 "\noindent \textit{Note}: The table displays means, for solar stove 
+> use and outcome variables " ///
+>                                                 "by treatment assignment and for the total sample. Standard deviatio
+> ns are in " ///
+>                                                 "parentheses. We also report \$p\$-values " ///
+>                                                 "on a \$t\$-test for the equality of means between treatment and con
+> trol.}  \end{tabular}") 
+(output written to C:/Users/jdmic/git/solar_stove/data/analysis/tables/out_tab.tex)
+
+. 
+. * sum week
+.         preserve 
+
+.                 duplicates drop         hhid week, force
+
+Duplicates in terms of hhid week
+
+(29,427 observations deleted)
+
+.                 estpost sum             
+
+             |  e(count)   e(sum_w)    e(mean)     e(Var)      e(sd)     e(min)     e(max)     e(sum) 
+-------------+----------------------------------------------------------------------------------------
+     village |       918        918   1.044662   .7646334   .8744332          0          2        959 
+        hhid |       918        918   241578.4   8.31e+09   91142.85     110000     374000   2.22e+08 
+         aas |       918        918   1.833333   1.303708     1.1418          0          3       1683 
+          cc |       918        918    23.9276   1602.497   40.03121          0        100   21965.54 
+     hh_size |       900        900   6.957778   6.598883   2.568829          1         15       6262 
+          ai |       918        918   9.917211   132.2418   11.49964          0         62       9104 
+         tli |       918        918   4.989586   147.4591   12.14328          0      86.84    4580.44 
+         sex |       918        918     1.6939   .2126345   .4611231          1          2       1555 
+         age |       906        906   47.82671   161.7987   12.72001         16         80      43331 
+         edu |       918        918   1.525054    .406678   .6377131          0          3       1400 
+treat_assign |       918        918   .3888889   .2379135   .4877638          0          1        357 
+        week |       918        918   3.480392   2.926006   1.710557          1          6       3195 
+         day |       918        918   1.042484   .1475934   .3841788          1          7        957 
+        meal |       918        918   .2538126   .1983224   .4453341          0          2        233 
+        dish |       918        918          1          0          0          1          1        918 
+      ss_use |       918        918   .1732026   .1433596   .3786286          0          1        159 
+        cook |       918        918   2.958606   1.470477   1.212632          1          5       2716 
+      recall |       876        876   .0319635   .0309772   .1760033          0          1         28 
+ ingred_dish |       918        918   2.603486   1.101057   1.049312          1          7       2390 
+ ingred_meal |       918        918   3.839869    4.46397   2.112811          1         17       3525 
+  ingred_day |       918        918   9.601307    10.1244   3.181887          1         23       8814 
+ ingred_week |       918        918   18.53922   30.47774   5.520665          1         38      17019 
+   hdds_dish |       918        918   2.056645     .70344   .8387133          1          6       1888 
+     sr_dish |       918        918   2.063181   .6895698   .8304034          1          5       1894 
+hdds_avg_d~h |       918        918   2.526012   .1505501   .3880078   1.154079   3.226093   2318.879 
+ sr_avg_dish |       918        918   2.537128   .2109687   .4593133   1.265861   4.198087   2329.083 
+   hdds_meal |       918        918   2.964052   1.796962   1.340508          1          7       2721 
+     sr_meal |       918        918   3.018519   2.142514   1.463733          1         12       2771 
+hdds_avg_m~l |       918        918   4.365451   .5806055   .7619747   2.084592   6.657787   4007.484 
+ sr_avg_meal |       918        918   4.543104   1.044825   1.022167    2.04321    9.68306   4170.569 
+    hdds_day |       918        918   5.867102   2.130629   1.459667          1         10       5386 
+      sr_day |       918        918   6.973856   5.628541   2.372455          1         18       6402 
+hdds_avg_day |       918        918   5.871171   .9539195    .976688   2.469136          8   5389.735 
+  sr_avg_day |       918        918   6.972062   2.815067   1.677816   2.444444   13.84221   6400.353 
+   hdds_week |       918        918   8.166667    2.41385   1.553657          1         12       7497 
+     sr_week |       918        918   13.34205   15.09116   3.884735          1         28      12248 
+hdds_avg_w~k |       918        918   8.273462   1.385342   1.177006   3.370968    10.7944   7595.038 
+ sr_avg_week |       918        918   13.59199   10.32339   3.213003   3.330645   23.70492   12477.45 
+  hdds_total |       918        918   9.840959   1.449051   1.203765          6         12       9034 
+    sr_total |       918        918   20.15904   22.87326     4.7826          8         31      18506 
+      p_dish |       918        918   .0228758   .0223769   .1495891          0          1         21 
+      p_meal |       918        918   .0446623   .0427141   .2066739          0          1         41 
+       p_day |       918        918   .2527233   .2675771   .5172785          0          2        232 
+      p_week |       918        918   1.913943   3.583644   1.893051          0         11       1757 
+     p_total |       918        918   11.36492   60.70093    7.79108          0         41      10433 
+    meal_day |       918        918   2.662309   .2871493   .5358631          1          3       2444 
+   meal_week |       918        918   17.34749   16.17683   4.022042          1         21      15925 
+  meal_total |       918        918   102.8573   472.1944   21.73004         20        126      94423 
+      br_day |       918        918   .7505447   .1874315   .4329337          0          1        689 
+     br_week |       918        918   4.936819    3.88041   1.969876          0          7       4532 
+      br_tot |       918        918   29.30283   96.33785   9.815185          1         42      26900 
+     lun_day |       918        918   .9651416     .03368    .183521          0          1        886 
+    lun_week |       918        918   6.303922   2.135448   1.461317          0          7       5787 
+     lun_tot |       918        918   37.36492   63.49482   7.968364          0         42      34301 
+     din_day |       918        918   .9466231   .0505829   .2249065          0          1        869 
+    din_week |       918        918   6.106754   2.269943   1.506633          0          7       5606 
+     din_tot |       918        918   36.18954   61.25738    7.82671          0         42      33222 
+    day_skip |       918        918   .3376906   .2871493   .5358631          0          2        310 
+   week_skip |       918        918   3.652505   16.17683   4.022042          0         20       3353 
+    tot_skip |       918        918    23.1427   472.1944   21.73004          0        106      21245 
+  brday_skip |       918        918   .2494553   .1874315   .4329337          0          1        229 
+ brweek_skip |       918        918   2.063181    3.88041   1.969876          0          7       1894 
+  brtot_skip |       918        918   12.69717   96.33785   9.815185          0         41      11656 
+ lunday_skip |       918        918   .0348584     .03368    .183521          0          1         32 
+lunweek_skip |       918        918   .6960784   2.135448   1.461317          0          7        639 
+ luntot_skip |       918        918   4.635076   63.49482   7.968364          0         42       4255 
+ dinday_skip |       918        918   .0533769   .0505829   .2249065          0          1         49 
+dinweek_skip |       918        918   .8932462   2.269943   1.506633          0          7        820 
+ dintot_skip |       918        918   5.810458   61.25738    7.82671          0         42       5334 
+    dish_day |       918        918    5.22549   2.783341   1.668335          1         12       4797 
+   dish_week |       918        918   33.05556   112.2248   10.59362          1         69      30345 
+    dish_tot |       918        918   196.0708   3327.239   57.68223         25        351     179993 
+  brdish_day |       918        918   .9694989   .5443249   .7377838          0          4        890 
+ brdish_week |       918        918   6.234205   10.58304   3.253158          0         20       5723 
+  brdish_tot |       918        918   37.01198   261.4622   16.16979          1         86      33977 
+ lundish_day |       918        918   2.196078   .6136378   .7833504          0          4       2016 
+lundish_week |       918        918   13.83333   21.75518   4.664245          0         28      12699 
+ lundish_tot |       918        918   82.05664   638.3588   25.26576          0        149      75328 
+ dindish_day |       918        918   2.059913   .6147271   .7840454          0          4       1891 
+dindish_week |       918        918   12.98802   20.31283   4.506976          0         27      11923 
+ dindish_tot |       918        918   77.00218   548.4253   23.41848          0        137      70688 
+    hh_m_use |       918        918   .2538126   .3313649   .5756431          0          4        233 
+   hh_m_fuel |       918        918   1.479303   .4265068   .6530749          1          4       1358 
+  share_meal |       918        918   .1773784   .1388195   .3725848          0          1   162.8333 
+   hh_da_use |       918        918   .9302832   2.527304    1.58975          0          8        854 
+  hh_da_fuel |       918        918    5.22549   2.783341   1.668335          1         12       4797 
+   share_day |       918        918   .1724213   .0837747   .2894386          0          1   158.2827 
+    hh_w_use |       918        918   5.942266   91.29328   9.554752          0         42       5455 
+   hh_w_fuel |       918        918   33.05556   112.2248   10.59362          1         69      30345 
+  share_week |       918        918   .1750462   .0733216   .2707797          0          1   160.6924 
+    hh_t_use |       918        918   35.45752   2739.263   52.33797          0        201      32550 
+   hh_t_fuel |       918        918   196.0708   3327.239   57.68223         25        351     179993 
+ share_total |       918        918   .1744642   .0640233   .2530283          0   .9333333   160.1581 
+
+.                 est store                       sum_week
+
+.         restore 
+
+. 
+. * sum total
+.         preserve 
+
+.                 duplicates drop         hhid, force
+
+Duplicates in terms of hhid
+
+(30,188 observations deleted)
+
+.                 estpost sum             share_total hdds_total sr_total p_total
+
+             |  e(count)   e(sum_w)    e(mean)     e(Var)      e(sd)     e(min)     e(max)     e(sum) 
+-------------+----------------------------------------------------------------------------------------
+ share_total |       157        157   .1733791   .0636203   .2522307          0   .9333333   27.22052 
+  hdds_total |       157        157   9.815287   1.510534   1.229038          6         12       1541 
+    sr_total |       157        157   20.06369   23.13694   4.810088          8         31       3150 
+     p_total |       157        157   11.19108   61.48889   7.841485          0         41       1757 
+
+.                 est store                       sum_total
+
+.         restore 
+
+. 
+. ************************************************************************
+. **## 1.2 - cooking frequency outcomes
+. ************************************************************************
+. 
+. * daily frequency
+.         preserve
+
+.                 duplicates drop         hhid week day, force
+
+Duplicates in terms of hhid week day
+
+(24,300 observations deleted)
+
+.                 
+.                 rename                  dish_day dish_eat
+
+.                 rename                  day_skip dish_skp
+
+.                 
+.                 eststo                  d_cntrl :       estpost ///
+>                                                 sum dish_eat dish_skp ///
+>                                                 if treat_assign == 0
+
+             |  e(count)   e(sum_w)    e(mean)     e(Var)      e(sd)     e(min)     e(max)     e(sum) 
+-------------+----------------------------------------------------------------------------------------
+    dish_eat |      3672       3672   4.885349   2.587505   1.608572          1         12      17939 
+    dish_skp |      3672       3672   .4104031   .3471868   .5892256          0          2       1507 
+
+.                 
+.                 eststo                  d_trtmnt : estpost ///
+>                                                 sum dish_eat dish_skp ///
+>                                                 if treat_assign == 1
+
+             |  e(count)   e(sum_w)    e(mean)     e(Var)      e(sd)     e(min)     e(max)     e(sum) 
+-------------+----------------------------------------------------------------------------------------
+    dish_eat |      2373       2373   5.227981   2.524309   1.588808          1         12      12406 
+    dish_skp |      2373       2373   .2962495   .2667524   .5164808          0          2        703 
+
+. 
+.                 eststo                  d_tot : estpost ///
+>                                                 sum dish_eat dish_skp
+
+             |  e(count)   e(sum_w)    e(mean)     e(Var)      e(sd)     e(min)     e(max)     e(sum) 
+-------------+----------------------------------------------------------------------------------------
+    dish_eat |      6045       6045   5.019851   2.590274   1.609433          1         12      30345 
+    dish_skp |      6045       6045   .3655914   .3186703   .5645089          0          2       2210 
+
+.                                                 
+.                 eststo                  d_diff : estpost ///
+>                                                 ttest dish_eat dish_skp, ///
+>                                                 by(treat_assign) unequal
+
+             |      e(b)   e(count)      e(se)       e(t)    e(df_t)     e(p_l)       e(p)     e(p_u)     e(N_1) 
+-------------+---------------------------------------------------------------------------------------------------
+    dish_eat | -.3426329       6045   .0420526  -8.147721   5107.292   2.31e-16   4.62e-16          1       3672 
+    dish_skp |  .1141536       6045   .0143861   7.934965   5517.931          1   2.53e-15   1.27e-15       3672 
+
+             |   e(mu_1)     e(N_2)    e(mu_2) 
+-------------+---------------------------------
+    dish_eat |  4.885349       2373   5.227981 
+    dish_skp |  .4104031       2373   .2962495 
+
+.         
+.                 distinct                hhid if treat_assign == 0
+
+       |        Observations
+       |      total   distinct
+-------+----------------------
+  hhid |       3672         96
+
+.                 local                   temp1a = r(N) 
+
+.                         local                   cntrld : display %4.0f `temp1a'
+
+.                 
+.                 distinct                hhid if treat_assign == 1
+
+       |        Observations
+       |      total   distinct
+-------+----------------------
+  hhid |       2373         61
+
+.                 local                   temp2a = r(N) 
+
+.                         local                   trtmntd : display %4.0f `temp2a'
+
+.                 
+.                 distinct                hhid
+
+       |        Observations
+       |      total   distinct
+-------+----------------------
+  hhid |       6045        157
+
+.                 local                   temp3a = r(N) 
+
+.                         local                   totd : display %4.0f `temp3a'
+
+.         restore
+
+.                                 
+. * weekly frequency
+.         preserve
+
+.                 duplicates drop         hhid week, force
+
+Duplicates in terms of hhid week
+
+(29,427 observations deleted)
+
+.                 
+.                 rename                  dish_week dish_eat
+
+.                 rename                  week_skip  dish_skp
+
+.                 
+.                 eststo                  w_cntrl :       estpost ///
+>                                                 sum dish_eat dish_skp ///
+>                                                 if treat_assign == 0
+
+             |  e(count)   e(sum_w)    e(mean)     e(Var)      e(sd)     e(min)     e(max)     e(sum) 
+-------------+----------------------------------------------------------------------------------------
+    dish_eat |       561        561   31.97683   111.4905   10.55891          2         69      17939 
+    dish_skp |       561        561   4.049911   16.44036   4.054672          0         19       2272 
+
+.                 
+.                 eststo                  w_trtmnt : estpost ///
+>                                                 sum dish_eat dish_skp ///
+>                                                 if treat_assign == 1
+
+             |  e(count)   e(sum_w)    e(mean)     e(Var)      e(sd)     e(min)     e(max)     e(sum) 
+-------------+----------------------------------------------------------------------------------------
+    dish_eat |       357        357    34.7507   108.9798   10.43934          1         66      12406 
+    dish_skp |       357        357   3.028011   15.16775    3.89458          0         20       1081 
+
+. 
+.                 eststo                  w_tot : estpost ///
+>                                                 sum dish_eat dish_skp
+
+             |  e(count)   e(sum_w)    e(mean)     e(Var)      e(sd)     e(min)     e(max)     e(sum) 
+-------------+----------------------------------------------------------------------------------------
+    dish_eat |       918        918   33.05556   112.2248   10.59362          1         69      30345 
+    dish_skp |       918        918   3.652505   16.17683   4.022042          0         20       3353 
+
+.                                                 
+.                 eststo                  w_diff : estpost ///
+>                                                 ttest dish_eat dish_skp, ///
+>                                                 by(treat_assign) unequal
+
+             |      e(b)   e(count)      e(se)       e(t)    e(df_t)     e(p_l)       e(p)     e(p_u)     e(N_1) 
+-------------+---------------------------------------------------------------------------------------------------
+    dish_eat | -2.773873        918   .7099302  -3.907248   764.4446   .0000508   .0001016   .9999492        561 
+    dish_skp |    1.0219        918   .2679406   3.813904   780.4356   .9999262   .0001476   .0000738        561 
+
+             |   e(mu_1)     e(N_2)    e(mu_2) 
+-------------+---------------------------------
+    dish_eat |  31.97683        357    34.7507 
+    dish_skp |  4.049911        357   3.028011 
+
+.         
+.                 distinct                hhid if treat_assign == 0
+
+       |        Observations
+       |      total   distinct
+-------+----------------------
+  hhid |        561         96
+
+.                 local                   temp1a = r(N) 
+
+.                         local                   cntrlw : display %4.0f `temp1a'
+
+.                 
+.                 distinct                hhid if treat_assign == 1
+
+       |        Observations
+       |      total   distinct
+-------+----------------------
+  hhid |        357         61
+
+.                 local                   temp2a = r(N) 
+
+.                         local                   trtmntw : display %4.0f `temp2a'
+
+.                 
+.                 distinct                hhid
+
+       |        Observations
+       |      total   distinct
+-------+----------------------
+  hhid |        918        157
+
+.                 local                   temp3a = r(N) 
+
+.                         local                   totw : display %4.0f `temp3a'
+
+.         restore
+
+. 
+.         
+. * total frequency
+.         preserve
+
+.                 duplicates drop         hhid, force
+
+Duplicates in terms of hhid
+
+(30,188 observations deleted)
+
+.                 
+.                 rename                  dish_tot dish_eat
+
+.                 rename                  tot_skip dish_skp
+
+.                                 
+.                 eststo                  t_cntrl :       estpost ///
+>                                                 sum dish_eat dish_skp ///
+>                                                 if treat_assign == 0
+
+             |  e(count)   e(sum_w)    e(mean)     e(Var)      e(sd)     e(min)     e(max)     e(sum) 
+-------------+----------------------------------------------------------------------------------------
+    dish_eat |        96         96   186.8646   3394.708   58.26412         25        304      17939 
+    dish_skp |        96         96   26.94792    506.913   22.51473          1        104       2587 
+
+.                 
+.                 eststo                  t_trtmnt : estpost ///
+>                                                 sum dish_eat dish_skp ///
+>                                                 if treat_assign == 1
+
+             |  e(count)   e(sum_w)    e(mean)     e(Var)      e(sd)     e(min)     e(max)     e(sum) 
+-------------+----------------------------------------------------------------------------------------
+    dish_eat |        61         61    203.377   3791.872   61.57818         30        351      12406 
+    dish_skp |        61         61   20.81967   604.0503   24.57743          0        106       1270 
+
+. 
+.                 eststo                  t_tot : estpost ///
+>                                                 sum dish_eat dish_skp
+
+             |  e(count)   e(sum_w)    e(mean)     e(Var)      e(sd)     e(min)     e(max)     e(sum) 
+-------------+----------------------------------------------------------------------------------------
+    dish_eat |       157        157   193.2803   3590.895   59.92408         25        351      30345 
+    dish_skp |       157        157   24.56688   550.0035   23.45215          0        106       3857 
+
+.                                                 
+.                 eststo                  t_diff : estpost ///
+>                                                 ttest dish_eat dish_skp, ///
+>                                                 by(treat_assign) unequal
+
+             |      e(b)   e(count)      e(se)       e(t)    e(df_t)     e(p_l)       e(p)     e(p_u)     e(N_1) 
+-------------+---------------------------------------------------------------------------------------------------
+    dish_eat | -16.51247        157   9.875393  -1.672082   122.6187    .048529   .0970581    .951471         96 
+    dish_skp |  6.128245        157   3.896512   1.572751    119.575   .9407906   .1184187   .0592094         96 
+
+             |   e(mu_1)     e(N_2)    e(mu_2) 
+-------------+---------------------------------
+    dish_eat |  186.8646         61    203.377 
+    dish_skp |  26.94792         61   20.81967 
+
+.         
+.                 distinct                hhid if treat_assign == 0
+
+       |        Observations
+       |      total   distinct
+-------+----------------------
+  hhid |         96         96
+
+.                 local                   temp1a = r(N) 
+
+.                         local                   cntrlt : display %4.0f `temp1a'
+
+.                 
+.                 distinct                hhid if treat_assign == 1
+
+       |        Observations
+       |      total   distinct
+-------+----------------------
+  hhid |         61         61
+
+.                 local                   temp2a = r(N) 
+
+.                         local                   trtmntt : display %4.0f `temp2a'
+
+.                 
+.                 distinct                hhid
+
+       |        Observations
+       |      total   distinct
+-------+----------------------
+  hhid |        157        157
+
+.                 local                   temp3a = r(N) 
+
+.                         local                   tott : display %4.0f `temp3a'
+
+.         restore
+
+. 
+.                 
+. * output table of summary of cooking frequency
+.         esttab                  d_cntrl d_trtmnt d_diff d_tot w_cntrl w_trtmnt w_diff w_tot t_cntrl t_trtmnt t_diff 
+> t_tot ///
+>                                                 using "$output/cook_tab.tex", replace booktabs ///
+>                                                 prehead("\begin{tabular}{l*{12}{c}} \\ [-1.8ex]\hline \hline \\[-1.8
+> ex] " ///
+>                                                 "& \multicolumn{4}{c}{Daily Cooking Frequency} &  \multicolumn{4}{c}
+> {Weekly Cooking Frequency} " ///
+>                                                 "& \multicolumn{4}{c}{Total Cooking Frequency} \\ " ///
+>                                                 "& \multicolumn{1}{c}{Control} & \multicolumn{1}{c}{Treatment} &  " 
+> ///
+>                                                 "\multicolumn{1}{c}{\$p\$-value} & \multicolumn{1}{c}{Total} " /// 
+>                                                 "& \multicolumn{1}{c}{Control} & \multicolumn{1}{c}{Treatment} &  " 
+> ///
+>                                                 "\multicolumn{1}{c}{\$p\$-value} & \multicolumn{1}{c}{Total} " /// 
+>                                                 "& \multicolumn{1}{c}{Control} & \multicolumn{1}{c}{Treatment} &  " 
+> ///
+>                                                 "\multicolumn{1}{c}{\$p\$-value} & \multicolumn{1}{c}{Total} \\ ") /
+> //
+>                                                 main(mean) aux(sd) nostar unstack nonum ///
+>                                                 collabels(none) f noobs nomtitle nogaps ///
+>                                                 cells("mean(fmt(3) pattern(1 1 0 1 1 1 0 1 1 1 0 1)) p(fmt(3) patter
+> n(0 0 1 0 0 0 1 0 0 0 1 0))"  ///
+>                                                 sd(fmt(3)par pattern(1 1 0 1 1 1 0 1 1 1 0 1) ) ) ///
+>                                                 rename(dish_eat "Dishes per Meal" dish_skp "Meals Skipped") ///
+>                                                 postfoot(" \midrule Observations & `cntrld' & `trtmntd' & & `totd' &
+>  " ///
+>                                                 " `cntrlw' & `trtmntw' & & `totw' & `cntrlt' & `trtmntt' & & `tott' 
+> \\ " ///
+>                                                 "\hline \hline \\[-1.8ex] \multicolumn{13}{J{\linewidth}}{\small " /
+> //
+>                                                 "\noindent \textit{Note}: The table displays means, for dishes per m
+> eal and meals skipped " ///
+>                                                 "by treatment assignment and for the total sample. Standard deviatio
+> ns are in " ///
+>                                                 "parentheses. We also report \$p\$-values " ///
+>                                                 "on a \$t\$-test for the equality of means between treatment and con
+> trol.}  \end{tabular}") 
+(file C:/Users/jdmic/git/solar_stove/data/analysis/tables/cook_tab.tex not found)
+(output written to C:/Users/jdmic/git/solar_stove/data/analysis/tables/cook_tab.tex)
+
+.                 
+.                                 
+. ************************************************************************
+. **## 1.3 - fuel outcomes
+. ************************************************************************
+. 
+. * load fuel data
+.         use                                     "$ans/fuel_cleaned.dta", clear  
+
+.         
+.         rename                          solar treat_assign
+
+.                                                 
+. * fuel week
+.         preserve
+
+.                 duplicates drop         hhid week, force
+
+Duplicates in terms of hhid week
+
+(0 observations are duplicates)
+
+.                 
+.                 eststo                  w_cntrl :       estpost ///
+>                                                 sum f_time f_quant_ub c_quant_ub val_fuel_ub ///
+>                                                 if treat_assign == 0
+
+             |  e(count)   e(sum_w)    e(mean)     e(Var)      e(sd)     e(min)     e(max)     e(sum) 
+-------------+----------------------------------------------------------------------------------------
+      f_time |       539        539   131.4842    54891.1   234.2885          0       2880      70870 
+  f_quant_ub |       539        539   71.59745   7848.188      88.59          0      974.7   38591.02 
+  c_quant_ub |       539        539   14.30056    636.824   25.23537          0        200       7708 
+ val_fuel_ub |       539        539   11.02374   122.1105   11.05036          0    126.711   5941.793 
+
+.                 
+.                 eststo                  w_trtmnt : estpost ///
+>                                                 sum f_time f_quant_ub c_quant_ub val_fuel_ub ///
+>                                                 if treat_assign == 1
+
+             |  e(count)   e(sum_w)    e(mean)     e(Var)      e(sd)     e(min)     e(max)     e(sum) 
+-------------+----------------------------------------------------------------------------------------
+      f_time |       331        331   88.45921   9043.831   95.09906          0        720      29280 
+  f_quant_ub |       331        331   41.60612   1357.254   36.84093          0     162.45   13771.62 
+  c_quant_ub |       331        331   17.05438   489.6334   22.12766          0        100       5645 
+ val_fuel_ub |       331        331   7.455321   29.52392   5.433592          0    33.1185   2467.711 
+
+. 
+.                 eststo                  w_tot : estpost ///
+>                                                 sum f_time f_quant_ub c_quant_ub val_fuel_ub
+
+             |  e(count)   e(sum_w)    e(mean)     e(Var)      e(sd)     e(min)     e(max)     e(sum) 
+-------------+----------------------------------------------------------------------------------------
+      f_time |       870        870   115.1149   37854.42   194.5621          0       2880     100150 
+  f_quant_ub |       870        870   60.18695   5586.506   74.74293          0      974.7   52362.65 
+  c_quant_ub |       870        870   15.34828   581.9856   24.12438          0        200      13353 
+ val_fuel_ub |       870        870   9.666097    89.8154   9.477099          0    126.711   8409.504 
+
+.                                                 
+.                 eststo                  w_diff : estpost ///
+>                                                 ttest f_time f_quant_ub c_quant_ub val_fuel_ub, ///
+>                                                 by(treat_assign) unequal
+
+             |      e(b)   e(count)      e(se)       e(t)    e(df_t)     e(p_l)       e(p)     e(p_u)     e(N_1) 
+-------------+---------------------------------------------------------------------------------------------------
+      f_time |  43.02502        870   11.36493   3.785772   774.5193   .9999175   .0001651   .0000825        539 
+  f_quant_ub |  29.99133        870   4.319851   6.942678   782.5094          1   8.09e-12   4.04e-12        539 
+  c_quant_ub | -2.753824        870    1.63118  -1.688241   767.3879   .0458856   .0917713   .9541144        539 
+ val_fuel_ub |  3.568414        870    .561913   6.350475   834.2144          1   3.52e-10   1.76e-10        539 
+
+             |   e(mu_1)     e(N_2)    e(mu_2) 
+-------------+---------------------------------
+      f_time |  131.4842        331   88.45921 
+  f_quant_ub |  71.59745        331   41.60612 
+  c_quant_ub |  14.30056        331   17.05438 
+ val_fuel_ub |  11.02374        331   7.455321 
+
+.         
+.                 distinct                hhid if treat_assign == 0
+
+       |        Observations
+       |      total   distinct
+-------+----------------------
+  hhid |        539         96
+
+.                 local                   temp1a = r(N) 
+
+.                         local                   cntrlob : display %4.0f `temp1a'
+
+.                 
+.                 distinct                hhid if treat_assign == 1
+
+       |        Observations
+       |      total   distinct
+-------+----------------------
+  hhid |        331         61
+
+.                 local                   temp2a = r(N) 
+
+.                         local                   trtmntob : display %4.0f `temp2a'
+
+.                 
+.                 distinct                hhid
+
+       |        Observations
+       |      total   distinct
+-------+----------------------
+  hhid |        870        157
+
+.                 local                   temp3a = r(N) 
+
+.                         local                   totob : display %4.0f `temp3a'
+
+.         restore
+
+. 
+.         
+. * fuel total
+.         preserve
+
+.                 duplicates drop         hhid, force
+
+Duplicates in terms of hhid
+
+(713 observations deleted)
+
+.                                 
+.                 eststo                  t_cntrl :       estpost ///
+>                                                 sum f_time f_quant_ub c_quant_ub val_fuel_ub ///
+>                                                 if treat_assign == 0
+
+             |  e(count)   e(sum_w)    e(mean)     e(Var)      e(sd)     e(min)     e(max)     e(sum) 
+-------------+----------------------------------------------------------------------------------------
+      f_time |        96         96   150.3125    62587.8   250.1755          0       1800      14430 
+  f_quant_ub |        96         96   76.75885   11915.63   109.1587          0      974.7    7368.85 
+  c_quant_ub |        96         96   13.44792   465.7236   21.58063          0        100       1291 
+ val_fuel_ub |        96         96    11.5924   190.3911   13.79823        1.2    126.711   1112.871 
+
+.                 
+.                 eststo                  t_trtmnt : estpost ///
+>                                                 sum f_time f_quant_ub c_quant_ub val_fuel_ub ///
+>                                                 if treat_assign == 1
+
+             |  e(count)   e(sum_w)    e(mean)     e(Var)      e(sd)     e(min)     e(max)     e(sum) 
+-------------+----------------------------------------------------------------------------------------
+      f_time |        61         61   95.90164   17267.09   131.4043          0        720       5850 
+  f_quant_ub |        61         61   46.18443   2047.262   45.24668          0     162.45    2817.25 
+  c_quant_ub |        61         61   18.39344   479.4093   21.89542          0        100       1122 
+ val_fuel_ub |        61         61   8.211188    39.0742   6.250936       1.92     30.772   500.8825 
+
+. 
+.                 eststo                  t_tot : estpost ///
+>                                                 sum f_time f_quant_ub c_quant_ub val_fuel_ub
+
+             |  e(count)   e(sum_w)    e(mean)     e(Var)      e(sd)     e(min)     e(max)     e(sum) 
+-------------+----------------------------------------------------------------------------------------
+      f_time |       157        157    129.172   45463.41   213.2215          0       1800      20280 
+  f_quant_ub |       157        157   64.87962   8267.228    90.9243          0      974.7    10186.1 
+  c_quant_ub |       157        157   15.36943   473.8498   21.76809          0        100       2413 
+ val_fuel_ub |       157        157   10.27868   133.7053    11.5631        1.2    126.711   1613.753 
+
+.                                                 
+.                 eststo                  t_diff : estpost ///
+>                                                 ttest f_time f_quant_ub c_quant_ub val_fuel_ub, ///
+>                                                 by(treat_assign) unequal
+
+             |      e(b)   e(count)      e(se)       e(t)    e(df_t)     e(p_l)       e(p)     e(p_u)     e(N_1) 
+-------------+---------------------------------------------------------------------------------------------------
+      f_time |  54.41086        157   30.57815   1.779403   150.4862   .9614039   .0771921   .0385961         96 
+  f_quant_ub |  30.57443        157   12.55718   2.434816   137.4134   .9919091   .0161818   .0080909         96 
+  c_quant_ub | -4.945526        157   3.565173  -1.387177   126.4942   .0839135   .1678271   .9160865         96 
+ val_fuel_ub |  3.381213        157   1.619815   2.087407   142.7065   .9806853   .0386293   .0193147         96 
+
+             |   e(mu_1)     e(N_2)    e(mu_2) 
+-------------+---------------------------------
+      f_time |  150.3125         61   95.90164 
+  f_quant_ub |  76.75885         61   46.18443 
+  c_quant_ub |  13.44792         61   18.39344 
+ val_fuel_ub |   11.5924         61   8.211188 
+
+.         
+.                 distinct                hhid if treat_assign == 0
+
+       |        Observations
+       |      total   distinct
+-------+----------------------
+  hhid |         96         96
+
+.                 local                   temp1a = r(N) 
+
+.                         local                   cntrlhh : display %4.0f `temp1a'
+
+.                 
+.                 distinct                hhid if treat_assign == 1
+
+       |        Observations
+       |      total   distinct
+-------+----------------------
+  hhid |         61         61
+
+.                 local                   temp2a = r(N) 
+
+.                         local                   trtmnthh : display %4.0f `temp2a'
+
+.                 
+.                 distinct                hhid
+
+       |        Observations
+       |      total   distinct
+-------+----------------------
+  hhid |        157        157
+
+.                 local                   temp3a = r(N) 
+
+.                         local                   tothh : display %4.0f `temp3a'
+
+.         restore
+
+. 
+.                 
+. * output table of fuel collection
+.         esttab                  w_cntrl w_trtmnt w_diff w_tot t_cntrl t_trtmnt t_diff t_tot ///
+>                                                 using "$output/fuel_tab.tex", replace booktabs ///
+>                                                 prehead("\begin{tabular}{l*{8}{c}} \\ [-1.8ex]\hline \hline \\[-1.8e
+> x] " ///
+>                                                 "& \multicolumn{4}{c}{Weekly Fuel Collection} & \multicolumn{4}{c}{T
+> otal Fuel Collection} \\ " ///
+>                                                 "& \multicolumn{1}{c}{Control} & \multicolumn{1}{c}{Treatment} &  " 
+> ///
+>                                                 "\multicolumn{1}{c}{\$p\$-value} & \multicolumn{1}{c}{Total} " /// 
+>                                                 "& \multicolumn{1}{c}{Control} & \multicolumn{1}{c}{Treatment} &  " 
+> ///
+>                                                 "\multicolumn{1}{c}{\$p\$-value} & \multicolumn{1}{c}{Total} \\ ") /
+> //
+>                                                 main(mean) aux(sd) nostar unstack nonum ///
+>                                                 collabels(none) f noobs nomtitle nogaps ///
+>                                                 cells("mean(fmt(1 2 2 3) pattern(1 1 0 1 1 1 0 1)) p(fmt(3) pattern(
+> 0 0 1 0 0 0 1 0))"  ///
+>                                                 sd(fmt(1 2 2 3)par pattern(1 1 0 1 1 1 0 1) ) ) ///
+>                                                 rename(f_time "Firewood Time (min)" f_quant_ub "Firewood Quantity (k
+> g)" ///
+>                                                 c_quant_ub "Charcoal Quantity (kg)" val_fuel_ub "Fuel Value (USD)" )
+>  ///
+>                                                 postfoot(" \midrule Observations & `cntrlob' & `trtmntob' & & `totob
+> ' & " ///
+>                                                 " `cntrlhh' & `trtmnthh' & & `tothh' \\ " ///
+>                                                 "\hline \hline \\[-1.8ex] \multicolumn{9}{J{\linewidth}}{\small " //
+> /
+>                                                 "\noindent \textit{Note}: The table displays means, for collected an
+> d purchased fuel " ///
+>                                                 "by treatment assignment and for the total sample. Standard deviatio
+> ns are in " ///
+>                                                 "parentheses. We also report \$p\$-values " ///
+>                                                 "on a \$t\$-test for the equality of means between treatment and con
+> trol.}  \end{tabular}") 
+(file C:/Users/jdmic/git/solar_stove/data/analysis/tables/fuel_tab.tex not found)
+(output written to C:/Users/jdmic/git/solar_stove/data/analysis/tables/fuel_tab.tex)
+
+.                 
+.                                 
+. ************************************************************************
+. **# 2 - covariates
+. ************************************************************************
+. 
+. * re-load data
+.         use                                     "$ans/dietary_cleaned.dta", clear               
+
+.         
+. preserve // dropping dupes to give clearer idea of hh breakdown
+
+.         duplicates drop         hhid, force
+
+Duplicates in terms of hhid
+
+(30,188 observations deleted)
+
+.         
+. * generate indicators for education and sex
+.         qui tab                         edu, generate(edu_)
+
+.         
+.         replace                         sex = 0 if sex == 1
+(48 real changes made)
+
+.         replace                         sex = 1 if sex == 2
+(109 real changes made)
+
+.         
+.         lab var                         sex "Female Head of Household"
+
+.         lab var                         edu_1 "No Education"
+
+.         lab var                         edu_2 "Primary Education"
+
+.         lab var                         edu_3 "Secondary Education"
+
+.         lab var                         edu_4 "Higher Education"
+
+.         
+. * summary stats by treatment with t-test
+.         eststo                  cntrl : estpost ///
+>                                                 sum age sex  edu_* hh_size tli ai cc ///
+>                                                 if treat_assign == 0
+
+             |  e(count)   e(sum_w)    e(mean)     e(Var)      e(sd)     e(min)     e(max)     e(sum) 
+-------------+----------------------------------------------------------------------------------------
+         age |        95         95   47.10526   181.7973   13.48322         16         80       4475 
+         sex |        96         96        .75   .1894737   .4352858          0          1         72 
+       edu_1 |        96         96   .0520833   .0498904   .2233615          0          1          5 
+       edu_2 |        96         96     .46875   .2516447    .501642          0          1         45 
+       edu_3 |        96         96   .4583333   .2508772   .5008764          0          1         44 
+       edu_4 |        96         96   .0208333    .020614   .1435759          0          1          2 
+     hh_size |        94         94   6.904255   6.388584   2.527565          2         14        649 
+         tli |        96         96   4.469375    143.681    11.9867          0      86.84     429.06 
+          ai |        96         96   8.583333   114.7719   10.71317          0         62        824 
+          cc |        96         96   98.95833   104.1667   10.20621          0        100       9500 
+
+.                 
+.         eststo                  trtmnt : estpost ///
+>                                                 sum age sex  edu_* hh_size tli ai cc ///
+>                                                 if treat_assign == 1
+
+             |  e(count)   e(sum_w)    e(mean)     e(Var)      e(sd)     e(min)     e(max)     e(sum) 
+-------------+----------------------------------------------------------------------------------------
+         age |        60         60   48.83333   131.0565   11.44799         30         74       2930 
+         sex |        61         61   .6065574    .242623   .4925677          0          1         37 
+       edu_1 |        61         61   .0163934   .0163934   .1280369          0          1          1 
+       edu_2 |        61         61   .3934426    .242623   .4925677          0          1         24 
+       edu_3 |        61         61   .5245902   .2535519   .5035394          0          1         32 
+       edu_4 |        61         61   .0655738   .0622951   .2495898          0          1          4 
+     hh_size |        60         60   6.933333   7.046328   2.654492          1         15        416 
+         tli |        61         61   6.022951   168.4021   12.97698          0      83.36      367.4 
+          ai |        61         61   11.72131   151.9377    12.3263          0         60        715 
+          cc |        61         61        100          0          0        100        100       6100 
+
+. 
+.         eststo                  tot : estpost ///
+>                                                 sum age sex  edu_* hh_size tli ai cc
+
+             |  e(count)   e(sum_w)    e(mean)     e(Var)      e(sd)     e(min)     e(max)     e(sum) 
+-------------+----------------------------------------------------------------------------------------
+         age |       155        155   47.77419   161.8902   12.72361         16         80       7405 
+         sex |       157        157   .6942675   .2136208   .4621913          0          1        109 
+       edu_1 |       157        157   .0382166   .0369917   .1923322          0          1          6 
+       edu_2 |       157        157   .4394904   .2479177   .4979133          0          1         69 
+       edu_3 |       157        157   .4840764   .2513474   .5013456          0          1         76 
+       edu_4 |       157        157   .0382166   .0369917   .1923322          0          1          6 
+     hh_size |       154        154   6.915584   6.600671   2.569177          1         15       1065 
+         tli |       157        157   5.072994   152.8452   12.36306          0      86.84     796.46 
+          ai |       157        157   9.802548   130.6851   11.43176          0         62       1539 
+          cc |       157        157   99.36306   63.69427   7.980869          0        100      15600 
+
+.                                                 
+.         eststo                  diff : estpost ///
+>                                                 ttest age sex  edu_* hh_size tli ai cc, ///
+>                                                 by(treat_assign) unequal
+
+             |      e(b)   e(count)      e(se)       e(t)    e(df_t)     e(p_l)       e(p)     e(p_u)     e(N_1) 
+-------------+---------------------------------------------------------------------------------------------------
+         age |  -1.72807        155   2.024335  -.8536485   140.1479   .1973782   .3947565   .8026218         95 
+         sex |  .1434426        157   .0771434   1.859427   116.2429   .9672525   .0654951   .0327475         96 
+       edu_1 |  .0356899        157   .0280791   1.271048   153.6157   .8971836   .2056329   .1028164         96 
+       edu_2 |  .0753074        157   .0812325   .9270593   129.5952   .8221905    .355619   .1778095         96 
+       edu_3 | -.0662568        157   .0822794  -.8052667   127.3655   .2110833   .4221665   .7889167         96 
+       edu_4 | -.0447404        157   .0351562  -1.272618    85.4972   .1033019   .2066037   .8966981         96 
+     hh_size |  -.029078        154   .4305839  -.0675316   121.2798   .4731349   .9462697   .5268651         94 
+         tli | -1.553576        157   2.063339  -.7529426   120.3508   .2264773   .4529547   .7735227         96 
+          ai | -3.137978        157    1.91998  -1.634381   114.7278     .05246     .10492     .94754         96 
+          cc | -1.041667        157   1.041667         -1         95   .1599254   .3198509   .8400746         96 
+
+             |   e(mu_1)     e(N_2)    e(mu_2) 
+-------------+---------------------------------
+         age |  47.10526         60   48.83333 
+         sex |       .75         61   .6065574 
+       edu_1 |  .0520833         61   .0163934 
+       edu_2 |    .46875         61   .3934426 
+       edu_3 |  .4583333         61   .5245902 
+       edu_4 |  .0208333         61   .0655738 
+     hh_size |  6.904255         60   6.933333 
+         tli |  4.469375         61   6.022951 
+          ai |  8.583333         61   11.72131 
+          cc |  98.95833         61        100 
+
+.         
+.         distinct                hhid if treat_assign == 0
+
+       |        Observations
+       |      total   distinct
+-------+----------------------
+  hhid |         96         96
+
+.         local                   temp1a = r(N) 
+
+.                 local                   cntrlhh : display %4.0f `temp1a'
+
+.                 
+.         distinct                hhid if treat_assign == 1
+
+       |        Observations
+       |      total   distinct
+-------+----------------------
+  hhid |         61         61
+
+.         local                   temp2a = r(N) 
+
+.                 local                   trtmnthh : display %4.0f `temp2a'
+
+.                 
+.         distinct                hhid
+
+       |        Observations
+       |      total   distinct
+-------+----------------------
+  hhid |        157        157
+
+.         local                   temp3a = r(N) 
+
+.                 local                   tothh : display %4.0f `temp3a'
+
+.                                                 
+.         esttab                  cntrl trtmnt diff tot ///
+>                                                 using "$output/convars_tab.tex", replace ///
+>                                                 prehead("\begin{tabular}{l*{4}{c}} \\ [-1.8ex]\hline \hline \\[-1.8e
+> x] " ///
+>                                                 "& \multicolumn{1}{c}{Control} & \multicolumn{1}{c}{Treatment} &  " 
+> ///
+>                                                 "\multicolumn{1}{c}{\$p\$-value} & \multicolumn{1}{c}{Total}  \\ ") 
+> ///
+>                                                 main(mean) aux(sd) nostar unstack label booktabs nonum ///
+>                                                 collabels(none) f noobs nomtitle nogaps ///
+>                                                 cells("mean(fmt(2 3 3 3 3 3 3 3 3 2) pattern(1 1 0 1)) p(fmt(3) patt
+> ern(0 0 1 0))"  ///
+>                                                 sd(fmt(2 3 3 3 3 3 3 2 2 2)par pattern(1 1 0 1) )  ) ///
+>                                                 postfoot(" \midrule Households & `cntrlhh' & `trtmnthh' & & `tothh' 
+> \\ " ///
+>                                                 "\hline \hline \\[-1.8ex] \multicolumn{5}{J{\linewidth}}{\small " //
+> /
+>                                                 "\noindent \textit{Note}: The table displays means for controls " //
+> /
+>                                                 "by treatment assignment and for the total sample. Standard deviatio
+> ns are in " ///
+>                                                 "parentheses. We also report \$p\$-values " ///
+>                                                 "on a \$t\$-test for the equality of means between treatment and con
+> trol.}  \end{tabular}") 
+(file C:/Users/jdmic/git/solar_stove/data/analysis/tables/convars_tab.tex not found)
+(output written to C:/Users/jdmic/git/solar_stove/data/analysis/tables/convars_tab.tex)
+
+. 
+. restore
+
+. 
+.                 
+. ************************************************************************
+. **# 3 - END
+. ************************************************************************
+. 
+. * close the log
+.         log                             close
+      name:  <unnamed>
+       log:  C:/Users/jdmic/git/solar_stove/data/logs/desc_stats.log
+  log type:  text
+ closed on:   1 Oct 2025, 13:02:31
+----------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  C:/Users/jdmic/git/solar_stove/data/logs/desc_stats.log
+  log type:  text
+ opened on:   1 Oct 2025, 13:02:50
+
+. 
+. * load data
+.         use                                     "$ans/dietary_cleaned.dta", clear               
+
+.                                         
+.                                                 
+. ************************************************************************
+. **# 1 - outcome variables
+. ************************************************************************
+. 
+. ************************************************************************
+. **## 1.1 - intermediate and dietary outcomes
+. ************************************************************************
+. 
+. 
+. * sum dish
+.                 eststo                  o_cntrl :       estpost ///
+>                                                 sum ss_use hdds_dish sr_dish p_dish ///
+>                                                 if treat_assign == 0
+
+             |  e(count)   e(sum_w)    e(mean)     e(Var)      e(sd)     e(min)     e(max)     e(sum) 
+-------------+----------------------------------------------------------------------------------------
+      ss_use |     17939      17939   .0119293   .0117877    .108571          0          1        214 
+   hdds_dish |     17939      17939   2.333575   .9639808   .9818252          1          6      41862 
+     sr_dish |     17939      17939   2.329896   1.038002   1.018824          1          7      41796 
+      p_dish |     17939      17939   .0576955   .0543698   .2331733          0          1       1035 
+
+.                 
+.                 eststo                  o_trtmnt : estpost ///
+>                                                 sum ss_use hdds_dish sr_dish p_dish ///
+>                                                 if treat_assign == 1
+
+             |  e(count)   e(sum_w)    e(mean)     e(Var)      e(sd)     e(min)     e(max)     e(sum) 
+-------------+----------------------------------------------------------------------------------------
+      ss_use |     12406      12406   .4224569   .2440067   .4939704          0          1       5241 
+   hdds_dish |     12406      12406   2.294857    1.04437   1.021944          1          6      28470 
+     sr_dish |     12406      12406   2.308802   1.041353   1.020467          1          6      28643 
+      p_dish |     12406      12406   .0590037   .0555267   .2356411          0          1        732 
+
+. 
+.                 eststo                  o_tot : estpost ///
+>                                                 sum ss_use hdds_dish sr_dish p_dish
+
+             |  e(count)   e(sum_w)    e(mean)     e(Var)      e(sd)     e(min)     e(max)     e(sum) 
+-------------+----------------------------------------------------------------------------------------
+      ss_use |     30345      30345    .179766   .1474551   .3839988          0          1       5455 
+   hdds_dish |     30345      30345   2.317746   .9971755   .9985868          1          6      70332 
+     sr_dish |     30345      30345   2.321272   1.039445   1.019532          1          7      70439 
+      p_dish |     30345      30345   .0582304   .0548414   .2341824          0          1       1767 
+
+.                                                 
+.                 eststo                  o_diff : estpost ///
+>                                                 ttest ss_use hdds_dish sr_dish p_dish, ///
+>                                                 by(treat_assign) unequal
+
+             |      e(b)   e(count)      e(se)       e(t)    e(df_t)     e(p_l)       e(p)     e(p_u)     e(N_1) 
+-------------+---------------------------------------------------------------------------------------------------
+      ss_use | -.4105276      30345   .0045084  -91.05866    13237.5          0          0          1      17939 
+   hdds_dish |  .0387176      30345   .0117439   3.296823   25976.83   .9995104   .0009792   .0004896      17939 
+     sr_dish |  .0210936      30345   .0119081   1.771366   26645.96   .9617444   .0765112   .0382556      17939 
+      p_dish | -.0013082      30345   .0027398  -.4774709   26492.57   .3165154   .6330308   .6834846      17939 
+
+             |   e(mu_1)     e(N_2)    e(mu_2) 
+-------------+---------------------------------
+      ss_use |  .0119293      12406   .4224569 
+   hdds_dish |  2.333575      12406   2.294857 
+     sr_dish |  2.329896      12406   2.308802 
+      p_dish |  .0576955      12406   .0590037 
+
+.         
+.                 distinct                hhid if treat_assign == 0
+
+       |        Observations
+       |      total   distinct
+-------+----------------------
+  hhid |      17939         96
+
+.                 local                   temp1a = r(N) 
+
+.                         local                   cntrlo : display %4.0f `temp1a'
+
+.                 
+.                 distinct                hhid if treat_assign == 1
+
+       |        Observations
+       |      total   distinct
+-------+----------------------
+  hhid |      12406         61
+
+.                 local                   temp2a = r(N) 
+
+.                         local                   trtmnto : display %4.0f `temp2a'
+
+.                 
+.                 distinct                hhid
+
+       |        Observations
+       |      total   distinct
+-------+----------------------
+  hhid |      30345        157
+
+.                 local                   temp3a = r(N) 
+
+.                         local                   toto : display %4.0f `temp3a'
+
+. 
+. * output table of summary of dietary outcomes
+.         esttab                  o_cntrl o_trtmnt o_diff o_tot ///
+>                                                 using "$output/out_tab.tex", replace ///
+>                                                 prehead("\begin{tabular}{l*{4}{c}} \\ [-1.8ex]\hline \hline \\[-1.8e
+> x] " ///
+>                                                 "& \multicolumn{1}{c}{Control} & \multicolumn{1}{c}{Treatment} &  " 
+> ///
+>                                                 "\multicolumn{1}{c}{\$p\$-value} & \multicolumn{1}{c}{Total}  \\ \mi
+> drule " ///
+>                                                 "\multicolumn{5}{l}{\emph{Panel A: Dish-Level Outcomes}} \\ " ) ///
+>                                                 booktabs main(mean) aux(sd) nostar unstack nonum ///
+>                                                 collabels(none) f noobs nomtitle nogaps ///
+>                                                 cells("mean(fmt(3) pattern(1 1 0 1)) p(fmt(3) pattern(0 0 1 0 ))"  /
+> //
+>                                                 sd(fmt(3)par pattern(1 1 0 1) ) ) ///
+>                                                 rename(ss_use "Solar Stove Use" hdds_dish "HDDS" ///
+>                                                 sr_dish "Species Richness" p_dish "Legumes Cooked") ///
+>                                                 prefoot(" \midrule Observations & `cntrlo' & `trtmnto' & & `toto' \\
+>  ")
+(output written to C:/Users/jdmic/git/solar_stove/data/analysis/tables/out_tab.tex)
+
+.                                                                         
+. * sum meal
+.         preserve 
+
+.                 duplicates drop         hhid week day meal, force
+
+Duplicates in terms of hhid week day meal
+
+(14,417 observations deleted)
+
+.                 
+.                 eststo                  m_cntrl :       estpost ///
+>                                                 sum share_meal hdds_meal sr_meal p_meal ///
+>                                                 if treat_assign == 0
+
+             |  e(count)   e(sum_w)    e(mean)     e(Var)      e(sd)     e(min)     e(max)     e(sum) 
+-------------+----------------------------------------------------------------------------------------
+  share_meal |      9509       9509   .0110159   .0085607   .0925238          0          1     104.75 
+   hdds_meal |      9509       9509   3.904301   2.310361   1.519987          1          9      37126 
+     sr_meal |      9509       9509   3.980334   3.062823   1.750092          1         15      37849 
+      p_meal |      9509       9509   .1088443   .0982695   .3134796          0          2       1035 
+
+.                 
+.                 eststo                  m_trtmnt : estpost ///
+>                                                 sum share_meal hdds_meal sr_meal p_meal ///
+>                                                 if treat_assign == 1
+
+             |  e(count)   e(sum_w)    e(mean)     e(Var)      e(sd)     e(min)     e(max)     e(sum) 
+-------------+----------------------------------------------------------------------------------------
+  share_meal |      6419       6419   .4169263   .2017935   .4492143          0          1    2676.25 
+   hdds_meal |      6419       6419   3.845926   2.447277   1.564377          1          8      24687 
+     sr_meal |      6419       6419   4.004518   3.088948    1.75754          1         11      25705 
+      p_meal |      6419       6419   .1140365   .1032292   .3212931          0          2        732 
+
+. 
+.                 eststo                  m_tot : estpost ///
+>                                                 sum share_meal hdds_meal sr_meal p_meal
+
+             |  e(count)   e(sum_w)    e(mean)     e(Var)      e(sd)     e(min)     e(max)     e(sum) 
+-------------+----------------------------------------------------------------------------------------
+  share_meal |     15928      15928   .1745982    .126069   .3550619          0          1       2781 
+   hdds_meal |     15928      15928   3.880776   2.366208   1.538248          1          9      61813 
+     sr_meal |     15928      15928    3.99008   3.073299   1.753083          1         15      63554 
+      p_meal |     15928      15928   .1109367   .1002684   .3166519          0          2       1767 
+
+.                                                 
+.                 eststo                  m_diff : estpost ///
+>                                                 ttest share_meal hdds_meal sr_meal p_meal, ///
+>                                                 by(treat_assign) unequal
+
+             |      e(b)   e(count)      e(se)       e(t)    e(df_t)     e(p_l)       e(p)     e(p_u)     e(N_1) 
+-------------+---------------------------------------------------------------------------------------------------
+  share_meal | -.4059104      15928   .0056866  -71.38043   6787.095          0          0          1       9509 
+   hdds_meal |   .058375      15928   .0249844   2.336458   13502.94    .990259   .0194819    .009741       9509 
+     sr_meal | -.0241834      15928   .0283428   -.853246   13732.16   .1967689   .3935378   .8032311       9509 
+      p_meal | -.0051922      15928   .0051397  -1.010221   13542.08   .1562037   .3124074   .8437963       9509 
+
+             |   e(mu_1)     e(N_2)    e(mu_2) 
+-------------+---------------------------------
+  share_meal |  .0110159       6419   .4169263 
+   hdds_meal |  3.904301       6419   3.845926 
+     sr_meal |  3.980334       6419   4.004518 
+      p_meal |  .1088443       6419   .1140365 
+
+.         
+.                 distinct                hhid if treat_assign == 0
+
+       |        Observations
+       |      total   distinct
+-------+----------------------
+  hhid |       9509         96
+
+.                 local                   temp1a = r(N) 
+
+.                         local                   cntrlm : display %4.0f `temp1a'
+
+.                 
+.                 distinct                hhid if treat_assign == 1
+
+       |        Observations
+       |      total   distinct
+-------+----------------------
+  hhid |       6419         61
+
+.                 local                   temp2a = r(N) 
+
+.                         local                   trtmntm : display %4.0f `temp2a'
+
+.                 
+.                 distinct                hhid
+
+       |        Observations
+       |      total   distinct
+-------+----------------------
+  hhid |      15928        157
+
+.                 local                   temp3a = r(N) 
+
+.                         local                   totm : display %4.0f `temp3a'
+
+.         restore 
+
+.                         
+. 
+. * output table of summary of dietary outcomes
+.         esttab                  m_cntrl m_trtmnt m_diff m_tot ///
+>                                                 using "$output/out_tab.tex", append ///
+>                                                 posthead("\midrule \multicolumn{5}{l}{\emph{Panel B: Meal-Level Outc
+> omes}} \\ " ) ///
+>                                                 booktabs main(mean) aux(sd) nostar unstack nonum ///
+>                                                 collabels(none) f noobs nomtitle nogaps ///
+>                                                 cells("mean(fmt(3) pattern(1 1 0 1)) p(fmt(3) pattern(0 0 1 0 ))"  /
+> //
+>                                                 sd(fmt(3)par pattern(1 1 0 1) ) ) ///
+>                                                 rename(share_meal "Solar Stove Use" hdds_meal "HDDS" ///
+>                                                 sr_meal "Species Richness"      p_meal "Legumes Cooked") ///
+>                                                 prefoot(" \midrule Observations & `cntrlm' & `trtmntm' & & `totm' \\
+>  ")
+(output written to C:/Users/jdmic/git/solar_stove/data/analysis/tables/out_tab.tex)
+
+.                                 
+. * sum day
+.         preserve 
+
+.                 duplicates drop         hhid week day, force
+
+Duplicates in terms of hhid week day
+
+(24,300 observations deleted)
+
+.                 
+.                 eststo                  d_cntrl :       estpost ///
+>                                                 sum share_day hdds_day sr_day p_day ///
+>                                                 if treat_assign == 0
+
+             |  e(count)   e(sum_w)    e(mean)     e(Var)      e(sd)     e(min)     e(max)     e(sum) 
+-------------+----------------------------------------------------------------------------------------
+   share_day |      3672       3672    .009278   .0048241   .0694554          0        .75   34.06865 
+    hdds_day |      3672       3672   5.644063   2.163931   1.471031          1         11      20725 
+      sr_day |      3672       3672    6.51988   5.468959   2.338581          1         19      23941 
+       p_day |      3672       3672   .2818627   .3027164   .5501967          0          3       1035 
+
+.                 
+.                 eststo                  d_trtmnt : estpost ///
+>                                                 sum share_day hdds_day sr_day p_day ///
+>                                                 if treat_assign == 1
+
+             |  e(count)   e(sum_w)    e(mean)     e(Var)      e(sd)     e(min)     e(max)     e(sum) 
+-------------+----------------------------------------------------------------------------------------
+   share_day |      2373       2373    .429528   .1091177   .3303298          0          1    1019.27 
+    hdds_day |      2373       2373   5.731985    2.27721   1.509043          1         10      13602 
+      sr_day |      2373       2373   6.865571   4.998363   2.235702          1         14      16292 
+       p_day |      2373       2373   .3084703    .325548   .5705681          0          3        732 
+
+. 
+.                 eststo                  d_tot : estpost ///
+>                                                 sum share_day hdds_day sr_day p_day
+
+             |  e(count)   e(sum_w)    e(mean)     e(Var)      e(sd)     e(min)     e(max)     e(sum) 
+-------------+----------------------------------------------------------------------------------------
+   share_day |      6045       6045   .1742496   .0878745   .2964364          0          1   1053.339 
+    hdds_day |      6045       6045   5.678577   2.209874   1.486564          1         11      34327 
+      sr_day |      6045       6045   6.655583   5.311867   2.304749          1         19      40233 
+       p_day |      6045       6045   .2923077   .3117956   .5583866          0          3       1767 
+
+.                                                 
+.                 eststo                  d_diff : estpost ///
+>                                                 ttest share_day hdds_day sr_day p_day, ///
+>                                                 by(treat_assign) unequal
+
+             |      e(b)   e(count)      e(se)       e(t)    e(df_t)     e(p_l)       e(p)     e(p_u)     e(N_1) 
+-------------+---------------------------------------------------------------------------------------------------
+   share_day | -.4202501       6045   .0068773  -61.10715    2508.15          0          0          1       3672 
+    hdds_day | -.0879216       6045   .0393566  -2.233977   4968.986   .0127645   .0255289   .9872355       3672 
+      sr_day | -.3456908       6045   .0599643  -5.764945   5224.538   4.32e-09   8.64e-09          1       3672 
+       p_day | -.0266075       6045   .0148198  -1.795401   4929.192   .0363255    .072651   .9636745       3672 
+
+             |   e(mu_1)     e(N_2)    e(mu_2) 
+-------------+---------------------------------
+   share_day |   .009278       2373    .429528 
+    hdds_day |  5.644063       2373   5.731985 
+      sr_day |   6.51988       2373   6.865571 
+       p_day |  .2818627       2373   .3084703 
+
+.         
+.                 distinct                hhid if treat_assign == 0
+
+       |        Observations
+       |      total   distinct
+-------+----------------------
+  hhid |       3672         96
+
+.                 local                   temp1a = r(N) 
+
+.                         local                   cntrld : display %4.0f `temp1a'
+
+.                 
+.                 distinct                hhid if treat_assign == 1
+
+       |        Observations
+       |      total   distinct
+-------+----------------------
+  hhid |       2373         61
+
+.                 local                   temp2a = r(N) 
+
+.                         local                   trtmntd : display %4.0f `temp2a'
+
+.                 
+.                 distinct                hhid
+
+       |        Observations
+       |      total   distinct
+-------+----------------------
+  hhid |       6045        157
+
+.                 local                   temp3a = r(N) 
+
+.                         local                   totd : display %4.0f `temp3a'
+
+.         restore 
+
+.                         
+. 
+. * output table of summary of dietary outcomes
+.         esttab                  d_cntrl d_trtmnt d_diff d_tot ///
+>                                                 using "$output/out_tab.tex", append ///
+>                                                 posthead("\midrule \multicolumn{5}{l}{\emph{Panel C: Day-Level Outco
+> mes}} \\ " ) ///
+>                                                 booktabs main(mean) aux(sd) nostar unstack nonum ///
+>                                                 collabels(none) f noobs nomtitle nogaps ///
+>                                                 cells("mean(fmt(3) pattern(1 1 0 1)) p(fmt(3) pattern(0 0 1 0 ))"  /
+> //
+>                                                 sd(fmt(3)par pattern(1 1 0 1) ) ) ///
+>                                                 rename(share_day "Solar Stove Use" hdds_day "HDDS" ///
+>                                                 sr_day "Species Richness"       p_day "Legumes Cooked") ///
+>                                                 prefoot(" \midrule Observations & `cntrld' & `trtmntd' & & `totd' \\
+>  ")
+(output written to C:/Users/jdmic/git/solar_stove/data/analysis/tables/out_tab.tex)
+
+.                         
+. * sum week
+.         preserve 
+
+.                 duplicates drop         hhid week, force
+
+Duplicates in terms of hhid week
+
+(29,427 observations deleted)
+
+.                 
+.                 eststo                  w_cntrl :       estpost ///
+>                                                 sum share_week hdds_week sr_week p_week ///
+>                                                 if treat_assign == 0
+
+             |  e(count)   e(sum_w)    e(mean)     e(Var)      e(sd)     e(min)     e(max)     e(sum) 
+-------------+----------------------------------------------------------------------------------------
+  share_week |       561        561   .0085369   .0037272    .061051          0   .6326531   4.789229 
+   hdds_week |       561        561   8.112299   2.607009   1.614624          1         12       4551 
+     sr_week |       561        561   13.16221   15.54328   3.942497          1         28       7384 
+      p_week |       561        561    1.84492   3.516979   1.875361          0         10       1035 
+
+.                 
+.                 eststo                  w_trtmnt : estpost ///
+>                                                 sum share_week hdds_week sr_week p_week ///
+>                                                 if treat_assign == 1
+
+             |  e(count)   e(sum_w)    e(mean)     e(Var)      e(sd)     e(min)     e(max)     e(sum) 
+-------------+----------------------------------------------------------------------------------------
+  share_week |       357        357   .4367036   .0706543   .2658088          0          1   155.9032 
+   hdds_week |       357        357   8.246499   2.124461   1.457553          1         11       2944 
+     sr_week |       357        357   13.62465    14.2913   3.780384          1         25       4864 
+      p_week |       357        357    2.05042   3.952507   1.988091          0         11        732 
+
+. 
+.                 eststo                  w_tot : estpost ///
+>                                                 sum share_week hdds_week sr_week p_week
+
+             |  e(count)   e(sum_w)    e(mean)     e(Var)      e(sd)     e(min)     e(max)     e(sum) 
+-------------+----------------------------------------------------------------------------------------
+  share_week |       918        918   .1750462   .0733216   .2707797          0          1   160.6924 
+   hdds_week |       918        918   8.164488   2.421115   1.555993          1         12       7495 
+     sr_week |       918        918   13.34205   15.09116   3.884735          1         28      12248 
+      p_week |       918        918   1.924837   3.692272   1.921529          0         11       1767 
+
+.                                                 
+.                 eststo                  w_diff : estpost ///
+>                                                 ttest share_week hdds_week sr_week p_week, ///
+>                                                 by(treat_assign) unequal
+
+             |      e(b)   e(count)      e(se)       e(t)    e(df_t)     e(p_l)       e(p)     e(p_u)     e(N_1) 
+-------------+---------------------------------------------------------------------------------------------------
+  share_week | -.4281667        918   .0143023  -29.93696   380.0308   2.6e-102   5.2e-102          1        561 
+   hdds_week | -.1341991        918   .1029463  -1.303584   813.6669   .0963722   .1927443   .9036278        561 
+     sr_week | -.4624395        918   .2602653    -1.7768   781.3718    .037995   .0759901    .962005        561 
+      p_week | -.2055004        918   .1316836  -1.560562   725.4426   .0595317   .1190633   .9404683        561 
+
+             |   e(mu_1)     e(N_2)    e(mu_2) 
+-------------+---------------------------------
+  share_week |  .0085369        357   .4367036 
+   hdds_week |  8.112299        357   8.246499 
+     sr_week |  13.16221        357   13.62465 
+      p_week |   1.84492        357    2.05042 
+
+.         
+.                 distinct                hhid if treat_assign == 0
+
+       |        Observations
+       |      total   distinct
+-------+----------------------
+  hhid |        561         96
+
+.                 local                   temp1a = r(N) 
+
+.                         local                   cntrlw : display %4.0f `temp1a'
+
+.                 
+.                 distinct                hhid if treat_assign == 1
+
+       |        Observations
+       |      total   distinct
+-------+----------------------
+  hhid |        357         61
+
+.                 local                   temp2a = r(N) 
+
+.                         local                   trtmntw : display %4.0f `temp2a'
+
+.                 
+.                 distinct                hhid
+
+       |        Observations
+       |      total   distinct
+-------+----------------------
+  hhid |        918        157
+
+.                 local                   temp3a = r(N) 
+
+.                         local                   totw : display %4.0f `temp3a'
+
+.         restore 
+
+.                         
+. 
+. * output table of summary of dietary outcomes
+.         esttab                  w_cntrl w_trtmnt w_diff w_tot ///
+>                                                 using "$output/out_tab.tex", append ///
+>                                                 posthead("\midrule \multicolumn{5}{l}{\emph{Panel C: Week-Level Outc
+> omes}} \\ " ) ///
+>                                                 booktabs main(mean) aux(sd) nostar unstack nonum ///
+>                                                 collabels(none) f noobs nomtitle nogaps ///
+>                                                 cells("mean(fmt(3) pattern(1 1 0 1)) p(fmt(3) pattern(0 0 1 0 ))"  /
+> //
+>                                                 sd(fmt(3)par pattern(1 1 0 1) ) ) ///
+>                                                 rename(share_week "Solar Stove Use" hdds_week "HDDS" ///
+>                                                 sr_week "Species Richness"      p_week "Legumes Cooked") ///
+>                                                 prefoot(" \midrule Observations & `cntrlw' & `trtmntw' & & `totw' \\
+>  ")
+(output written to C:/Users/jdmic/git/solar_stove/data/analysis/tables/out_tab.tex)
+
+.                 
+. * sum week
+.         preserve 
+
+.                 duplicates drop         hhid, force
+
+Duplicates in terms of hhid
+
+(30,188 observations deleted)
+
+.                 
+.                 eststo                  t_cntrl :       estpost ///
+>                                                 sum share_total hdds_total sr_total p_total ///
+>                                                 if treat_assign == 0
+
+             |  e(count)   e(sum_w)    e(mean)     e(Var)      e(sd)     e(min)     e(max)     e(sum) 
+-------------+----------------------------------------------------------------------------------------
+ share_total |        96         96   .0084522   .0035323    .059433          0   .5413534   .8114082 
+  hdds_total |        96         96   9.739583   1.710417   1.307829          6         12        935 
+    sr_total |        96         96         20   24.25263   4.924696          8         31       1920 
+     p_total |        96         96   10.78125   61.79375     7.8609          0         41       1035 
+
+.                 
+.                 eststo                  t_trtmnt : estpost ///
+>                                                 sum share_total hdds_total sr_total p_total ///
+>                                                 if treat_assign == 1
+
+             |  e(count)   e(sum_w)    e(mean)     e(Var)      e(sd)     e(min)     e(max)     e(sum) 
+-------------+----------------------------------------------------------------------------------------
+ share_total |        61         61   .4329363   .0478058   .2186454          0   .9333333   26.40912 
+  hdds_total |        61         61   9.934426   1.195628   1.093448          8         12        606 
+    sr_total |        61         61   20.16393   21.73934   4.662547         10         31       1230 
+     p_total |        61         61         12   69.53333   8.338665          0         45        732 
+
+. 
+.                 eststo                  t_tot : estpost ///
+>                                                 sum share_total hdds_total sr_total p_total
+
+             |  e(count)   e(sum_w)    e(mean)     e(Var)      e(sd)     e(min)     e(max)     e(sum) 
+-------------+----------------------------------------------------------------------------------------
+ share_total |       157        157   .1733791   .0636203   .2522307          0   .9333333   27.22052 
+  hdds_total |       157        157   9.815287   1.510534   1.229038          6         12       1541 
+    sr_total |       157        157   20.06369   23.13694   4.810088          8         31       3150 
+     p_total |       157        157   11.25478   64.72954   8.045467          0         45       1767 
+
+.                                                 
+.                 eststo                  t_diff : estpost ///
+>                                                 ttest share_total hdds_total sr_total p_total, ///
+>                                                 by(treat_assign) unequal
+
+             |      e(b)   e(count)      e(se)       e(t)    e(df_t)     e(p_l)       e(p)     e(p_u)     e(N_1) 
+-------------+---------------------------------------------------------------------------------------------------
+ share_total | -.4244842        157   .0286443  -14.81915    65.6748   6.30e-23   1.26e-22          1         96 
+  hdds_total | -.1948429        157   .1934355  -1.007276   143.6773   .1577479   .3154957   .8422521         96 
+    sr_total | -.1639344        157   .7803937  -.2100663   133.0039   .4169687   .8339374   .5830313         96 
+     p_total |  -1.21875        157   1.335506  -.9125756   122.2706   .1816308   .3632616   .8183692         96 
+
+             |   e(mu_1)     e(N_2)    e(mu_2) 
+-------------+---------------------------------
+ share_total |  .0084522         61   .4329363 
+  hdds_total |  9.739583         61   9.934426 
+    sr_total |        20         61   20.16393 
+     p_total |  10.78125         61         12 
+
+.         
+.                 distinct                hhid if treat_assign == 0
+
+       |        Observations
+       |      total   distinct
+-------+----------------------
+  hhid |         96         96
+
+.                 local                   temp1a = r(N) 
+
+.                         local                   cntrlt : display %4.0f `temp1a'
+
+.                 
+.                 distinct                hhid if treat_assign == 1
+
+       |        Observations
+       |      total   distinct
+-------+----------------------
+  hhid |         61         61
+
+.                 local                   temp2a = r(N) 
+
+.                         local                   trtmntt : display %4.0f `temp2a'
+
+.                 
+.                 distinct                hhid
+
+       |        Observations
+       |      total   distinct
+-------+----------------------
+  hhid |        157        157
+
+.                 local                   temp3a = r(N) 
+
+.                         local                   tott : display %4.0f `temp3a'
+
+.         restore 
+
+.                         
+. 
+. * output table of summary of dietary outcomes
+.         esttab                  t_cntrl t_trtmnt t_diff t_tot ///
+>                                                 using "$output/out_tab.tex", append ///
+>                                                 posthead("\midrule \multicolumn{5}{l}{\emph{Panel C: Overall Outcome
+> s}} \\ " ) ///
+>                                                 booktabs main(mean) aux(sd) nostar unstack nonum ///
+>                                                 collabels(none) f noobs nomtitle nogaps ///
+>                                                 cells("mean(fmt(3) pattern(1 1 0 1)) p(fmt(3) pattern(0 0 1 0 ))"  /
+> //
+>                                                 sd(fmt(3)par pattern(1 1 0 1) ) ) ///
+>                                                 rename(share_total "Solar Stove Use" hdds_total "HDDS" ///
+>                                                 sr_total "Species Richness"     p_total "Legumes Cooked") ///
+>                                                 postfoot(" \midrule Observations & `cntrlt' & `trtmntt' & & `tott' \
+> \ " ///
+>                                                 "\hline \hline \\[-1.8ex] \multicolumn{5}{J{\linewidth}}{\small " //
+> /
+>                                                 "\noindent \textit{Note}: The table displays means, for solar stove 
+> use and outcome variables " ///
+>                                                 "by treatment assignment and for the total sample. Standard deviatio
+> ns are in " ///
+>                                                 "parentheses. We also report \$p\$-values " ///
+>                                                 "on a \$t\$-test for the equality of means between treatment and con
+> trol.}  \end{tabular}")
+(output written to C:/Users/jdmic/git/solar_stove/data/analysis/tables/out_tab.tex)
+
+.                                                 
+.                                         
+. 
+.                         
+.                         
+.                         
+.                         
+.                         
+. * output table of summary of dietary outcomes
+.         esttab                  o_cntrl o_trtmnt o_diff o_tot ///
+>                                                 using "$output/out_tab.tex", replace booktabs ///
+>                                                 prehead("\begin{tabular}{l*{4}{c}} \\ [-1.8ex]\hline \hline \\[-1.8e
+> x] " ///
+>                                                 "\multicolumn{5}{c}{\emph{Panel A: Daily Cooking Frequency} &  \mult
+> icolumn{4}{c}{Weekly Cooking Frequency} " ///
+>                                                 "& \multicolumn{4}{c}{Total Cooking Frequency} \\ " ///
+>                                                 "& \multicolumn{1}{c}{Control} & \multicolumn{1}{c}{Treatment} &  " 
+> ///
+>                                                 "\multicolumn{1}{c}{\$p\$-value} & \multicolumn{1}{c}{Total} " /// 
+>                                                 "& \multicolumn{1}{c}{Control} & \multicolumn{1}{c}{Treatment} &  " 
+> ///
+>                                                 "\multicolumn{1}{c}{\$p\$-value} & \multicolumn{1}{c}{Total} " /// 
+>                                                 "& \multicolumn{1}{c}{Control} & \multicolumn{1}{c}{Treatment} &  " 
+> ///
+>                                                 "\multicolumn{1}{c}{\$p\$-value} & \multicolumn{1}{c}{Total} \\ ") /
+> //
+>                                                 main(mean) aux(sd) nostar unstack nonum ///
+>                                                 collabels(none) f noobs nomtitle nogaps ///
+>                                                 cells("mean(fmt(3) pattern(1 1 0 1 1 1 0 1 1 1 0 1)) p(fmt(3) patter
+> n(0 0 1 0 0 0 1 0 0 0 1 0))"  ///
+>                                                 sd(fmt(3)par pattern(1 1 0 1 1 1 0 1 1 1 0 1) ) ) ///
+>                                                 rename(dish_eat "Dishes per Meal" dish_skp "Meals Skipped") ///
+>                                                 postfoot(" \midrule Observations & `cntrld' & `trtmntd' & & `totd' &
+>  " ///
+>                                                 " `cntrlw' & `trtmntw' & & `totw' & `cntrlt' & `trtmntt' & & `tott' 
+> \\ " ///
+>                                                 "\hline \hline \\[-1.8ex] \multicolumn{13}{J{\linewidth}}{\small " /
+> //
+>                                                 "\noindent \textit{Note}: The table displays means, for solar stove 
+> use and outcome variables " ///
+>                                                 "by treatment assignment and for the total sample. Standard deviatio
+> ns are in " ///
+>                                                 "parentheses. We also report \$p\$-values " ///
+>                                                 "on a \$t\$-test for the equality of means between treatment and con
+> trol.}  \end{tabular}") 
+(output written to C:/Users/jdmic/git/solar_stove/data/analysis/tables/out_tab.tex)
+
+. 
+. * sum week
+.         preserve 
+
+.                 duplicates drop         hhid week, force
+
+Duplicates in terms of hhid week
+
+(29,427 observations deleted)
+
+.                 estpost sum             
+
+             |  e(count)   e(sum_w)    e(mean)     e(Var)      e(sd)     e(min)     e(max)     e(sum) 
+-------------+----------------------------------------------------------------------------------------
+     village |       918        918   1.044662   .7646334   .8744332          0          2        959 
+        hhid |       918        918   241578.4   8.31e+09   91142.85     110000     374000   2.22e+08 
+         aas |       918        918   1.833333   1.303708     1.1418          0          3       1683 
+          cc |       918        918    23.9276   1602.497   40.03121          0        100   21965.54 
+     hh_size |       900        900   6.957778   6.598883   2.568829          1         15       6262 
+          ai |       918        918   9.917211   132.2418   11.49964          0         62       9104 
+         tli |       918        918   4.989586   147.4591   12.14328          0      86.84    4580.44 
+         sex |       918        918     1.6939   .2126345   .4611231          1          2       1555 
+         age |       906        906   47.82671   161.7987   12.72001         16         80      43331 
+         edu |       918        918   1.525054    .406678   .6377131          0          3       1400 
+treat_assign |       918        918   .3888889   .2379135   .4877638          0          1        357 
+        week |       918        918   3.480392   2.926006   1.710557          1          6       3195 
+         day |       918        918   1.042484   .1475934   .3841788          1          7        957 
+        meal |       918        918   .2538126   .1983224   .4453341          0          2        233 
+        dish |       918        918          1          0          0          1          1        918 
+      ss_use |       918        918   .1732026   .1433596   .3786286          0          1        159 
+        cook |       918        918   2.958606   1.470477   1.212632          1          5       2716 
+      recall |       876        876   .0319635   .0309772   .1760033          0          1         28 
+ ingred_dish |       918        918   2.603486   1.101057   1.049312          1          7       2390 
+ ingred_meal |       918        918   3.839869    4.46397   2.112811          1         17       3525 
+  ingred_day |       918        918   9.601307    10.1244   3.181887          1         23       8814 
+ ingred_week |       918        918   18.53922   30.47774   5.520665          1         38      17019 
+   hdds_dish |       918        918   2.056645     .70344   .8387133          1          6       1888 
+     sr_dish |       918        918   2.063181   .6895698   .8304034          1          5       1894 
+hdds_avg_d~h |       918        918   2.526148    .150275   .3876533   1.154079   3.226093   2319.003 
+ sr_avg_dish |       918        918   2.537128   .2109687   .4593133   1.265861   4.198087   2329.083 
+   hdds_meal |       918        918   2.965142   1.798129   1.340943          1          7       2722 
+     sr_meal |       918        918   3.018519   2.142514   1.463733          1         12       2771 
+hdds_avg_m~l |       918        918   4.365526   .5804429    .761868   2.084592   6.657787   4007.553 
+ sr_avg_meal |       918        918   4.543104   1.044825   1.022167    2.04321    9.68306   4170.569 
+    hdds_day |       918        918   5.868192   2.129827   1.459393          1         10       5387 
+      sr_day |       918        918   6.973856   5.628541   2.372455          1         18       6402 
+hdds_avg_day |       918        918   5.870775   .9555103   .9775021   2.469136          8   5389.371 
+  sr_avg_day |       918        918   6.972062   2.815067   1.677816   2.444444   13.84221   6400.353 
+   hdds_week |       918        918   8.164488   2.421115   1.555993          1         12       7495 
+     sr_week |       918        918   13.34205   15.09116   3.884735          1         28      12248 
+hdds_avg_w~k |       918        918   8.271361    1.39193   1.179801   3.370968    10.7944   7593.109 
+ sr_avg_week |       918        918   13.59199   10.32339   3.213003   3.330645   23.70492   12477.45 
+  hdds_total |       918        918   9.840959   1.449051   1.203765          6         12       9034 
+    sr_total |       918        918   20.15904   22.87326     4.7826          8         31      18506 
+      p_dish |       918        918   .0228758   .0223769   .1495891          0          1         21 
+      p_meal |       918        918   .0457516    .043706   .2090599          0          1         42 
+       p_day |       918        918   .2538126   .2681152   .5177984          0          2        233 
+      p_week |       918        918   1.924837   3.692272   1.921529          0         11       1767 
+     p_total |       918        918   11.43028   63.98586   7.999117          0         45      10493 
+    meal_day |       918        918   2.662309   .2871493   .5358631          1          3       2444 
+   meal_week |       918        918   17.34749   16.17683   4.022042          1         21      15925 
+  meal_total |       918        918   102.8573   472.1944   21.73004         20        126      94423 
+      br_day |       918        918   .7505447   .1874315   .4329337          0          1        689 
+     br_week |       918        918   4.936819    3.88041   1.969876          0          7       4532 
+      br_tot |       918        918   29.30283   96.33785   9.815185          1         42      26900 
+     lun_day |       918        918   .9651416     .03368    .183521          0          1        886 
+    lun_week |       918        918   6.303922   2.135448   1.461317          0          7       5787 
+     lun_tot |       918        918   37.36492   63.49482   7.968364          0         42      34301 
+     din_day |       918        918   .9466231   .0505829   .2249065          0          1        869 
+    din_week |       918        918   6.106754   2.269943   1.506633          0          7       5606 
+     din_tot |       918        918   36.18954   61.25738    7.82671          0         42      33222 
+    day_skip |       918        918   .3376906   .2871493   .5358631          0          2        310 
+   week_skip |       918        918   3.652505   16.17683   4.022042          0         20       3353 
+    tot_skip |       918        918    23.1427   472.1944   21.73004          0        106      21245 
+  brday_skip |       918        918   .2494553   .1874315   .4329337          0          1        229 
+ brweek_skip |       918        918   2.063181    3.88041   1.969876          0          7       1894 
+  brtot_skip |       918        918   12.69717   96.33785   9.815185          0         41      11656 
+ lunday_skip |       918        918   .0348584     .03368    .183521          0          1         32 
+lunweek_skip |       918        918   .6960784   2.135448   1.461317          0          7        639 
+ luntot_skip |       918        918   4.635076   63.49482   7.968364          0         42       4255 
+ dinday_skip |       918        918   .0533769   .0505829   .2249065          0          1         49 
+dinweek_skip |       918        918   .8932462   2.269943   1.506633          0          7        820 
+ dintot_skip |       918        918   5.810458   61.25738    7.82671          0         42       5334 
+    dish_day |       918        918    5.22549   2.783341   1.668335          1         12       4797 
+   dish_week |       918        918   33.05556   112.2248   10.59362          1         69      30345 
+    dish_tot |       918        918   196.0708   3327.239   57.68223         25        351     179993 
+  brdish_day |       918        918   .9694989   .5443249   .7377838          0          4        890 
+ brdish_week |       918        918   6.234205   10.58304   3.253158          0         20       5723 
+  brdish_tot |       918        918   37.01198   261.4622   16.16979          1         86      33977 
+ lundish_day |       918        918   2.196078   .6136378   .7833504          0          4       2016 
+lundish_week |       918        918   13.83333   21.75518   4.664245          0         28      12699 
+ lundish_tot |       918        918   82.05664   638.3588   25.26576          0        149      75328 
+ dindish_day |       918        918   2.059913   .6147271   .7840454          0          4       1891 
+dindish_week |       918        918   12.98802   20.31283   4.506976          0         27      11923 
+ dindish_tot |       918        918   77.00218   548.4253   23.41848          0        137      70688 
+    hh_m_use |       918        918   .2538126   .3313649   .5756431          0          4        233 
+   hh_m_fuel |       918        918   1.479303   .4265068   .6530749          1          4       1358 
+  share_meal |       918        918   .1773784   .1388195   .3725848          0          1   162.8333 
+   hh_da_use |       918        918   .9302832   2.527304    1.58975          0          8        854 
+  hh_da_fuel |       918        918    5.22549   2.783341   1.668335          1         12       4797 
+   share_day |       918        918   .1724213   .0837747   .2894386          0          1   158.2827 
+    hh_w_use |       918        918   5.942266   91.29328   9.554752          0         42       5455 
+   hh_w_fuel |       918        918   33.05556   112.2248   10.59362          1         69      30345 
+  share_week |       918        918   .1750462   .0733216   .2707797          0          1   160.6924 
+    hh_t_use |       918        918   35.45752   2739.263   52.33797          0        201      32550 
+   hh_t_fuel |       918        918   196.0708   3327.239   57.68223         25        351     179993 
+ share_total |       918        918   .1744642   .0640233   .2530283          0   .9333333   160.1581 
+
+.                 est store                       sum_week
+
+.         restore 
+
+. 
+. * sum total
+.         preserve 
+
+.                 duplicates drop         hhid, force
+
+Duplicates in terms of hhid
+
+(30,188 observations deleted)
+
+.                 estpost sum             share_total hdds_total sr_total p_total
+
+             |  e(count)   e(sum_w)    e(mean)     e(Var)      e(sd)     e(min)     e(max)     e(sum) 
+-------------+----------------------------------------------------------------------------------------
+ share_total |       157        157   .1733791   .0636203   .2522307          0   .9333333   27.22052 
+  hdds_total |       157        157   9.815287   1.510534   1.229038          6         12       1541 
+    sr_total |       157        157   20.06369   23.13694   4.810088          8         31       3150 
+     p_total |       157        157   11.25478   64.72954   8.045467          0         45       1767 
+
+.                 est store                       sum_total
+
+.         restore 
+
+. 
+. ************************************************************************
+. **## 1.2 - cooking frequency outcomes
+. ************************************************************************
+. 
+. * daily frequency
+.         preserve
+
+.                 duplicates drop         hhid week day, force
+
+Duplicates in terms of hhid week day
+
+(24,300 observations deleted)
+
+.                 
+.                 rename                  dish_day dish_eat
+
+.                 rename                  day_skip dish_skp
+
+.                 
+.                 eststo                  d_cntrl :       estpost ///
+>                                                 sum dish_eat dish_skp ///
+>                                                 if treat_assign == 0
+
+             |  e(count)   e(sum_w)    e(mean)     e(Var)      e(sd)     e(min)     e(max)     e(sum) 
+-------------+----------------------------------------------------------------------------------------
+    dish_eat |      3672       3672   4.885349   2.587505   1.608572          1         12      17939 
+    dish_skp |      3672       3672   .4104031   .3471868   .5892256          0          2       1507 
+
+.                 
+.                 eststo                  d_trtmnt : estpost ///
+>                                                 sum dish_eat dish_skp ///
+>                                                 if treat_assign == 1
+
+             |  e(count)   e(sum_w)    e(mean)     e(Var)      e(sd)     e(min)     e(max)     e(sum) 
+-------------+----------------------------------------------------------------------------------------
+    dish_eat |      2373       2373   5.227981   2.524309   1.588808          1         12      12406 
+    dish_skp |      2373       2373   .2962495   .2667524   .5164808          0          2        703 
+
+. 
+.                 eststo                  d_tot : estpost ///
+>                                                 sum dish_eat dish_skp
+
+             |  e(count)   e(sum_w)    e(mean)     e(Var)      e(sd)     e(min)     e(max)     e(sum) 
+-------------+----------------------------------------------------------------------------------------
+    dish_eat |      6045       6045   5.019851   2.590274   1.609433          1         12      30345 
+    dish_skp |      6045       6045   .3655914   .3186703   .5645089          0          2       2210 
+
+.                                                 
+.                 eststo                  d_diff : estpost ///
+>                                                 ttest dish_eat dish_skp, ///
+>                                                 by(treat_assign) unequal
+
+             |      e(b)   e(count)      e(se)       e(t)    e(df_t)     e(p_l)       e(p)     e(p_u)     e(N_1) 
+-------------+---------------------------------------------------------------------------------------------------
+    dish_eat | -.3426329       6045   .0420526  -8.147721   5107.292   2.31e-16   4.62e-16          1       3672 
+    dish_skp |  .1141536       6045   .0143861   7.934965   5517.931          1   2.53e-15   1.27e-15       3672 
+
+             |   e(mu_1)     e(N_2)    e(mu_2) 
+-------------+---------------------------------
+    dish_eat |  4.885349       2373   5.227981 
+    dish_skp |  .4104031       2373   .2962495 
+
+.         
+.                 distinct                hhid if treat_assign == 0
+
+       |        Observations
+       |      total   distinct
+-------+----------------------
+  hhid |       3672         96
+
+.                 local                   temp1a = r(N) 
+
+.                         local                   cntrld : display %4.0f `temp1a'
+
+.                 
+.                 distinct                hhid if treat_assign == 1
+
+       |        Observations
+       |      total   distinct
+-------+----------------------
+  hhid |       2373         61
+
+.                 local                   temp2a = r(N) 
+
+.                         local                   trtmntd : display %4.0f `temp2a'
+
+.                 
+.                 distinct                hhid
+
+       |        Observations
+       |      total   distinct
+-------+----------------------
+  hhid |       6045        157
+
+.                 local                   temp3a = r(N) 
+
+.                         local                   totd : display %4.0f `temp3a'
+
+.         restore
+
+.                                 
+. * weekly frequency
+.         preserve
+
+.                 duplicates drop         hhid week, force
+
+Duplicates in terms of hhid week
+
+(29,427 observations deleted)
+
+.                 
+.                 rename                  dish_week dish_eat
+
+.                 rename                  week_skip  dish_skp
+
+.                 
+.                 eststo                  w_cntrl :       estpost ///
+>                                                 sum dish_eat dish_skp ///
+>                                                 if treat_assign == 0
+
+             |  e(count)   e(sum_w)    e(mean)     e(Var)      e(sd)     e(min)     e(max)     e(sum) 
+-------------+----------------------------------------------------------------------------------------
+    dish_eat |       561        561   31.97683   111.4905   10.55891          2         69      17939 
+    dish_skp |       561        561   4.049911   16.44036   4.054672          0         19       2272 
+
+.                 
+.                 eststo                  w_trtmnt : estpost ///
+>                                                 sum dish_eat dish_skp ///
+>                                                 if treat_assign == 1
+
+             |  e(count)   e(sum_w)    e(mean)     e(Var)      e(sd)     e(min)     e(max)     e(sum) 
+-------------+----------------------------------------------------------------------------------------
+    dish_eat |       357        357    34.7507   108.9798   10.43934          1         66      12406 
+    dish_skp |       357        357   3.028011   15.16775    3.89458          0         20       1081 
+
+. 
+.                 eststo                  w_tot : estpost ///
+>                                                 sum dish_eat dish_skp
+
+             |  e(count)   e(sum_w)    e(mean)     e(Var)      e(sd)     e(min)     e(max)     e(sum) 
+-------------+----------------------------------------------------------------------------------------
+    dish_eat |       918        918   33.05556   112.2248   10.59362          1         69      30345 
+    dish_skp |       918        918   3.652505   16.17683   4.022042          0         20       3353 
+
+.                                                 
+.                 eststo                  w_diff : estpost ///
+>                                                 ttest dish_eat dish_skp, ///
+>                                                 by(treat_assign) unequal
+
+             |      e(b)   e(count)      e(se)       e(t)    e(df_t)     e(p_l)       e(p)     e(p_u)     e(N_1) 
+-------------+---------------------------------------------------------------------------------------------------
+    dish_eat | -2.773873        918   .7099302  -3.907248   764.4446   .0000508   .0001016   .9999492        561 
+    dish_skp |    1.0219        918   .2679406   3.813904   780.4356   .9999262   .0001476   .0000738        561 
+
+             |   e(mu_1)     e(N_2)    e(mu_2) 
+-------------+---------------------------------
+    dish_eat |  31.97683        357    34.7507 
+    dish_skp |  4.049911        357   3.028011 
+
+.         
+.                 distinct                hhid if treat_assign == 0
+
+       |        Observations
+       |      total   distinct
+-------+----------------------
+  hhid |        561         96
+
+.                 local                   temp1a = r(N) 
+
+.                         local                   cntrlw : display %4.0f `temp1a'
+
+.                 
+.                 distinct                hhid if treat_assign == 1
+
+       |        Observations
+       |      total   distinct
+-------+----------------------
+  hhid |        357         61
+
+.                 local                   temp2a = r(N) 
+
+.                         local                   trtmntw : display %4.0f `temp2a'
+
+.                 
+.                 distinct                hhid
+
+       |        Observations
+       |      total   distinct
+-------+----------------------
+  hhid |        918        157
+
+.                 local                   temp3a = r(N) 
+
+.                         local                   totw : display %4.0f `temp3a'
+
+.         restore
+
+. 
+.         
+. * total frequency
+.         preserve
+
+.                 duplicates drop         hhid, force
+
+Duplicates in terms of hhid
+
+(30,188 observations deleted)
+
+.                 
+.                 rename                  dish_tot dish_eat
+
+.                 rename                  tot_skip dish_skp
+
+.                                 
+.                 eststo                  t_cntrl :       estpost ///
+>                                                 sum dish_eat dish_skp ///
+>                                                 if treat_assign == 0
+
+             |  e(count)   e(sum_w)    e(mean)     e(Var)      e(sd)     e(min)     e(max)     e(sum) 
+-------------+----------------------------------------------------------------------------------------
+    dish_eat |        96         96   186.8646   3394.708   58.26412         25        304      17939 
+    dish_skp |        96         96   26.94792    506.913   22.51473          1        104       2587 
+
+.                 
+.                 eststo                  t_trtmnt : estpost ///
+>                                                 sum dish_eat dish_skp ///
+>                                                 if treat_assign == 1
+
+             |  e(count)   e(sum_w)    e(mean)     e(Var)      e(sd)     e(min)     e(max)     e(sum) 
+-------------+----------------------------------------------------------------------------------------
+    dish_eat |        61         61    203.377   3791.872   61.57818         30        351      12406 
+    dish_skp |        61         61   20.81967   604.0503   24.57743          0        106       1270 
+
+. 
+.                 eststo                  t_tot : estpost ///
+>                                                 sum dish_eat dish_skp
+
+             |  e(count)   e(sum_w)    e(mean)     e(Var)      e(sd)     e(min)     e(max)     e(sum) 
+-------------+----------------------------------------------------------------------------------------
+    dish_eat |       157        157   193.2803   3590.895   59.92408         25        351      30345 
+    dish_skp |       157        157   24.56688   550.0035   23.45215          0        106       3857 
+
+.                                                 
+.                 eststo                  t_diff : estpost ///
+>                                                 ttest dish_eat dish_skp, ///
+>                                                 by(treat_assign) unequal
+
+             |      e(b)   e(count)      e(se)       e(t)    e(df_t)     e(p_l)       e(p)     e(p_u)     e(N_1) 
+-------------+---------------------------------------------------------------------------------------------------
+    dish_eat | -16.51247        157   9.875393  -1.672082   122.6187    .048529   .0970581    .951471         96 
+    dish_skp |  6.128245        157   3.896512   1.572751    119.575   .9407906   .1184187   .0592094         96 
+
+             |   e(mu_1)     e(N_2)    e(mu_2) 
+-------------+---------------------------------
+    dish_eat |  186.8646         61    203.377 
+    dish_skp |  26.94792         61   20.81967 
+
+.         
+.                 distinct                hhid if treat_assign == 0
+
+       |        Observations
+       |      total   distinct
+-------+----------------------
+  hhid |         96         96
+
+.                 local                   temp1a = r(N) 
+
+.                         local                   cntrlt : display %4.0f `temp1a'
+
+.                 
+.                 distinct                hhid if treat_assign == 1
+
+       |        Observations
+       |      total   distinct
+-------+----------------------
+  hhid |         61         61
+
+.                 local                   temp2a = r(N) 
+
+.                         local                   trtmntt : display %4.0f `temp2a'
+
+.                 
+.                 distinct                hhid
+
+       |        Observations
+       |      total   distinct
+-------+----------------------
+  hhid |        157        157
+
+.                 local                   temp3a = r(N) 
+
+.                         local                   tott : display %4.0f `temp3a'
+
+.         restore
+
+. 
+.                 
+. * output table of summary of cooking frequency
+.         esttab                  d_cntrl d_trtmnt d_diff d_tot w_cntrl w_trtmnt w_diff w_tot t_cntrl t_trtmnt t_diff 
+> t_tot ///
+>                                                 using "$output/cook_tab.tex", replace booktabs ///
+>                                                 prehead("\begin{tabular}{l*{12}{c}} \\ [-1.8ex]\hline \hline \\[-1.8
+> ex] " ///
+>                                                 "& \multicolumn{4}{c}{Daily Cooking Frequency} &  \multicolumn{4}{c}
+> {Weekly Cooking Frequency} " ///
+>                                                 "& \multicolumn{4}{c}{Total Cooking Frequency} \\ " ///
+>                                                 "& \multicolumn{1}{c}{Control} & \multicolumn{1}{c}{Treatment} &  " 
+> ///
+>                                                 "\multicolumn{1}{c}{\$p\$-value} & \multicolumn{1}{c}{Total} " /// 
+>                                                 "& \multicolumn{1}{c}{Control} & \multicolumn{1}{c}{Treatment} &  " 
+> ///
+>                                                 "\multicolumn{1}{c}{\$p\$-value} & \multicolumn{1}{c}{Total} " /// 
+>                                                 "& \multicolumn{1}{c}{Control} & \multicolumn{1}{c}{Treatment} &  " 
+> ///
+>                                                 "\multicolumn{1}{c}{\$p\$-value} & \multicolumn{1}{c}{Total} \\ ") /
+> //
+>                                                 main(mean) aux(sd) nostar unstack nonum ///
+>                                                 collabels(none) f noobs nomtitle nogaps ///
+>                                                 cells("mean(fmt(3) pattern(1 1 0 1 1 1 0 1 1 1 0 1)) p(fmt(3) patter
+> n(0 0 1 0 0 0 1 0 0 0 1 0))"  ///
+>                                                 sd(fmt(3)par pattern(1 1 0 1 1 1 0 1 1 1 0 1) ) ) ///
+>                                                 rename(dish_eat "Dishes per Meal" dish_skp "Meals Skipped") ///
+>                                                 postfoot(" \midrule Observations & `cntrld' & `trtmntd' & & `totd' &
+>  " ///
+>                                                 " `cntrlw' & `trtmntw' & & `totw' & `cntrlt' & `trtmntt' & & `tott' 
+> \\ " ///
+>                                                 "\hline \hline \\[-1.8ex] \multicolumn{13}{J{\linewidth}}{\small " /
+> //
+>                                                 "\noindent \textit{Note}: The table displays means, for dishes per m
+> eal and meals skipped " ///
+>                                                 "by treatment assignment and for the total sample. Standard deviatio
+> ns are in " ///
+>                                                 "parentheses. We also report \$p\$-values " ///
+>                                                 "on a \$t\$-test for the equality of means between treatment and con
+> trol.}  \end{tabular}") 
+(output written to C:/Users/jdmic/git/solar_stove/data/analysis/tables/cook_tab.tex)
+
+.                 
+.                                 
+. ************************************************************************
+. **## 1.3 - fuel outcomes
+. ************************************************************************
+. 
+. * load fuel data
+.         use                                     "$ans/fuel_cleaned.dta", clear  
+
+.         
+.         rename                          solar treat_assign
+
+.                                                 
+. * fuel week
+.         preserve
+
+.                 duplicates drop         hhid week, force
+
+Duplicates in terms of hhid week
+
+(0 observations are duplicates)
+
+.                 
+.                 eststo                  w_cntrl :       estpost ///
+>                                                 sum f_time f_quant_ub c_quant_ub val_fuel_ub ///
+>                                                 if treat_assign == 0
+
+             |  e(count)   e(sum_w)    e(mean)     e(Var)      e(sd)     e(min)     e(max)     e(sum) 
+-------------+----------------------------------------------------------------------------------------
+      f_time |       539        539   131.4842    54891.1   234.2885          0       2880      70870 
+  f_quant_ub |       539        539   71.59745   7848.188      88.59          0      974.7   38591.02 
+  c_quant_ub |       539        539   14.30056    636.824   25.23537          0        200       7708 
+ val_fuel_ub |       539        539   11.02374   122.1105   11.05036          0    126.711   5941.793 
+
+.                 
+.                 eststo                  w_trtmnt : estpost ///
+>                                                 sum f_time f_quant_ub c_quant_ub val_fuel_ub ///
+>                                                 if treat_assign == 1
+
+             |  e(count)   e(sum_w)    e(mean)     e(Var)      e(sd)     e(min)     e(max)     e(sum) 
+-------------+----------------------------------------------------------------------------------------
+      f_time |       331        331   88.45921   9043.831   95.09906          0        720      29280 
+  f_quant_ub |       331        331   41.60612   1357.254   36.84093          0     162.45   13771.62 
+  c_quant_ub |       331        331   17.05438   489.6334   22.12766          0        100       5645 
+ val_fuel_ub |       331        331   7.455321   29.52392   5.433592          0    33.1185   2467.711 
+
+. 
+.                 eststo                  w_tot : estpost ///
+>                                                 sum f_time f_quant_ub c_quant_ub val_fuel_ub
+
+             |  e(count)   e(sum_w)    e(mean)     e(Var)      e(sd)     e(min)     e(max)     e(sum) 
+-------------+----------------------------------------------------------------------------------------
+      f_time |       870        870   115.1149   37854.42   194.5621          0       2880     100150 
+  f_quant_ub |       870        870   60.18695   5586.506   74.74293          0      974.7   52362.65 
+  c_quant_ub |       870        870   15.34828   581.9856   24.12438          0        200      13353 
+ val_fuel_ub |       870        870   9.666097    89.8154   9.477099          0    126.711   8409.504 
+
+.                                                 
+.                 eststo                  w_diff : estpost ///
+>                                                 ttest f_time f_quant_ub c_quant_ub val_fuel_ub, ///
+>                                                 by(treat_assign) unequal
+
+             |      e(b)   e(count)      e(se)       e(t)    e(df_t)     e(p_l)       e(p)     e(p_u)     e(N_1) 
+-------------+---------------------------------------------------------------------------------------------------
+      f_time |  43.02502        870   11.36493   3.785772   774.5193   .9999175   .0001651   .0000825        539 
+  f_quant_ub |  29.99133        870   4.319851   6.942678   782.5094          1   8.09e-12   4.04e-12        539 
+  c_quant_ub | -2.753824        870    1.63118  -1.688241   767.3879   .0458856   .0917713   .9541144        539 
+ val_fuel_ub |  3.568414        870    .561913   6.350475   834.2144          1   3.52e-10   1.76e-10        539 
+
+             |   e(mu_1)     e(N_2)    e(mu_2) 
+-------------+---------------------------------
+      f_time |  131.4842        331   88.45921 
+  f_quant_ub |  71.59745        331   41.60612 
+  c_quant_ub |  14.30056        331   17.05438 
+ val_fuel_ub |  11.02374        331   7.455321 
+
+.         
+.                 distinct                hhid if treat_assign == 0
+
+       |        Observations
+       |      total   distinct
+-------+----------------------
+  hhid |        539         96
+
+.                 local                   temp1a = r(N) 
+
+.                         local                   cntrlob : display %4.0f `temp1a'
+
+.                 
+.                 distinct                hhid if treat_assign == 1
+
+       |        Observations
+       |      total   distinct
+-------+----------------------
+  hhid |        331         61
+
+.                 local                   temp2a = r(N) 
+
+.                         local                   trtmntob : display %4.0f `temp2a'
+
+.                 
+.                 distinct                hhid
+
+       |        Observations
+       |      total   distinct
+-------+----------------------
+  hhid |        870        157
+
+.                 local                   temp3a = r(N) 
+
+.                         local                   totob : display %4.0f `temp3a'
+
+.         restore
+
+. 
+.         
+. * fuel total
+.         preserve
+
+.                 duplicates drop         hhid, force
+
+Duplicates in terms of hhid
+
+(713 observations deleted)
+
+.                                 
+.                 eststo                  t_cntrl :       estpost ///
+>                                                 sum f_time f_quant_ub c_quant_ub val_fuel_ub ///
+>                                                 if treat_assign == 0
+
+             |  e(count)   e(sum_w)    e(mean)     e(Var)      e(sd)     e(min)     e(max)     e(sum) 
+-------------+----------------------------------------------------------------------------------------
+      f_time |        96         96   150.3125    62587.8   250.1755          0       1800      14430 
+  f_quant_ub |        96         96   76.75885   11915.63   109.1587          0      974.7    7368.85 
+  c_quant_ub |        96         96   13.44792   465.7236   21.58063          0        100       1291 
+ val_fuel_ub |        96         96    11.5924   190.3911   13.79823        1.2    126.711   1112.871 
+
+.                 
+.                 eststo                  t_trtmnt : estpost ///
+>                                                 sum f_time f_quant_ub c_quant_ub val_fuel_ub ///
+>                                                 if treat_assign == 1
+
+             |  e(count)   e(sum_w)    e(mean)     e(Var)      e(sd)     e(min)     e(max)     e(sum) 
+-------------+----------------------------------------------------------------------------------------
+      f_time |        61         61   95.90164   17267.09   131.4043          0        720       5850 
+  f_quant_ub |        61         61   46.18443   2047.262   45.24668          0     162.45    2817.25 
+  c_quant_ub |        61         61   18.39344   479.4093   21.89542          0        100       1122 
+ val_fuel_ub |        61         61   8.211188    39.0742   6.250936       1.92     30.772   500.8825 
+
+. 
+.                 eststo                  t_tot : estpost ///
+>                                                 sum f_time f_quant_ub c_quant_ub val_fuel_ub
+
+             |  e(count)   e(sum_w)    e(mean)     e(Var)      e(sd)     e(min)     e(max)     e(sum) 
+-------------+----------------------------------------------------------------------------------------
+      f_time |       157        157    129.172   45463.41   213.2215          0       1800      20280 
+  f_quant_ub |       157        157   64.87962   8267.228    90.9243          0      974.7    10186.1 
+  c_quant_ub |       157        157   15.36943   473.8498   21.76809          0        100       2413 
+ val_fuel_ub |       157        157   10.27868   133.7053    11.5631        1.2    126.711   1613.753 
+
+.                                                 
+.                 eststo                  t_diff : estpost ///
+>                                                 ttest f_time f_quant_ub c_quant_ub val_fuel_ub, ///
+>                                                 by(treat_assign) unequal
+
+             |      e(b)   e(count)      e(se)       e(t)    e(df_t)     e(p_l)       e(p)     e(p_u)     e(N_1) 
+-------------+---------------------------------------------------------------------------------------------------
+      f_time |  54.41086        157   30.57815   1.779403   150.4862   .9614039   .0771921   .0385961         96 
+  f_quant_ub |  30.57443        157   12.55718   2.434816   137.4134   .9919091   .0161818   .0080909         96 
+  c_quant_ub | -4.945526        157   3.565173  -1.387177   126.4942   .0839135   .1678271   .9160865         96 
+ val_fuel_ub |  3.381213        157   1.619815   2.087407   142.7065   .9806853   .0386293   .0193147         96 
+
+             |   e(mu_1)     e(N_2)    e(mu_2) 
+-------------+---------------------------------
+      f_time |  150.3125         61   95.90164 
+  f_quant_ub |  76.75885         61   46.18443 
+  c_quant_ub |  13.44792         61   18.39344 
+ val_fuel_ub |   11.5924         61   8.211188 
+
+.         
+.                 distinct                hhid if treat_assign == 0
+
+       |        Observations
+       |      total   distinct
+-------+----------------------
+  hhid |         96         96
+
+.                 local                   temp1a = r(N) 
+
+.                         local                   cntrlhh : display %4.0f `temp1a'
+
+.                 
+.                 distinct                hhid if treat_assign == 1
+
+       |        Observations
+       |      total   distinct
+-------+----------------------
+  hhid |         61         61
+
+.                 local                   temp2a = r(N) 
+
+.                         local                   trtmnthh : display %4.0f `temp2a'
+
+.                 
+.                 distinct                hhid
+
+       |        Observations
+       |      total   distinct
+-------+----------------------
+  hhid |        157        157
+
+.                 local                   temp3a = r(N) 
+
+.                         local                   tothh : display %4.0f `temp3a'
+
+.         restore
+
+. 
+.                 
+. * output table of fuel collection
+.         esttab                  w_cntrl w_trtmnt w_diff w_tot t_cntrl t_trtmnt t_diff t_tot ///
+>                                                 using "$output/fuel_tab.tex", replace booktabs ///
+>                                                 prehead("\begin{tabular}{l*{8}{c}} \\ [-1.8ex]\hline \hline \\[-1.8e
+> x] " ///
+>                                                 "& \multicolumn{4}{c}{Weekly Fuel Collection} & \multicolumn{4}{c}{T
+> otal Fuel Collection} \\ " ///
+>                                                 "& \multicolumn{1}{c}{Control} & \multicolumn{1}{c}{Treatment} &  " 
+> ///
+>                                                 "\multicolumn{1}{c}{\$p\$-value} & \multicolumn{1}{c}{Total} " /// 
+>                                                 "& \multicolumn{1}{c}{Control} & \multicolumn{1}{c}{Treatment} &  " 
+> ///
+>                                                 "\multicolumn{1}{c}{\$p\$-value} & \multicolumn{1}{c}{Total} \\ ") /
+> //
+>                                                 main(mean) aux(sd) nostar unstack nonum ///
+>                                                 collabels(none) f noobs nomtitle nogaps ///
+>                                                 cells("mean(fmt(1 2 2 3) pattern(1 1 0 1 1 1 0 1)) p(fmt(3) pattern(
+> 0 0 1 0 0 0 1 0))"  ///
+>                                                 sd(fmt(1 2 2 3)par pattern(1 1 0 1 1 1 0 1) ) ) ///
+>                                                 rename(f_time "Firewood Time (min)" f_quant_ub "Firewood Quantity (k
+> g)" ///
+>                                                 c_quant_ub "Charcoal Quantity (kg)" val_fuel_ub "Fuel Value (USD)" )
+>  ///
+>                                                 postfoot(" \midrule Observations & `cntrlob' & `trtmntob' & & `totob
+> ' & " ///
+>                                                 " `cntrlhh' & `trtmnthh' & & `tothh' \\ " ///
+>                                                 "\hline \hline \\[-1.8ex] \multicolumn{9}{J{\linewidth}}{\small " //
+> /
+>                                                 "\noindent \textit{Note}: The table displays means, for collected an
+> d purchased fuel " ///
+>                                                 "by treatment assignment and for the total sample. Standard deviatio
+> ns are in " ///
+>                                                 "parentheses. We also report \$p\$-values " ///
+>                                                 "on a \$t\$-test for the equality of means between treatment and con
+> trol.}  \end{tabular}") 
+(output written to C:/Users/jdmic/git/solar_stove/data/analysis/tables/fuel_tab.tex)
+
+.                 
+.                                 
+. ************************************************************************
+. **# 2 - covariates
+. ************************************************************************
+. 
+. * re-load data
+.         use                                     "$ans/dietary_cleaned.dta", clear               
+
+.         
+. preserve // dropping dupes to give clearer idea of hh breakdown
+
+.         duplicates drop         hhid, force
+
+Duplicates in terms of hhid
+
+(30,188 observations deleted)
+
+.         
+. * generate indicators for education and sex
+.         qui tab                         edu, generate(edu_)
+
+.         
+.         replace                         sex = 0 if sex == 1
+(48 real changes made)
+
+.         replace                         sex = 1 if sex == 2
+(109 real changes made)
+
+.         
+.         lab var                         sex "Female Head of Household"
+
+.         lab var                         edu_1 "No Education"
+
+.         lab var                         edu_2 "Primary Education"
+
+.         lab var                         edu_3 "Secondary Education"
+
+.         lab var                         edu_4 "Higher Education"
+
+.         
+. * summary stats by treatment with t-test
+.         eststo                  cntrl : estpost ///
+>                                                 sum age sex  edu_* hh_size tli ai cc ///
+>                                                 if treat_assign == 0
+
+             |  e(count)   e(sum_w)    e(mean)     e(Var)      e(sd)     e(min)     e(max)     e(sum) 
+-------------+----------------------------------------------------------------------------------------
+         age |        95         95   47.10526   181.7973   13.48322         16         80       4475 
+         sex |        96         96        .75   .1894737   .4352858          0          1         72 
+       edu_1 |        96         96   .0520833   .0498904   .2233615          0          1          5 
+       edu_2 |        96         96     .46875   .2516447    .501642          0          1         45 
+       edu_3 |        96         96   .4583333   .2508772   .5008764          0          1         44 
+       edu_4 |        96         96   .0208333    .020614   .1435759          0          1          2 
+     hh_size |        94         94   6.904255   6.388584   2.527565          2         14        649 
+         tli |        96         96   4.469375    143.681    11.9867          0      86.84     429.06 
+          ai |        96         96   8.583333   114.7719   10.71317          0         62        824 
+          cc |        96         96   98.95833   104.1667   10.20621          0        100       9500 
+
+.                 
+.         eststo                  trtmnt : estpost ///
+>                                                 sum age sex  edu_* hh_size tli ai cc ///
+>                                                 if treat_assign == 1
+
+             |  e(count)   e(sum_w)    e(mean)     e(Var)      e(sd)     e(min)     e(max)     e(sum) 
+-------------+----------------------------------------------------------------------------------------
+         age |        60         60   48.83333   131.0565   11.44799         30         74       2930 
+         sex |        61         61   .6065574    .242623   .4925677          0          1         37 
+       edu_1 |        61         61   .0163934   .0163934   .1280369          0          1          1 
+       edu_2 |        61         61   .3934426    .242623   .4925677          0          1         24 
+       edu_3 |        61         61   .5245902   .2535519   .5035394          0          1         32 
+       edu_4 |        61         61   .0655738   .0622951   .2495898          0          1          4 
+     hh_size |        60         60   6.933333   7.046328   2.654492          1         15        416 
+         tli |        61         61   6.022951   168.4021   12.97698          0      83.36      367.4 
+          ai |        61         61   11.72131   151.9377    12.3263          0         60        715 
+          cc |        61         61        100          0          0        100        100       6100 
+
+. 
+.         eststo                  tot : estpost ///
+>                                                 sum age sex  edu_* hh_size tli ai cc
+
+             |  e(count)   e(sum_w)    e(mean)     e(Var)      e(sd)     e(min)     e(max)     e(sum) 
+-------------+----------------------------------------------------------------------------------------
+         age |       155        155   47.77419   161.8902   12.72361         16         80       7405 
+         sex |       157        157   .6942675   .2136208   .4621913          0          1        109 
+       edu_1 |       157        157   .0382166   .0369917   .1923322          0          1          6 
+       edu_2 |       157        157   .4394904   .2479177   .4979133          0          1         69 
+       edu_3 |       157        157   .4840764   .2513474   .5013456          0          1         76 
+       edu_4 |       157        157   .0382166   .0369917   .1923322          0          1          6 
+     hh_size |       154        154   6.915584   6.600671   2.569177          1         15       1065 
+         tli |       157        157   5.072994   152.8452   12.36306          0      86.84     796.46 
+          ai |       157        157   9.802548   130.6851   11.43176          0         62       1539 
+          cc |       157        157   99.36306   63.69427   7.980869          0        100      15600 
+
+.                                                 
+.         eststo                  diff : estpost ///
+>                                                 ttest age sex  edu_* hh_size tli ai cc, ///
+>                                                 by(treat_assign) unequal
+
+             |      e(b)   e(count)      e(se)       e(t)    e(df_t)     e(p_l)       e(p)     e(p_u)     e(N_1) 
+-------------+---------------------------------------------------------------------------------------------------
+         age |  -1.72807        155   2.024335  -.8536485   140.1479   .1973782   .3947565   .8026218         95 
+         sex |  .1434426        157   .0771434   1.859427   116.2429   .9672525   .0654951   .0327475         96 
+       edu_1 |  .0356899        157   .0280791   1.271048   153.6157   .8971836   .2056329   .1028164         96 
+       edu_2 |  .0753074        157   .0812325   .9270593   129.5952   .8221905    .355619   .1778095         96 
+       edu_3 | -.0662568        157   .0822794  -.8052667   127.3655   .2110833   .4221665   .7889167         96 
+       edu_4 | -.0447404        157   .0351562  -1.272618    85.4972   .1033019   .2066037   .8966981         96 
+     hh_size |  -.029078        154   .4305839  -.0675316   121.2798   .4731349   .9462697   .5268651         94 
+         tli | -1.553576        157   2.063339  -.7529426   120.3508   .2264773   .4529547   .7735227         96 
+          ai | -3.137978        157    1.91998  -1.634381   114.7278     .05246     .10492     .94754         96 
+          cc | -1.041667        157   1.041667         -1         95   .1599254   .3198509   .8400746         96 
+
+             |   e(mu_1)     e(N_2)    e(mu_2) 
+-------------+---------------------------------
+         age |  47.10526         60   48.83333 
+         sex |       .75         61   .6065574 
+       edu_1 |  .0520833         61   .0163934 
+       edu_2 |    .46875         61   .3934426 
+       edu_3 |  .4583333         61   .5245902 
+       edu_4 |  .0208333         61   .0655738 
+     hh_size |  6.904255         60   6.933333 
+         tli |  4.469375         61   6.022951 
+          ai |  8.583333         61   11.72131 
+          cc |  98.95833         61        100 
+
+.         
+.         distinct                hhid if treat_assign == 0
+
+       |        Observations
+       |      total   distinct
+-------+----------------------
+  hhid |         96         96
+
+.         local                   temp1a = r(N) 
+
+.                 local                   cntrlhh : display %4.0f `temp1a'
+
+.                 
+.         distinct                hhid if treat_assign == 1
+
+       |        Observations
+       |      total   distinct
+-------+----------------------
+  hhid |         61         61
+
+.         local                   temp2a = r(N) 
+
+.                 local                   trtmnthh : display %4.0f `temp2a'
+
+.                 
+.         distinct                hhid
+
+       |        Observations
+       |      total   distinct
+-------+----------------------
+  hhid |        157        157
+
+.         local                   temp3a = r(N) 
+
+.                 local                   tothh : display %4.0f `temp3a'
+
+.                                                 
+.         esttab                  cntrl trtmnt diff tot ///
+>                                                 using "$output/convars_tab.tex", replace ///
+>                                                 prehead("\begin{tabular}{l*{4}{c}} \\ [-1.8ex]\hline \hline \\[-1.8e
+> x] " ///
+>                                                 "& \multicolumn{1}{c}{Control} & \multicolumn{1}{c}{Treatment} &  " 
+> ///
+>                                                 "\multicolumn{1}{c}{\$p\$-value} & \multicolumn{1}{c}{Total}  \\ ") 
+> ///
+>                                                 main(mean) aux(sd) nostar unstack label booktabs nonum ///
+>                                                 collabels(none) f noobs nomtitle nogaps ///
+>                                                 cells("mean(fmt(2 3 3 3 3 3 3 3 3 2) pattern(1 1 0 1)) p(fmt(3) patt
+> ern(0 0 1 0))"  ///
+>                                                 sd(fmt(2 3 3 3 3 3 3 2 2 2)par pattern(1 1 0 1) )  ) ///
+>                                                 postfoot(" \midrule Households & `cntrlhh' & `trtmnthh' & & `tothh' 
+> \\ " ///
+>                                                 "\hline \hline \\[-1.8ex] \multicolumn{5}{J{\linewidth}}{\small " //
+> /
+>                                                 "\noindent \textit{Note}: The table displays means for controls " //
+> /
+>                                                 "by treatment assignment and for the total sample. Standard deviatio
+> ns are in " ///
+>                                                 "parentheses. We also report \$p\$-values " ///
+>                                                 "on a \$t\$-test for the equality of means between treatment and con
+> trol.}  \end{tabular}") 
+(output written to C:/Users/jdmic/git/solar_stove/data/analysis/tables/convars_tab.tex)
+
+. 
+. restore
+
+. 
+.                 
+. ************************************************************************
+. **# 3 - END
+. ************************************************************************
+. 
+. * close the log
+.         log                             close
+      name:  <unnamed>
+       log:  C:/Users/jdmic/git/solar_stove/data/logs/desc_stats.log
+  log type:  text
+ closed on:   1 Oct 2025, 13:02:53
+----------------------------------------------------------------------------------------------------------------------
