@@ -53,7 +53,7 @@
 		estpost tab			cook, sort nototal
 	
 * output table of food group frequencies
-		esttab 			 using "$output/descriptive/cook.tex", replace booktabs ///
+		esttab 			 using "$output/cook.tex", replace booktabs ///
 							prehead("\begin{tabular}{l*{2}{c}} \\ [-1.8ex]\hline \hline \\[-1.8ex] ") ///
 							cells("b(label(Frequency) fmt(%9.0gc)) pct(label(Percent) fmt(2))") ///
 							nonumber nomtitle noobs fragment varlabels(`e(labels)') ///

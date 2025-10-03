@@ -24,7 +24,7 @@
 ***********************************************************************
 
 * define paths
-	global	root	=	"$data/raw/dietary"
+	global	root	=	"$data/raw"
 	global	export	=	"$data/refined"
 	global	output	=	"$data/analysis/tables"
 	global	logout	=	"$data/logs"
@@ -372,7 +372,7 @@
 * cut out liquid data
 	preserve
 		keep if 	meal == 3
-		save 		"$export/liquids/liquids.dta", replace
+		save 		"$export/liquids.dta", replace
 	restore
 
 
@@ -443,7 +443,7 @@
 	
 * merge in data of Ingredient1
 	rename 			Ingredient1 lozi
-	merge m:1 		lozi using "$export/hdds/food_match.dta"
+	merge m:1 		lozi using "$export/food_match.dta"
 	drop if 		_merge == 2
 	sort 			_merge lozi
 	*** 30,736 observations matched, 207 observations didn't match
@@ -457,7 +457,7 @@
 
 * merge in data of Ingredient2
 	rename 			Ingredient2 lozi
-	merge m:1 		lozi using "$export/hdds/food_match.dta"
+	merge m:1 		lozi using "$export/food_match.dta"
 	drop if 		_merge == 2
 	sort 			_merge lozi
 	*** 29,824 observations matched, 1,119 observations didn't match
@@ -471,7 +471,7 @@
 
 * merge in data of Ingredient3
 	rename 			Ingredient3 lozi
-	merge m:1 		lozi using "$export/hdds/food_match.dta"	
+	merge m:1 		lozi using "$export/food_match.dta"	
 	drop if 		_merge == 2
 	sort 			_merge lozi
 	*** 30,016 observations matched, 927 observations didn't match
@@ -485,7 +485,7 @@
 
 * merge in data of Ingredient4
 	rename 			Ingredient4 lozi
-	merge m:1 		lozi using "$export/hdds/food_match.dta"
+	merge m:1 		lozi using "$export/food_match.dta"
 	drop if 		_merge == 2
 	sort 			_merge lozi
 	*** 30,249 observations matched, 694 observations didn't match
@@ -499,7 +499,7 @@
 
 * merge in data of Ingredient5
 	rename 			Ingredient5 lozi
-	merge m:1 		lozi using "$export/hdds/food_match.dta"
+	merge m:1 		lozi using "$export/food_match.dta"
 	drop if 		_merge == 2
 	sort 			_merge lozi	
 	*** 30,581 observations matched, 362 observations didn't match
@@ -513,7 +513,7 @@
 
 * merge in data of Ingredient6
 	rename 			Ingredient6 lozi
-	merge m:1 		lozi using "$export/hdds/food_match.dta"
+	merge m:1 		lozi using "$export/food_match.dta"
 	drop if 		_merge == 2
 	sort 			_merge lozi		
 	*** 330,857 observations matched, 86 observations didn't match
@@ -527,7 +527,7 @@
 
 * merge in data of Ingredient7
 	rename 			Ingredient7 lozi
-	merge m:1 		lozi using "$export/hdds/food_match.dta"
+	merge m:1 		lozi using "$export/food_match.dta"
 	drop if 		_merge == 2	
 	sort 			_merge lozi	
 	*** 330,933 observations matched, 10 observations didn't match

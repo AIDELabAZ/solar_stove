@@ -24,7 +24,7 @@
 ************************************************************************
 
 * define paths
-	global	root	=	"$data/raw/fuel"
+	global	root	=	"$data/raw"
 	global	export	=	"$data/refined"
 	global	logout	=	"$data/logs"
 	

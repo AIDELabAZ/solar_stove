@@ -21,7 +21,7 @@
 ************************************************************************
 
 * define paths
-	global	root	=	"$data/raw/controls"
+	global	root	=	"$data/raw"
 	global	export	=	"$data/refined"
 	global	logout	=	"$data/logs"
 	

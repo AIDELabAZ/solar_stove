@@ -26,7 +26,7 @@
 ***********************************************************************
 
 * define paths
-	global			root	=	"$data/raw/dietary"
+	global			root	=	"$data/raw"
 	global			export	=	"$data/refined"
 	global			logout	=	"$data/logs"
 	
@@ -705,7 +705,7 @@
 	
 * save
 	compress
-	save 		"$export/hdds/food_match.dta", replace
+	save 		"$export/food_match.dta", replace
 
 * close the log
 	log	close

@@ -26,7 +26,7 @@
 ***********************************************************************
 
 * define paths
-	global	root	=	"$data/raw/dietary"
+	global	root	=	"$data/raw"
 	global	export	=	"$data/refined"
 	global	output	=	"$data/analysis/tables"
 	global	figure	=	"$data/analysis/figures"
